@@ -1,4 +1,9 @@
 [versions]
+wearTiles = "1.4.0"
+wearProtolayout = "1.2.1"
+wearWatchface = "1.2.1"
+guavaListenableFuture = "1.0"
+kotlinxCoroutinesGuava = "1.9.0"
 agp = "8.7.2"
 kotlin = "2.0.21"
 ksp = "2.0.21-1.0.27"
@@ -15,6 +20,15 @@ playServicesWearable = "18.2.0"
 junit = "4.13.2"
 
 [libraries]
+androidx-wear-tiles = { group = "androidx.wear.tiles", name = "tiles", version.ref = "wearTiles" }
+androidx-wear-tiles-tooling = { group = "androidx.wear.tiles", name = "tiles-tooling", version.ref = "wearTiles" }
+androidx-wear-protolayout = { group = "androidx.wear.protolayout", name = "protolayout", version.ref = "wearProtolayout" }
+androidx-wear-protolayout-material = { group = "androidx.wear.protolayout", name = "protolayout-material", version.ref = "wearProtolayout" }
+androidx-wear-protolayout-expression = { group = "androidx.wear.protolayout", name = "protolayout-expression", version.ref = "wearProtolayout" }
+androidx-wear-watchface-complications-data = { group = "androidx.wear.watchface", name = "watchface-complications-data", version.ref = "wearWatchface" }
+androidx-wear-watchface-complications-data-source = { group = "androidx.wear.watchface", name = "watchface-complications-data-source", version.ref = "wearWatchface" }
+guava-listenablefuture = { group = "com.google.guava", name = "listenablefuture", version.ref = "guavaListenableFuture" }
+kotlinx-coroutines-guava = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-guava", version.ref = "kotlinxCoroutinesGuava" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle" }
 androidx-lifecycle-viewmodel-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "lifecycle" }
