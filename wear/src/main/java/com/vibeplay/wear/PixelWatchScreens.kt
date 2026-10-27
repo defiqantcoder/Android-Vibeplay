@@ -29,6 +29,8 @@ import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
 import androidx.wear.compose.foundation.lazy.items
 import androidx.wear.compose.foundation.lazy.rememberScalingLazyListState
 import androidx.wear.compose.material.*
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import com.vibeplay.core.model.Track
 import com.vibeplay.core.model.VibeSeedData
 import kotlinx.coroutines.launch
@@ -53,7 +55,9 @@ fun PixelWatchApp() {
     }
 
     val playbackState by syncManager.playbackState.collectAsState()
-    var selectedScreen by remember { mutableStateOf(0) }
+    val tracks by syncManager.tracks.collectAsState()
+    val pagerState = rememberPagerState(pageCount = { 5 })
+    val coroutineScope = rememberCoroutineScope()
 
     Scaffold(
         timeText = { TimeText() },
@@ -61,68 +65,80 @@ fun PixelWatchApp() {
             HorizontalPageIndicator(
                 pageIndicatorState = object : PageIndicatorState {
                     override val pageCount: Int = 5
-                    override val pageOffset: Float = 0f
-                    override val selectedPage: Int = selectedScreen
+                    override val pageOffset: Float = pagerState.currentPageOffsetFraction
+                    override val selectedPage: Int = pagerState.currentPage
                 }
             )
         }
     ) {
-        Box(
+        HorizontalPager(
+            state = pagerState,
             modifier = Modifier
                 .fillMaxSize()
-                .background(WearBackground),
-            contentAlignment = Alignment.Center
-        ) {
-            when (selectedScreen) {
-                0 -> NowPlayingWatchScreen(
-                    state = playbackState,
-                    haptics = haptics,
-                    onVolumeChange = { syncManager.setVolume(it) },
-                    onTogglePlay = {
-                        syncManager.togglePlayPause()
-                        haptics.performClick()
-                    },
-                    onNextTrack = {
-                        syncManager.nextTrack()
-                        haptics.performClick()
-                    },
-                    onPrevTrack = {
-                        syncManager.prevTrack()
-                        haptics.performClick()
-                    },
-                    onNextScreen = {
-                        selectedScreen = (selectedScreen + 1) % 5
-                        haptics.performClick()
-                    }
-                )
-                1 -> WristCrateExplorerScreen(
-                    haptics = haptics,
-                    onSelectTrack = { trackId ->
-                        syncManager.selectTrack(trackId)
-                        selectedScreen = 0
-                        haptics.performClick()
-                    }
-                )
-                2 -> BiometricBpmSyncScreen(
-                    haptics = haptics,
-                    onSyncBpm = { bpm ->
-                        syncManager.syncBpm(bpm)
-                    }
-                )
-                3 -> QuickVibeVoiceScreen(
-                    haptics = haptics,
-                    onPromptSelected = { prompt ->
-                        syncManager.triggerVibePrompt(prompt)
-                        selectedScreen = 0
-                    }
-                )
-                4 -> DacRemoteWatchScreen(
-                    state = playbackState,
-                    haptics = haptics,
-                    onToggleBitPerfect = {
-                        syncManager.toggleBitPerfect()
-                    }
-                )
+                .background(WearBackground)
+        ) { page ->
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                when (page) {
+                    0 -> NowPlayingWatchScreen(
+                        state = playbackState,
+                        haptics = haptics,
+                        onVolumeChange = { syncManager.setVolume(it) },
+                        onTogglePlay = {
+                            syncManager.togglePlayPause()
+                            haptics.performClick()
+                        },
+                        onNextTrack = {
+                            syncManager.nextTrack()
+                            haptics.performClick()
+                        },
+                        onPrevTrack = {
+                            syncManager.prevTrack()
+                            haptics.performClick()
+                        },
+                        onNextScreen = {
+                            coroutineScope.launch {
+                                pagerState.animateScrollToPage((pagerState.currentPage + 1) % 5)
+                            }
+                            haptics.performClick()
+                        }
+                    )
+                    1 -> WristCrateExplorerScreen(
+                        haptics = haptics,
+                        tracks = tracks,
+                        onSelectTrack = { trackId ->
+                            syncManager.selectTrack(trackId)
+                            coroutineScope.launch {
+                                pagerState.animateScrollToPage(0)
+                            }
+                            haptics.performClick()
+                        }
+                    )
+                    2 -> BiometricBpmSyncScreen(
+                        haptics = haptics,
+                        onSyncBpm = { bpm ->
+                            syncManager.syncBpm(bpm)
+                        }
+                    )
+                    3 -> QuickVibeVoiceScreen(
+                        haptics = haptics,
+                        onPromptSelected = { prompt ->
+                            syncManager.triggerVibePrompt(prompt)
+                            coroutineScope.launch {
+                                pagerState.animateScrollToPage(0)
+                            }
+                        }
+                    )
+                    4 -> DacRemoteWatchScreen(
+                        state = playbackState,
+                        haptics = haptics,
+                        onToggleBitPerfect = {
+                            syncManager.toggleBitPerfect()
+                        }
+                    )
+                }
             }
         }
     }
@@ -259,6 +275,7 @@ fun NowPlayingWatchScreen(
 @Composable
 fun WristCrateExplorerScreen(
     haptics: WatchHapticsController,
+    tracks: List<Track>,
     onSelectTrack: (String) -> Unit
 ) {
     val listState = rememberScalingLazyListState()
@@ -284,7 +301,7 @@ fun WristCrateExplorerScreen(
         item {
             Text("Wrist Crates", fontWeight = FontWeight.Bold, fontSize = 12.sp, color = WearPrimary)
         }
-        items(VibeSeedData.INITIAL_TRACKS) { track ->
+        items(tracks) { track ->
             Chip(
                 label = { Text(track.title, fontSize = 11.sp, maxLines = 1) },
                 secondaryLabel = { Text("${track.bpm.toInt()} BPM • ${track.format}", fontSize = 9.sp) },

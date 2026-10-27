@@ -21,11 +21,11 @@ import kotlinx.coroutines.withContext
 import java.io.File
 
 data class VibePlayUiState(
-    val currentTrack: Track? = VibeSeedData.INITIAL_TRACKS.first(),
+    val currentTrack: Track? = null,
     val isPlaying: Boolean = false,
     val positionMs: Long = 0L,
     val durationMs: Long = 342000L,
-    val tracks: List<Track> = VibeSeedData.INITIAL_TRACKS,
+    val tracks: List<Track> = emptyList(),
     val crates: List<CrateFolder> = VibeSeedData.INITIAL_CRATES,
     val activeCrateId: String? = null,
     val activeEndpoint: UsbDacEndpoint = VibeSeedData.INITIAL_USB_DAC_MODELS.first(),
@@ -60,6 +60,7 @@ data class VibePlayUiState(
 )
 
 class VibePlayViewModel(
+    private val context: android.content.Context? = null,
     private val audioEngine: VibeAudioEngine? = null,
     private val database: VibePlayDatabase? = null,
     private val wearBridge: PhoneWearBridge? = null,
@@ -108,6 +109,7 @@ class VibePlayViewModel(
             viewModelScope.launch {
                 _uiState.collect { state ->
                     bridge.syncPlaybackState(state)
+                    bridge.syncTracks(state.tracks)
                 }
             }
         }
@@ -119,8 +121,14 @@ class VibePlayViewModel(
             }
         }
 
-        // Trigger initial local lossless scan of /home/sinnoh/music-test
-        scanLocalMusicFolder(File("/home/sinnoh/music-test"))
+        // Trigger initial local lossless scan
+        context?.let { ctx ->
+            val sharedPrefs = ctx.getSharedPreferences("vibeplay_prefs", android.content.Context.MODE_PRIVATE)
+            val libraryPath = sharedPrefs.getString("library_path", "/home/sinnoh/music-test") ?: "/home/sinnoh/music-test"
+            scanLocalMusicFolder(File(libraryPath))
+        } ?: run {
+            scanLocalMusicFolder(File("/home/sinnoh/music-test"))
+        }
     }
 
     fun scanLocalMusicFolder(directory: File) {
@@ -135,7 +143,7 @@ class VibePlayViewModel(
             }
 
             if (scannedTracks.isNotEmpty()) {
-                val combinedTracks = scannedTracks + VibeSeedData.INITIAL_TRACKS
+                val combinedTracks = scannedTracks
                 val losslessCrate = CrateFolder(
                     id = "crate-lossless-local",
                     name = "Local Lossless Master Vault",

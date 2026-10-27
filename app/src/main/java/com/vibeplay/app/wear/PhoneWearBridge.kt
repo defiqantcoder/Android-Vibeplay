@@ -62,4 +62,27 @@ class PhoneWearBridge(private val context: Context) {
             }
         }
     }
+
+    fun syncTracks(tracks: List<com.vibeplay.core.model.Track>) {
+        scope.launch {
+            try {
+                val putDataMapReq = PutDataMapRequest.create(WearSyncProtocol.DATA_PATH_CRATE_ITEMS).apply {
+                    val trackDataList = tracks.map { track ->
+                        com.google.android.gms.wearable.DataMap().apply {
+                            putString(WearSyncProtocol.KEY_TRACK_ID, track.id)
+                            putString(WearSyncProtocol.KEY_TITLE, track.title)
+                            putString(WearSyncProtocol.KEY_ARTIST, track.artist)
+                            putString(WearSyncProtocol.KEY_ALBUM, track.album)
+                            putDouble(WearSyncProtocol.KEY_BPM, track.bpm.toDouble())
+                            putString("format", track.format)
+                        }
+                    }
+                    dataMap.putDataMapArrayList("tracks", ArrayList(trackDataList))
+                    dataMap.putLong(WearSyncProtocol.KEY_TIMESTAMP, System.currentTimeMillis())
+                }
+                val putDataReq = putDataMapReq.asPutDataRequest().setUrgent()
+                dataClient.putDataItem(putDataReq).await()
+            } catch (_: Exception) {}
+        }
+    }
 }
