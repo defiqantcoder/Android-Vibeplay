@@ -1,4 +1,4 @@
-package com.defiqantcoder.vibeplay.ui.sheets
+package com.vibeplay.app.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -19,7 +19,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.defiqantcoder.vibeplay.hardware.UniversalDacEndpoint
+import com.vibeplay.app.ui.theme.*
+import com.vibeplay.core.hardware.UniversalDacEndpoint
 
 /**
  * Jetpack Compose Material 3 ModalBottomSheet for Universal Dynamic USB DAC Routing
@@ -34,15 +35,12 @@ fun DacOutputBottomSheet(
     exclusiveUsbAccess: Boolean,
     dolbyAtmosEnabled: Boolean,
     dolbyAtmosProfile: String,
-    autoSwapOnPlug: Boolean,
     onScanUsbBus: () -> Unit,
     onSelectDac: (UniversalDacEndpoint) -> Unit,
     onMountCustomDac: (modelName: String) -> Unit,
     onSelectPhoneSpeaker: () -> Unit,
     onToggleExclusiveUsb: (Boolean) -> Unit,
     onToggleDolbyAtmos: (Boolean) -> Unit,
-    onSelectAtmosProfile: (String) -> Unit,
-    onToggleAutoSwap: (Boolean) -> Unit,
     onDismiss: () -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -54,7 +52,7 @@ fun DacOutputBottomSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = Color(0xFF1E1E24),
+        containerColor = ContainerSurface,
         scrimColor = Color.Black.copy(alpha = 0.72f),
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
     ) {
@@ -74,13 +72,13 @@ fun DacOutputBottomSheet(
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = "Audio Output & Universal DAC",
-                        color = Color(0xFFE4E4E7),
+                        color = TextPrimary,
                         fontSize = 19.sp,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
                         text = "Android UsbManager + UAC 1.0/2.0/3.0 dynamic hardware discovery",
-                        color = Color(0xFF9CA3AF),
+                        color = TextMuted,
                         fontSize = 12.sp
                     )
                 }
@@ -92,14 +90,14 @@ fun DacOutputBottomSheet(
                         else -> "OS MIXER 48kHz"
                     },
                     accentColor = when {
-                        dolbyAtmosEnabled -> Color(0xFFF59E0B)
-                        isBitPerfect -> Color(0xFF10B981)
-                        else -> Color(0xFF9CA3AF)
+                        dolbyAtmosEnabled -> AmberSecondary
+                        isBitPerfect -> EmeraldTertiary
+                        else -> TextMuted
                     }
                 )
             }
 
-            HorizontalDivider(color = Color(0xFF2A2A35))
+            HorizontalDivider(color = ContainerBorder)
 
             // Hardware Bus Action Bar
             Row(
@@ -109,7 +107,7 @@ fun DacOutputBottomSheet(
             ) {
                 Text(
                     text = "DETECTED HARDWARE SINKS (${connectedDacs.size})",
-                    color = Color(0xFF9CA3AF),
+                    color = TextMuted,
                     fontSize = 11.sp,
                     fontFamily = FontFamily.Monospace
                 )
@@ -118,7 +116,7 @@ fun DacOutputBottomSheet(
                     TextButton(onClick = onScanUsbBus) {
                         Text(
                             text = "Scan USB-C OTG",
-                            color = Color(0xFF06B6D4),
+                            color = TealPrimary,
                             fontSize = 11.sp,
                             fontFamily = FontFamily.Monospace
                         )
@@ -129,7 +127,7 @@ fun DacOutputBottomSheet(
                     ) {
                         Text(
                             text = if (showAllDetectedModels) "Hide List" else "Switch DAC",
-                            color = Color(0xFFE4E4E7),
+                            color = TextPrimary,
                             fontSize = 11.sp,
                             fontFamily = FontFamily.Monospace
                         )
@@ -143,8 +141,8 @@ fun DacOutputBottomSheet(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(16.dp))
-                        .background(Color(0xFF16161B))
-                        .border(1.dp, Color(0xFF2A2A35), RoundedCornerShape(16.dp))
+                        .background(BackgroundDark)
+                        .border(1.dp, ContainerBorder, RoundedCornerShape(16.dp))
                         .padding(12.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
@@ -159,12 +157,12 @@ fun DacOutputBottomSheet(
                                     .fillMaxWidth()
                                     .clip(RoundedCornerShape(12.dp))
                                     .background(
-                                        if (isSelected) Color(0xFF06B6D4).copy(alpha = 0.15f)
-                                        else Color(0xFF1E1E24)
+                                        if (isSelected) TealPrimary.copy(alpha = 0.15f)
+                                        else ContainerSurface
                                     )
                                     .border(
                                         1.dp,
-                                        if (isSelected) Color(0xFF06B6D4) else Color.Transparent,
+                                        if (isSelected) TealPrimary else Color.Transparent,
                                         RoundedCornerShape(12.dp)
                                     )
                                     .clickable { onSelectDac(dac) }
@@ -175,7 +173,7 @@ fun DacOutputBottomSheet(
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
                                         text = dac.modelName,
-                                        color = Color(0xFFE4E4E7),
+                                        color = TextPrimary,
                                         fontSize = 13.sp,
                                         fontWeight = FontWeight.SemiBold,
                                         maxLines = 1,
@@ -183,7 +181,7 @@ fun DacOutputBottomSheet(
                                     )
                                     Text(
                                         text = "${dac.vendorName} · VID:PID ${dac.usbVidPid} · ${dac.maxBitDepth}/${dac.maxSampleRate}",
-                                        color = Color(0xFF9CA3AF),
+                                        color = TextMuted,
                                         fontSize = 10.sp,
                                         fontFamily = FontFamily.Monospace,
                                         maxLines = 1,
@@ -193,7 +191,7 @@ fun DacOutputBottomSheet(
                                 if (isSelected) {
                                     Text(
                                         text = "ACTIVE",
-                                        color = Color(0xFF06B6D4),
+                                        color = TealPrimary,
                                         fontSize = 10.sp,
                                         fontFamily = FontFamily.Monospace,
                                         fontWeight = FontWeight.Bold
@@ -213,10 +211,16 @@ fun DacOutputBottomSheet(
                             value = customDacName,
                             onValueChange = { customDacName = it },
                             placeholder = {
-                                Text("Mount any USB DAC (e.g. Topping G5, DragonFly)...", fontSize = 11.sp)
+                                Text("Mount any USB DAC (e.g. Topping G5, DragonFly)...", fontSize = 11.sp, color = TextMuted)
                             },
                             singleLine = true,
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier.weight(1f),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedTextColor = TextPrimary,
+                                unfocusedTextColor = TextPrimary,
+                                focusedBorderColor = TealPrimary,
+                                unfocusedBorderColor = ContainerBorder
+                            )
                         )
                         Button(
                             onClick = {
@@ -226,8 +230,8 @@ fun DacOutputBottomSheet(
                                 }
                             },
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xFF06B6D4),
-                                contentColor = Color(0xFF121214)
+                                containerColor = TealPrimary,
+                                contentColor = Color.Black
                             )
                         ) {
                             Text("Mount", fontWeight = FontWeight.Bold, fontSize = 12.sp)
@@ -242,10 +246,10 @@ fun DacOutputBottomSheet(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(18.dp))
-                        .background(if (isUsbDacActive) Color(0xFF25252E) else Color(0xFF16161B))
+                        .background(if (isUsbDacActive) ContainerSurface else BackgroundDark)
                         .border(
                             width = if (isUsbDacActive) 2.dp else 1.dp,
-                            color = if (isUsbDacActive) Color(0xFF06B6D4) else Color(0xFF2A2A35),
+                            color = if (isUsbDacActive) TealPrimary else ContainerBorder,
                             shape = RoundedCornerShape(18.dp)
                         )
                         .clickable { onSelectDac(activeDac) }
@@ -259,29 +263,48 @@ fun DacOutputBottomSheet(
                     ) {
                         Text(
                             text = activeDac.modelName,
-                            color = Color(0xFFE4E4E7),
+                            color = TextPrimary,
                             fontSize = 15.sp,
                             fontWeight = FontWeight.Bold
                         )
                         Text(
                             text = "USB ${activeDac.usbVidPid} · ${activeDac.uacProtocol}",
-                            color = Color(0xFF06B6D4),
+                            color = TealPrimary,
                             fontSize = 11.sp,
                             fontFamily = FontFamily.Monospace
                         )
                     }
                     Text(
                         text = "${activeDac.interfaceType} · ${activeDac.maxBitDepth} / ${activeDac.maxSampleRate} · ${activeDac.dsdCapability}",
-                        color = Color(0xFF9CA3AF),
+                        color = TextMuted,
                         fontSize = 11.sp,
                         fontFamily = FontFamily.Monospace
                     )
                     Text(
                         text = "Clock: ${activeDac.clockArchitecture} · Chipset: ${activeDac.chipset}",
-                        color = Color(0xFF9CA3AF),
+                        color = TextMuted,
                         fontSize = 10.sp,
                         fontFamily = FontFamily.Monospace
                     )
+                }
+            } else {
+                // Speaker fallback card
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(ContainerSurface)
+                        .border(1.dp, ContainerBorder, RoundedCornerShape(14.dp))
+                        .clickable { onSelectPhoneSpeaker() }
+                        .padding(14.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text("Internal Phone Speaker", color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                        Text("Operating through Android OS AudioFlinger Mixer", color = TextMuted, fontSize = 11.sp)
+                    }
+                    Text("ACTIVE", color = AmberSecondary, fontWeight = FontWeight.Bold, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
                 }
             }
 
@@ -290,8 +313,8 @@ fun DacOutputBottomSheet(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(18.dp))
-                    .background(Color(0xFF16161B))
-                    .border(1.dp, Color(0xFF2A2A35), RoundedCornerShape(18.dp))
+                    .background(BackgroundDark)
+                    .border(1.dp, ContainerBorder, RoundedCornerShape(18.dp))
                     .padding(14.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
@@ -303,23 +326,24 @@ fun DacOutputBottomSheet(
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
                             text = "Exclusive USB Audio Access (Bit-Perfect)",
-                            color = Color(0xFFE4E4E7),
+                            color = TextPrimary,
                             fontSize = 13.sp,
                             fontWeight = FontWeight.SemiBold
                         )
                         Text(
                             text = "Android 14+ MIXER_BEHAVIOR_BIT_PERFECT · Disables Dolby Atmos",
-                            color = Color(0xFF9CA3AF),
+                            color = TextMuted,
                             fontSize = 11.sp
                         )
                     }
                     Switch(
                         checked = exclusiveUsbAccess && !dolbyAtmosEnabled,
-                        onCheckedChange = onToggleExclusiveUsb
+                        onCheckedChange = onToggleExclusiveUsb,
+                        colors = SwitchDefaults.colors(checkedThumbColor = Color.Black, checkedTrackColor = TealPrimary)
                     )
                 }
 
-                HorizontalDivider(color = Color(0xFF2A2A35))
+                HorizontalDivider(color = ContainerBorder)
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -329,19 +353,20 @@ fun DacOutputBottomSheet(
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
                             text = "Dolby Atmos 3D Spatial Audio",
-                            color = Color(0xFFE4E4E7),
+                            color = TextPrimary,
                             fontSize = 13.sp,
                             fontWeight = FontWeight.SemiBold
                         )
                         Text(
                             text = "Profile: ${dolbyAtmosProfile.uppercase()} · Cancels Bit-Perfect USB",
-                            color = Color(0xFF9CA3AF),
+                            color = TextMuted,
                             fontSize = 11.sp
                         )
                     }
                     Switch(
                         checked = dolbyAtmosEnabled,
-                        onCheckedChange = onToggleDolbyAtmos
+                        onCheckedChange = onToggleDolbyAtmos,
+                        colors = SwitchDefaults.colors(checkedThumbColor = Color.Black, checkedTrackColor = AmberSecondary)
                     )
                 }
             }
@@ -351,8 +376,8 @@ fun DacOutputBottomSheet(
                 modifier = Modifier.fillMaxWidth(),
                 shape = CircleShape,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF06B6D4),
-                    contentColor = Color(0xFF121214)
+                    containerColor = TealPrimary,
+                    contentColor = Color.Black
                 )
             ) {
                 Text("Done", fontWeight = FontWeight.Bold, fontSize = 15.sp)

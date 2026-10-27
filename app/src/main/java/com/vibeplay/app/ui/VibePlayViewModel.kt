@@ -7,8 +7,10 @@ import com.vibeplay.core.db.VibePlayDatabase
 import com.vibeplay.core.engine.VibeCookerEngine
 import com.vibeplay.core.model.*
 import com.vibeplay.core.scanner.LocalMusicScanner
+import com.vibeplay.app.hardware.UsbDacHardwareManager
 import com.vibeplay.app.wear.PhoneWearBridge
 import com.vibeplay.app.wear.PhoneWearBridgeEvents
+import com.vibeplay.core.hardware.UniversalDacEndpoint
 import com.vibeplay.core.wear.WearSyncProtocol
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,6 +30,8 @@ data class VibePlayUiState(
     val activeCrateId: String? = null,
     val activeEndpoint: UsbDacEndpoint = VibeSeedData.INITIAL_USB_DAC_MODELS.first(),
     val availableEndpoints: List<UsbDacEndpoint> = VibeSeedData.INITIAL_USB_DAC_MODELS,
+    val universalDacs: List<UniversalDacEndpoint> = emptyList(),
+    val activeUniversalDac: UniversalDacEndpoint? = null,
     val eqBands: List<EqBand> = VibeSeedData.INITIAL_EQ_BANDS,
     val selectedPresetId: String = "flat",
     val bitPerfectDirect: Boolean = true,
@@ -58,7 +62,8 @@ data class VibePlayUiState(
 class VibePlayViewModel(
     private val audioEngine: VibeAudioEngine? = null,
     private val database: VibePlayDatabase? = null,
-    private val wearBridge: PhoneWearBridge? = null
+    private val wearBridge: PhoneWearBridge? = null,
+    private val hardwareManager: UsbDacHardwareManager? = null
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(VibePlayUiState())
@@ -80,6 +85,20 @@ class VibePlayViewModel(
             viewModelScope.launch {
                 engine.durationMs.collect { dur ->
                     if (dur > 0) _uiState.value = _uiState.value.copy(durationMs = dur)
+                }
+            }
+        }
+
+        // Observe Universal USB DAC hardware discovery
+        hardwareManager?.let { hw ->
+            viewModelScope.launch {
+                hw.connectedDacs.collect { dacs ->
+                    _uiState.value = _uiState.value.copy(universalDacs = dacs)
+                }
+            }
+            viewModelScope.launch {
+                hw.activeDac.collect { active ->
+                    _uiState.value = _uiState.value.copy(activeUniversalDac = active)
                 }
             }
         }
@@ -210,6 +229,7 @@ class VibePlayViewModel(
             dolbyAtmosEnabled = newAtmos
         )
         audioEngine?.setBitPerfectMode(enabled, _uiState.value.exclusiveUsbAccess)
+        hardwareManager?.configureBitPerfectRouting(enabled)
     }
 
     fun setDolbyAtmos(enabled: Boolean) {
@@ -218,6 +238,32 @@ class VibePlayViewModel(
             dolbyAtmosEnabled = enabled,
             bitPerfectDirect = newBitPerfect
         )
+        hardwareManager?.toggleDolbyAtmosSpatial(enabled)
+    }
+
+    fun setExclusiveUsb(enabled: Boolean) {
+        _uiState.value = _uiState.value.copy(exclusiveUsbAccess = enabled)
+        audioEngine?.setBitPerfectMode(_uiState.value.bitPerfectDirect, enabled)
+    }
+
+    fun setAtmosProfile(profile: AtmosProfile) {
+        _uiState.value = _uiState.value.copy(atmosProfile = profile)
+    }
+
+    fun scanUsbBus() {
+        hardwareManager?.scanAllConnectedAudioHardware()
+    }
+
+    fun selectUniversalDac(dac: UniversalDacEndpoint) {
+        hardwareManager?.selectDacEndpoint(dac)
+    }
+
+    fun mountCustomDac(name: String) {
+        hardwareManager?.mountCustomDac(name)
+    }
+
+    fun selectPhoneSpeaker() {
+        hardwareManager?.selectPhoneSpeaker()
     }
 
     fun setForceDspOnDac(force: Boolean) {

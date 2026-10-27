@@ -1,4 +1,4 @@
-package com.defiqantcoder.vibeplay.hardware
+package com.vibeplay.app.hardware
 
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
@@ -17,33 +17,10 @@ import android.media.AudioMixerAttributes
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import com.vibeplay.core.hardware.UniversalDacEndpoint
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
-
-/**
- * Universal USB DAC Hardware Descriptor representing ANY connected USB-C OTG
- * or external Audio Interface (UAC 1.0 / UAC 2.0 / UAC 3.0).
- */
-data class UniversalDacEndpoint(
-    val id: String,
-    val androidDeviceId: Int?,
-    val modelName: String,
-    val vendorName: String,
-    val usbVidPid: String,
-    val interfaceType: String,
-    val uacProtocol: String,
-    val maxBitDepth: String,
-    val maxSampleRate: String,
-    val dsdCapability: String,
-    val clockArchitecture: String,
-    val chipset: String,
-    val defaultHardwareVol: Int = 80,
-    val latencyMs: Double = 3.8,
-    val isBitPerfectCapable: Boolean = true,
-    val detectionSource: String = "Android UsbManager + AudioDeviceInfo"
-)
 
 /**
  * Universal Dynamic USB DAC Recognition Engine for Android (Kotlin + Jetpack Compose).
@@ -221,6 +198,44 @@ class UsbDacHardwareManager(
         _activeDac.value = endpoint
         if (_exclusiveBitPerfect.value && !_dolbyAtmosEnabled.value) {
             configureBitPerfectRouting(true)
+        }
+    }
+
+    fun setAutoSwapOnPlug(enabled: Boolean) {
+        _autoSwapOnPlug.value = enabled
+    }
+
+    fun mountCustomDac(modelName: String) {
+        val custom = UniversalDacEndpoint(
+            id = "custom-${System.currentTimeMillis()}",
+            androidDeviceId = null,
+            modelName = modelName,
+            vendorName = "Custom Audio Endpoint",
+            usbVidPid = "USER:CUSTOM",
+            interfaceType = "Direct USB Host (UAC 2.0)",
+            uacProtocol = "UAC 2.0",
+            maxBitDepth = "32-bit",
+            maxSampleRate = "768kHz",
+            dsdCapability = "DSD512 Native / DoP",
+            clockArchitecture = "Ultra-Low Jitter Dual Clock",
+            chipset = "Custom Flagship DAC Sink"
+        )
+        val updated = listOf(custom) + _connectedDacs.value
+        _connectedDacs.value = updated
+        selectDacEndpoint(custom)
+    }
+
+    fun selectPhoneSpeaker() {
+        _activeDac.value = null
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            val audioAttrs = AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_MEDIA)
+                .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                .build()
+            val outputs = audioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS)
+            for (out in outputs) {
+                audioManager.clearPreferredMixerAttributes(audioAttrs, out)
+            }
         }
     }
 

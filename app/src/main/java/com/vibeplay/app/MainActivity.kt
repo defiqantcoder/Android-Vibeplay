@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.vibeplay.app.hardware.UsbDacHardwareManager
 import com.vibeplay.app.audio.UsbDacReceiver
 import com.vibeplay.app.audio.VibePlaybackService
 import com.vibeplay.app.ui.*
@@ -35,13 +36,27 @@ import com.vibeplay.core.model.UsbDacEndpoint
 
 class MainActivity : ComponentActivity() {
 
+    private lateinit var hardwareManager: UsbDacHardwareManager
+
     private val viewModel: VibePlayViewModel by viewModels {
         object : androidx.lifecycle.ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
                 val app = application as VibePlayApplication
                 val wearBridge = com.vibeplay.app.wear.PhoneWearBridge(applicationContext)
-                return VibePlayViewModel(app.audioEngine, wearBridge = wearBridge) as T
+                if (!::hardwareManager.isInitialized) {
+                    hardwareManager = UsbDacHardwareManager(
+                        context = applicationContext,
+                        onDacUnpluggedSafetyPause = {
+                            viewModel.onUsbDacDetached()
+                        }
+                    )
+                }
+                return VibePlayViewModel(
+                    audioEngine = app.audioEngine,
+                    wearBridge = wearBridge,
+                    hardwareManager = hardwareManager
+                ) as T
             }
         }
     }
@@ -50,6 +65,16 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        if (!::hardwareManager.isInitialized) {
+            hardwareManager = UsbDacHardwareManager(
+                context = applicationContext,
+                onDacUnpluggedSafetyPause = {
+                    viewModel.onUsbDacDetached()
+                }
+            )
+        }
+        hardwareManager.startMonitoring()
 
         // Start Foreground MediaSessionService
         val serviceIntent = Intent(this, VibePlaybackService::class.java)
@@ -180,7 +205,21 @@ class MainActivity : ComponentActivity() {
                         }
 
                         if (state.showDacModal) {
-                            DacOutputModal(viewModel = viewModel)
+                            DacOutputBottomSheet(
+                                connectedDacs = state.universalDacs,
+                                activeDac = state.activeUniversalDac,
+                                isUsbDacActive = state.activeUniversalDac != null,
+                                exclusiveUsbAccess = state.exclusiveUsbAccess,
+                                dolbyAtmosEnabled = state.dolbyAtmosEnabled,
+                                dolbyAtmosProfile = state.atmosProfile.displayName,
+                                onScanUsbBus = { viewModel.scanUsbBus() },
+                                onSelectDac = { dac -> viewModel.selectUniversalDac(dac) },
+                                onMountCustomDac = { name -> viewModel.mountCustomDac(name) },
+                                onSelectPhoneSpeaker = { viewModel.selectPhoneSpeaker() },
+                                onToggleExclusiveUsb = { enabled -> viewModel.setExclusiveUsb(enabled) },
+                                onToggleDolbyAtmos = { enabled -> viewModel.setDolbyAtmos(enabled) },
+                                onDismiss = { viewModel.setDacModalVisible(false) }
+                            )
                         }
 
                         if (state.showTrackActions) {
@@ -229,6 +268,9 @@ class MainActivity : ComponentActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        if (::hardwareManager.isInitialized) {
+            hardwareManager.stopMonitoring()
+        }
         unregisterReceiver(usbDacReceiver)
     }
 }
