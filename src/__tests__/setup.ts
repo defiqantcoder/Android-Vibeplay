@@ -53,4 +53,4 @@ class MockAudioContext {
 }
 
 global.window.AudioContext = MockAudioContext as any;
-global.window.webkitAudioContext = MockAudioContext as any;
+(global.window as any).webkitAudioContext = MockAudioContext as any;
