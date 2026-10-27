@@ -66,3 +66,14 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
 }
+
+dependencies {
+    implementation(libs.androidx.wear.tiles)
+    implementation(libs.androidx.wear.protolayout)
+    implementation(libs.androidx.wear.protolayout.material)
+    implementation(libs.androidx.wear.protolayout.expression)
+    implementation(libs.androidx.wear.watchface.complications.data)
+    implementation(libs.androidx.wear.watchface.complications.data.source)
+    implementation(libs.guava.listenablefuture)
+    implementation(libs.kotlinx.coroutines.guava)
+}
