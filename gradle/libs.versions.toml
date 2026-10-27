@@ -1,5 +1,4 @@
 [versions]
-jaudiotagger = "3.0.1"
 wearTiles = "1.4.0"
 wearProtolayout = "1.2.1"
 wearWatchface = "1.2.1"
@@ -21,7 +20,6 @@ playServicesWearable = "18.2.0"
 junit = "4.13.2"
 
 [libraries]
-jaudiotagger = { group = "net.jthink", name = "jaudiotagger", version.ref = "jaudiotagger" }
 androidx-wear-tiles = { group = "androidx.wear.tiles", name = "tiles", version.ref = "wearTiles" }
 androidx-wear-tiles-tooling = { group = "androidx.wear.tiles", name = "tiles-tooling", version.ref = "wearTiles" }
 androidx-wear-protolayout = { group = "androidx.wear.protolayout", name = "protolayout", version.ref = "wearProtolayout" }
