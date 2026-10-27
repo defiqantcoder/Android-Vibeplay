@@ -1,5 +1,20 @@
-node_modules/
+# Android & Gradle
+.gradle/
 build/
+*/build/
+app/build/
+core/build/
+wear/build/
+local.properties
+.idea/
+*.iml
+.kotlin/
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Node & Web
+node_modules/
 dist/
 coverage/
 .DS_Store
