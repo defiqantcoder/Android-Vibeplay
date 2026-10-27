@@ -12,6 +12,7 @@ import androidx.media3.exoplayer.audio.AudioSink
 import androidx.media3.exoplayer.audio.DefaultAudioSink
 import com.vibeplay.core.dsp.BiquadPeqEngine
 import com.vibeplay.core.model.Track
+import androidx.media3.common.util.UnstableApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -45,6 +46,7 @@ class VibeAudioEngine(private val context: Context) {
         initializePlayer()
     }
 
+    @androidx.annotation.OptIn(UnstableApi::class)
     private fun initializePlayer() {
         val audioAttributes = AudioAttributes.Builder()
             .setUsage(C.USAGE_MEDIA)

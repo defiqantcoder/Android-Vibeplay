@@ -3,6 +3,7 @@ package com.vibeplay.app.audio
 import androidx.media3.common.C
 import androidx.media3.common.audio.AudioProcessor
 import androidx.media3.common.audio.BaseAudioProcessor
+import androidx.media3.common.util.UnstableApi
 import com.vibeplay.core.dsp.BiquadPeqEngine
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -14,6 +15,7 @@ import java.nio.ByteOrder
  * Automatically bypasses processing when isBypassed is set to true
  * (e.g. When bit-perfect hardware output mode is active).
  */
+@androidx.annotation.OptIn(UnstableApi::class)
 class BiquadPeqAudioProcessor(val peqEngine: BiquadPeqEngine = BiquadPeqEngine(44100f)) : BaseAudioProcessor() {
 
     @Volatile
