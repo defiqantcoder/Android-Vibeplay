@@ -1,0 +1,230 @@
+@import "tailwindcss";
+
+@layer base {
+  :root,
+  [data-vibe-theme="teal"] {
+    --vibe-primary: #4cd7f6;
+    --vibe-primary-container: #06b6d4;
+    --vibe-on-primary: #003640;
+    --vibe-on-primary-container: #001f26;
+    --vibe-secondary: #ffb95f;
+    --vibe-secondary-container: #ee9800;
+    --vibe-tertiary: #4edea3;
+    --vibe-tertiary-container: #1bbd85;
+    --vibe-surface: #131315;
+    --vibe-surface-lowest: #0e0e10;
+    --vibe-surface-low: #1b1b1d;
+    --vibe-surface-container: #201f21;
+    --vibe-surface-high: #2a2a2c;
+    --vibe-surface-highest: #353437;
+    --vibe-surface-bright: #39393b;
+  }
+
+  [data-vibe-theme="amber"] {
+    --vibe-primary: #ffb95f;
+    --vibe-primary-container: #f59e0b;
+    --vibe-on-primary: #2a1700;
+    --vibe-on-primary-container: #1f1100;
+    --vibe-secondary: #4cd7f6;
+    --vibe-secondary-container: #06b6d4;
+    --vibe-tertiary: #4edea3;
+    --vibe-tertiary-container: #1bbd85;
+    --vibe-surface: #141210;
+    --vibe-surface-lowest: #0e0c0a;
+    --vibe-surface-low: #1c1916;
+    --vibe-surface-container: #231f1b;
+    --vibe-surface-high: #2d2823;
+    --vibe-surface-highest: #38322c;
+    --vibe-surface-bright: #403932;
+  }
+
+  [data-vibe-theme="lofi"] {
+    --vibe-primary: #c084fc;
+    --vibe-primary-container: #9333ea;
+    --vibe-on-primary: #240046;
+    --vibe-on-primary-container: #ffffff;
+    --vibe-secondary: #f472b6;
+    --vibe-secondary-container: #db2777;
+    --vibe-tertiary: #4edea3;
+    --vibe-tertiary-container: #1bbd85;
+    --vibe-surface: #121117;
+    --vibe-surface-lowest: #0c0b10;
+    --vibe-surface-low: #191721;
+    --vibe-surface-container: #201e29;
+    --vibe-surface-high: #2a2736;
+    --vibe-surface-highest: #353144;
+    --vibe-surface-bright: #3e3a4f;
+  }
+
+  [data-vibe-theme="ink"] {
+    --vibe-primary: #6ffbbe;
+    --vibe-primary-container: #10b981;
+    --vibe-on-primary: #002113;
+    --vibe-on-primary-container: #001f12;
+    --vibe-secondary: #4cd7f6;
+    --vibe-secondary-container: #06b6d4;
+    --vibe-tertiary: #ffb95f;
+    --vibe-tertiary-container: #f59e0b;
+    --vibe-surface: #0e0e10;
+    --vibe-surface-lowest: #08080a;
+    --vibe-surface-low: #151518;
+    --vibe-surface-container: #1b1b1f;
+    --vibe-surface-high: #242429;
+    --vibe-surface-highest: #2f2f36;
+    --vibe-surface-bright: #383840;
+  }
+
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+    background-color: #08080a;
+    color: #e5e1e4;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior-y: contain;
+  }
+}
+
+@theme {
+  --color-surface: var(--vibe-surface);
+  --color-surface-dim: var(--vibe-surface);
+  --color-surface-bright: var(--vibe-surface-bright);
+  --color-surface-container-lowest: var(--vibe-surface-lowest);
+  --color-surface-container-low: var(--vibe-surface-low);
+  --color-surface-container: var(--vibe-surface-container);
+  --color-surface-container-high: var(--vibe-surface-high);
+  --color-surface-container-highest: var(--vibe-surface-highest);
+  --color-surface-variant: var(--vibe-surface-highest);
+
+  --color-on-surface: #e5e1e4;
+  --color-on-surface-variant: #bcc9cd;
+  --color-outline: #869397;
+  --color-outline-variant: #3d494c;
+
+  --color-primary: var(--vibe-primary);
+  --color-primary-container: var(--vibe-primary-container);
+  --color-on-primary: var(--vibe-on-primary);
+  --color-on-primary-container: var(--vibe-on-primary-container);
+  --color-primary-fixed: #acedff;
+  --color-primary-fixed-dim: var(--vibe-primary);
+
+  --color-secondary: var(--vibe-secondary);
+  --color-secondary-container: var(--vibe-secondary-container);
+  --color-on-secondary: #472a00;
+  --color-secondary-fixed: #ffddb8;
+  --color-secondary-fixed-dim: var(--vibe-secondary);
+
+  --color-tertiary: var(--vibe-tertiary);
+  --color-tertiary-container: var(--vibe-tertiary-container);
+  --color-on-tertiary: #003824;
+  --color-tertiary-fixed: #6ffbbe;
+
+  --color-error: #ffb4ab;
+  --color-error-container: #93000a;
+  --color-on-error: #690005;
+  --color-on-error-container: #ffdad6;
+
+  --font-headline: "Plus Jakarta Sans", sans-serif;
+  --font-body: "Inter", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+}
+
+.font-headline-lg {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 28px;
+  line-height: 34px;
+  letter-spacing: -0.02em;
+  font-weight: 700;
+}
+
+.font-headline-md {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 22px;
+  line-height: 28px;
+  letter-spacing: -0.015em;
+  font-weight: 700;
+}
+
+.font-headline-sm {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 600;
+}
+
+.font-label-lg {
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  line-height: 18px;
+  letter-spacing: 0.01em;
+  font-weight: 600;
+}
+
+.font-label-md {
+  font-family: "Inter", sans-serif;
+  font-size: 12px;
+  line-height: 16px;
+  letter-spacing: 0.02em;
+  font-weight: 500;
+}
+
+.font-body-lg {
+  font-family: "Inter", sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 500;
+}
+
+.font-body-md {
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 400;
+}
+
+.font-body-sm {
+  font-family: "Inter", sans-serif;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 400;
+}
+
+.font-telemetry-md {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12px;
+  line-height: 16px;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.font-telemetry-sm {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  line-height: 14px;
+  letter-spacing: 0.06em;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.artwork-aura-cyan {
+  background: radial-gradient(circle at 35% 35%, rgba(6, 182, 212, 0.35) 0%, transparent 68%);
+  filter: blur(48px);
+}
+.artwork-aura-amber {
+  background: radial-gradient(circle at 65% 65%, rgba(245, 158, 11, 0.28) 0%, transparent 68%);
+  filter: blur(52px);
+}
+
+.vinyl-sheen-border {
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.18), 0 12px 36px rgba(0, 0, 0, 0.7);
+}

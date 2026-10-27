@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_tab" name="shell-type"/><title>VibePlay Mobile</title><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@500;600&amp;family=Plus+Jakarta+Sans:wght@600;700;800&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{width:100vw;min-height:100vh;margin:0;padding:0;background-color:#131315;}body{overscroll-behavior-y:contain;-webkit-tap-highlight-color:transparent;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}}::-webkit-scrollbar{display:none;}*{-ms-overflow-style:none;scrollbar-width:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { colors: { "on-tertiary-fixed-variant": "#005236", "surface-tint": "#4cd7f6", "surface-dim": "#131315", "secondary-fixed-dim": "#ffb95f", "surface-container": "#201f21", "tertiary-fixed": "#6ffbbe", "inverse-surface": "#e5e1e4", "on-error-container": "#ffdad6", "primary": "#4cd7f6", "on-secondary": "#472a00", "inverse-on-surface": "#303032", "on-primary-fixed": "#001f26", "background": "#131315", "surface-bright": "#39393b", "on-primary-fixed-variant": "#004e5c", "primary-fixed-dim": "#4cd7f6", "tertiary-fixed-dim": "#4edea3", "error": "#ffb4ab", "tertiary": "#4edea3", "surface-container-high": "#2a2a2c", "surface-container-lowest": "#0e0e10", "outline-variant": "#3d494c", "on-secondary-fixed": "#2a1700", "surface-container-highest": "#353437", "outline": "#869397", "inverse-primary": "#00687a", "on-surface": "#e5e1e4", "primary-fixed": "#acedff", "error-container": "#93000a", "secondary-container": "#ee9800", "surface": "#131315", "on-primary-container": "#00424f", "on-surface-variant": "#bcc9cd", "tertiary-container": "#1bbd85", "on-secondary-container": "#5b3800", "secondary-fixed": "#ffddb8", "surface-variant": "#353437", "on-background": "#e5e1e4", "on-tertiary-fixed": "#002113", "secondary": "#ffb95f", "on-tertiary-container": "#00452e", "on-secondary-fixed-variant": "#653e00", "on-primary": "#003640", "on-tertiary": "#003824", "on-error": "#690005", "primary-container": "#06b6d4", "surface-container-low": "#1b1b1d" }, borderRadius: { "DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px" }, spacing: { "space-xs": "0.25rem", "space-sm": "0.5rem", "space-xl": "2rem", "space-md": "1rem", "margin-mobile": "1rem", "space-lg": "1.5rem", "gutter": "1rem", "gutter-sm": "0.75rem", "margin": "1.25rem" }, fontFamily: { "body-sm": ["Inter"], "body-lg": ["Inter"], "headline-sm": ["Plus Jakarta Sans"], "label-md": ["Inter"], "headline-md": ["Plus Jakarta Sans"], "telemetry-sm": ["JetBrains Mono"], "telemetry-md": ["JetBrains Mono"], "display-lg": ["Plus Jakarta Sans"], "label-lg": ["Inter"], "body-md": ["Inter"], "headline-lg": ["Plus Jakarta Sans"] }, fontSize: { "body-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }], "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "500" }], "headline-sm": ["18px", { "lineHeight": "24px", "fontWeight": "600" }], "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }], "headline-md": ["22px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "700" }], "telemetry-sm": ["10px", { "lineHeight": "14px", "letterSpacing": "0.06em", "fontWeight": "500" }], "telemetry-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.04em", "fontWeight": "600" }], "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.03em", "fontWeight": "800" }], "label-lg": ["14px", { "lineHeight": "18px", "letterSpacing": "0.01em", "fontWeight": "600" }], "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }], "headline-lg": ["30px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "700" }] } } } };</script><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-surface font-body-md text-on-surface antialiased flex flex-col min-h-screen selection:bg-primary-container selection:text-on-primary"><header class="fixed top-0 w-full z-50 pt-safe bg-surface/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.25)]"><div class="h-14 px-margin-mobile flex items-center justify-between"><div class="flex items-center gap-space-sm"><span class="font-headline-md text-headline-md tracking-tight text-on-surface flex items-center gap-1.5"><span>✨</span><span>vibeplay</span></span><div class="w-1.5 h-1.5 rounded-full bg-primary-container shadow-[0_0_8px_rgba(6,182,212,0.8)]"></div></div><div class="flex items-center gap-1"><div class="hidden sm:flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-container-high"><div class="w-2 h-2 rounded-full bg-tertiary-container shadow-[0_0_6px_rgba(27,189,133,0.7)]"></div><span class="font-telemetry-sm text-telemetry-sm text-on-surface font-medium">🎧 USB DAC</span></div><a class="w-11 h-11 flex items-center justify-center rounded-full text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors" href="#"><span class="material-symbols-outlined text-[22px]">search</span></a><a class="w-11 h-11 flex items-center justify-center rounded-full text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors" href="#"><span class="material-symbols-outlined text-[22px]">settings</span></a><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center ml-1"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="flex flex-col relative w-full pt-14 pb-44 px-margin-mobile bg-surface min-h-screen"><div class="flex flex-col w-full gap-space-lg select-none">
+<!-- Content Header Block -->
+<div class="flex flex-col gap-space-sm pt-space-xs">
+<div class="flex items-center justify-between">
+<a aria-label="Go Back" class="w-10 h-10 -ml-2 rounded-full flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors" href="#">
+<span class="material-symbols-outlined text-[24px]">arrow_back</span>
+</a>
+<div class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container-high shadow-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary shadow-[0_0_8px_rgba(78,222,163,0.8)]"></span>
+<span class="font-telemetry-sm text-telemetry-sm text-tertiary font-medium">v2.4.2 Core • Direct ALSA</span>
+</div>
+</div>
+<div class="flex flex-col">
+<h1 class="font-headline-md text-headline-md text-on-surface tracking-tight flex items-center gap-2">
+<span>Settings &amp; Preferences</span>
+<span class="text-[20px]">⚙️</span>
+</h1>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
+        Audio engine, UI styling, and storage configuration
+      </p>
+</div>
+</div>
+<!-- Section 1: Appearance & Theme Palette -->
+<section class="flex flex-col gap-space-sm">
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="text-[18px]">🎨</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface tracking-tight">Appearance &amp; Theme Palette</h2>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
+        Select your acoustic UI mood. Auto-synchronizes across playback surfaces.
+      </p>
+</div>
+<!-- Theme Selection Horizontal Scroll / Snapper -->
+<div class="flex gap-space-sm overflow-x-auto pb-2 pt-1 -mx-margin-mobile px-margin-mobile scroll-smooth no-scrollbar" id="theme-carousel">
+<!-- Theme Card 1 (Active) -->
+<button class="theme-card active flex-shrink-0 w-64 p-space-md rounded-2xl bg-surface-container text-left transition-all duration-200 relative shadow-[0_8px_24px_rgba(0,0,0,0.45)] group focus:outline-none" data-theme="teal" type="button">
+<!-- Visual Glow Aura for selected state -->
+<div class="theme-glow absolute inset-0 rounded-2xl bg-primary/10 pointer-events-none transition-opacity"></div>
+<div class="flex items-start justify-between relative z-10">
+<div class="flex flex-col min-w-0 pr-2">
+<span class="font-label-lg text-label-lg text-on-surface truncate">Teal Lounge</span>
+<span class="font-telemetry-sm text-telemetry-sm text-primary mt-0.5 font-medium">Current Default</span>
+</div>
+<!-- Radio Indicator (Active) -->
+<div class="radio-indicator w-6 h-6 rounded-full bg-primary flex items-center justify-center text-on-primary shadow-[0_0_12px_rgba(6,182,212,0.4)] flex-shrink-0">
+<span class="material-symbols-outlined text-[16px] font-bold">check</span>
+</div>
+</div>
+<!-- Color Palette Preview Dots -->
+<div class="flex items-center gap-2 mt-4 pt-3 relative z-10">
+<div class="w-6 h-6 rounded-full bg-surface shadow-inner" title="Base #121214"></div>
+<div class="w-6 h-6 rounded-full bg-surface-container shadow-inner" title="Card #1e1e24"></div>
+<div class="w-6 h-6 rounded-full bg-primary shadow-[0_0_8px_rgba(6,182,212,0.6)]" title="Cyan Accent #06b6d4"></div>
+<span class="font-telemetry-sm text-telemetry-sm text-on-surface-variant ml-auto">OLED Cyan</span>
+</div>
+</button>
+<!-- Theme Card 2 -->
+<button class="theme-card flex-shrink-0 w-64 p-space-md rounded-2xl bg-surface-container text-left transition-all duration-200 relative shadow-sm group focus:outline-none opacity-85 hover:opacity-100" data-theme="amber" type="button">
+<div class="theme-glow hidden absolute inset-0 rounded-2xl bg-secondary/10 pointer-events-none"></div>
+<div class="flex items-start justify-between relative z-10">
+<div class="flex flex-col min-w-0 pr-2">
+<span class="font-label-lg text-label-lg text-on-surface truncate">Warm Amber Tape</span>
+<span class="font-telemetry-sm text-telemetry-sm text-on-surface-variant mt-0.5 font-medium">Analog Tape Warmth</span>
+</div>
+<!-- Radio Indicator (Unchecked) -->
+<div class="radio-indicator w-6 h-6 rounded-full bg-surface-container-high flex items-center justify-center text-transparent flex-shrink-0">
+<span class="material-symbols-outlined text-[16px]">check</span>
+</div>
+</div>
+<div class="flex items-center gap-2 mt-4 pt-3 relative z-10">
+<div class="w-6 h-6 rounded-full bg-surface shadow-inner"></div>
+<div class="w-6 h-6 rounded-full bg-surface-container shadow-inner"></div>
+<div class="w-6 h-6 rounded-full bg-secondary shadow-[0_0_8px_rgba(245,158,11,0.5)]"></div>
+<span class="font-telemetry-sm text-telemetry-sm text-on-surface-variant ml-auto">Vintage 432Hz</span>
+</div>
+</button>
+<!-- Theme Card 3 -->
+<button class="theme-card flex-shrink-0 w-64 p-space-md rounded-2xl bg-surface-container text-left transition-all duration-200 relative shadow-sm group focus:outline-none opacity-85 hover:opacity-100" data-theme="lofi" type="button">
+<div class="theme-glow hidden absolute inset-0 rounded-2xl bg-primary-fixed/10 pointer-events-none"></div>
+<div class="flex items-start justify-between relative z-10">
+<div class="flex flex-col min-w-0 pr-2">
+<span class="font-label-lg text-label-lg text-on-surface truncate">Midnight Lo-Fi</span>
+<span class="font-telemetry-sm text-telemetry-sm text-on-surface-variant mt-0.5 font-medium">Deep Violet Chill</span>
+</div>
+<!-- Radio Indicator (Unchecked) -->
+<div class="radio-indicator w-6 h-6 rounded-full bg-surface-container-high flex items-center justify-center text-transparent flex-shrink-0">
+<span class="material-symbols-outlined text-[16px]">check</span>
+</div>
+</div>
+<div class="flex items-center gap-2 mt-4 pt-3 relative z-10">
+<div class="w-6 h-6 rounded-full bg-surface-container-lowest shadow-inner"></div>
+<div class="w-6 h-6 rounded-full bg-surface-container-low shadow-inner"></div>
+<div class="w-6 h-6 rounded-full bg-primary-fixed shadow-[0_0_8px_rgba(172,237,255,0.4)]"></div>
+<span class="font-telemetry-sm text-telemetry-sm text-on-surface-variant ml-auto">Nocturnal</span>
+</div>
+</button>
+</div>
+<!-- Persistence notice pill -->
+<div class="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-surface-container-low text-on-surface-variant">
+<span class="text-[14px]">💾</span>
+<span class="font-telemetry-sm text-telemetry-sm">Themes save to device storage &amp; persist on relaunch</span>
+</div>
+</section>
+<!-- Section 2: Ambient Backgrounds -->
+<section class="flex flex-col gap-space-sm">
+<div class="p-space-md rounded-2xl bg-surface-container shadow-[0_8px_24px_rgba(0,0,0,0.45)] flex items-center justify-between gap-space-md">
+<div class="flex items-start gap-3 min-w-0 flex-1">
+<div class="w-10 h-10 rounded-xl bg-surface-container-high flex items-center justify-center text-primary flex-shrink-0 shadow-inner">
+<span class="material-symbols-outlined text-[22px]">blur_on</span>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-1.5">
+<span class="font-label-lg text-label-lg text-on-surface">Ambient Glow Engine</span>
+<span class="text-[12px]">✨</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
+            Dynamic blurred backdrop reacting to album colors on full-screen player
+          </p>
+</div>
+</div>
+<!-- Toggle Switch (ON) -->
+<button aria-checked="true" class="switch-toggle w-13 h-7 px-0.5 rounded-full bg-primary flex items-center justify-end transition-colors flex-shrink-0 shadow-[0_0_12px_rgba(6,182,212,0.4)] focus:outline-none" onclick="toggleSwitch(this)" role="switch" type="button">
+<span class="w-6 h-6 rounded-full bg-surface flex items-center justify-center text-primary shadow-sm transition-transform">
+<span class="material-symbols-outlined text-[14px] font-bold">check</span>
+</span>
+</button>
+</div>
+</section>
+<!-- Section 3: Audio Engine & Bit-Perfect Settings -->
+<section class="flex flex-col gap-space-sm">
+<div class="flex items-center gap-2">
+<span class="text-[18px]">🎛️</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface tracking-tight">Audio Engine &amp; Bit-Perfect</h2>
+</div>
+<div class="flex flex-col gap-2">
+<!-- Setting 1: Hardware Volume Lock -->
+<div class="p-space-md rounded-2xl bg-surface-container shadow-[0_8px_24px_rgba(0,0,0,0.45)] flex items-start justify-between gap-space-md">
+<div class="flex items-start gap-3 min-w-0 flex-1">
+<div class="w-10 h-10 rounded-xl bg-surface-container-high flex items-center justify-center text-secondary flex-shrink-0 shadow-inner">
+<span class="material-symbols-outlined text-[20px]">lock_open</span>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-1.5">
+<span class="font-label-lg text-label-lg text-on-surface">Hardware Volume Lock</span>
+<span class="font-telemetry-sm text-telemetry-sm px-1.5 py-0.5 rounded bg-surface-container-lowest text-tertiary">0 dB</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1 leading-snug">
+              Locks Android digital mixer to 100% to prevent software bit-truncation and guarantee bit-perfect DSD/PCM streams to USB DAC.
+            </p>
+</div>
+</div>
+<!-- Toggle Switch (ON) -->
+<button aria-checked="true" class="switch-toggle w-13 h-7 px-0.5 rounded-full bg-primary flex items-center justify-end transition-colors flex-shrink-0 shadow-[0_0_12px_rgba(6,182,212,0.4)] focus:outline-none mt-1" onclick="toggleSwitch(this)" role="switch" type="button">
+<span class="w-6 h-6 rounded-full bg-surface flex items-center justify-center text-primary shadow-sm transition-transform">
+<span class="material-symbols-outlined text-[14px] font-bold">check</span>
+</span>
+</button>
+</div>
+<!-- Setting 2: Audio Resampler Engine Dropdown -->
+<div class="p-space-md rounded-2xl bg-surface-container shadow-[0_8px_24px_rgba(0,0,0,0.45)] flex flex-col gap-space-sm">
+<div class="flex items-start gap-3 min-w-0">
+<div class="w-10 h-10 rounded-xl bg-surface-container-high flex items-center justify-center text-primary flex-shrink-0 shadow-inner">
+<span class="material-symbols-outlined text-[22px]">tune</span>
+</div>
+<div class="flex flex-col min-w-0 flex-1">
+<span class="font-label-lg text-label-lg text-on-surface">Audio Resampler Engine</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
+              Active DSP SRC algorithm when sample rate conversion is enforced
+            </p>
+</div>
+</div>
+<!-- Selector Picker -->
+<div class="relative w-full mt-1">
+<button class="w-full h-13 px-4 rounded-xl bg-surface-container-high text-left flex items-center justify-between gap-2 shadow-inner focus:outline-none hover:bg-surface-bright/40 transition-colors" id="resampler-trigger" onclick="toggleResamplerMenu()" type="button">
+<div class="flex flex-col min-w-0">
+<span class="font-telemetry-md text-telemetry-md text-primary font-semibold truncate" id="resampler-label">SOXR Very High Quality (96dB Stopband)</span>
+<span class="font-telemetry-sm text-telemetry-sm text-on-surface-variant">Polyphase FIR • Min. Phase</span>
+</div>
+<span class="material-symbols-outlined text-primary text-[20px] transition-transform duration-200" id="resampler-chevron">expand_more</span>
+</button>
+<!-- Dropdown Options List -->
+<div class="hidden absolute top-full left-0 right-0 mt-1.5 p-1 rounded-xl bg-surface-container-highest shadow-[0_12px_32px_rgba(0,0,0,0.6)] z-20 flex flex-col gap-1" id="resampler-menu">
+<button class="w-full p-2.5 rounded-lg text-left flex items-center justify-between bg-primary/10 text-primary" onclick="selectResampler('SOXR Very High Quality (96dB Stopband)', this)" type="button">
+<span class="font-telemetry-md text-telemetry-md">SOXR Very High Quality (96dB)</span>
+<span class="material-symbols-outlined text-[18px]">done</span>
+</button>
+<button class="w-full p-2.5 rounded-lg text-left flex items-center justify-between text-on-surface hover:bg-surface-container-high" onclick="selectResampler('SOXR Ultra (120dB Stopband Linear)', this)" type="button">
+<span class="font-telemetry-md text-telemetry-md">SOXR Ultra (120dB Linear)</span>
+</button>
+<button class="w-full p-2.5 rounded-lg text-left flex items-center justify-between text-on-surface hover:bg-surface-container-high" onclick="selectResampler('Direct Hardware Bypass (No Resampling)', this)" type="button">
+<span class="font-telemetry-md text-telemetry-md">Direct Bypass (Bit-Perfect)</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Section 4: Storage & Local Music Library -->
+<section class="flex flex-col gap-space-sm">
+<div class="flex items-center gap-2">
+<span class="text-[18px]">📁</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface tracking-tight">Storage &amp; Folders</h2>
+</div>
+<div class="p-space-md rounded-2xl bg-surface-container shadow-[0_8px_24px_rgba(0,0,0,0.45)] flex flex-col gap-3">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface-variant font-medium">Indexed Audio Source</span>
+<!-- Path Pill -->
+<div class="flex items-center gap-2 mt-2 px-3 py-2.5 rounded-xl bg-surface-container-lowest shadow-inner">
+<span class="material-symbols-outlined text-primary text-[18px]">folder_open</span>
+<span class="font-telemetry-md text-telemetry-md text-on-surface font-semibold truncate flex-1">/storage/emulated/0/Music</span>
+<span class="font-telemetry-sm text-telemetry-sm px-1.5 py-0.5 rounded bg-surface-container-high text-on-surface-variant">FLAC/DSD</span>
+</div>
+</div>
+<!-- Telemetry Info -->
+<div class="flex items-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px] text-tertiary">check_circle</span>
+<span class="font-telemetry-sm text-telemetry-sm">1,428 lossless files indexed • 64.2 GB</span>
+</div>
+<!-- Action Buttons Row -->
+<div class="grid grid-cols-2 gap-space-sm pt-2">
+<button class="h-11 px-3 rounded-full bg-surface-container-high text-on-surface hover:bg-surface-bright/50 active:scale-95 transition-all flex items-center justify-center gap-1.5" type="button">
+<span class="material-symbols-outlined text-[18px]">create_new_folder</span>
+<span class="font-label-md text-label-md font-medium">Change Folder</span>
+</button>
+<button class="h-11 px-3 rounded-full bg-primary/10 text-primary hover:bg-primary/20 active:scale-95 transition-all flex items-center justify-center gap-1.5" id="rescan-btn" onclick="triggerRescan()" type="button">
+<span class="material-symbols-outlined text-[18px] transition-transform" id="rescan-icon">sync</span>
+<span class="font-label-md text-label-md font-semibold" id="rescan-text">Rescan Crate</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Bottom System Info & Architecture Guarantee -->
+<footer class="flex flex-col items-center justify-center gap-1 pt-space-md pb-4 text-center">
+<div class="flex items-center gap-1.5 text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px] text-primary">verified</span>
+<span class="font-telemetry-sm text-telemetry-sm text-on-surface-variant">Zero-Jitter Hardware Pipeline</span>
+</div>
+<span class="font-telemetry-sm text-telemetry-sm text-on-surface-variant/70">
+      VibePlay Android • Bit-Perfect ALSA Core • OpenSL ES / AAudio
+    </span>
+</footer>
+</div>
+<script>
+  function toggleSwitch(btn) {
+    const isChecked = btn.getAttribute('aria-checked') === 'true';
+    btn.setAttribute('aria-checked', !isChecked);
+    
+    const knob = btn.firstElementChild;
+    const icon = knob.firstElementChild;
+
+    if (isChecked) {
+      btn.classList.remove('bg-primary', 'shadow-[0_0_12px_rgba(6,182,212,0.4)]', 'justify-end');
+      btn.classList.add('bg-surface-container-high', 'justify-start');
+      knob.classList.remove('text-primary');
+      knob.classList.add('text-on-surface-variant');
+      icon.textContent = 'close';
+    } else {
+      btn.classList.add('bg-primary', 'shadow-[0_0_12px_rgba(6,182,212,0.4)]', 'justify-end');
+      btn.classList.remove('bg-surface-container-high', 'justify-start');
+      knob.classList.add('text-primary');
+      knob.classList.remove('text-on-surface-variant');
+      icon.textContent = 'check';
+    }
+  }
+
+  function toggleResamplerMenu() {
+    const menu = document.getElementById('resampler-menu');
+    const chevron = document.getElementById('resampler-chevron');
+    if (menu.classList.contains('hidden')) {
+      menu.classList.remove('hidden');
+      chevron.classList.add('rotate-180');
+    } else {
+      menu.classList.add('hidden');
+      chevron.classList.remove('rotate-180');
+    }
+  }
+
+  function selectResampler(name, buttonElement) {
+    document.getElementById('resampler-label').textContent = name;
+    toggleResamplerMenu();
+
+    const buttons = document.querySelectorAll('#resampler-menu button');
+    buttons.forEach(btn => {
+      btn.classList.remove('bg-primary/10', 'text-primary');
+      btn.classList.add('text-on-surface');
+      const check = btn.querySelector('.material-symbols-outlined');
+      if (check) check.remove();
+    });
+
+    buttonElement.classList.add('bg-primary/10', 'text-primary');
+    buttonElement.classList.remove('text-on-surface');
+    
+    const checkSpan = document.createElement('span');
+    checkSpan.className = 'material-symbols-outlined text-[18px]';
+    checkSpan.textContent = 'done';
+    buttonElement.appendChild(checkSpan);
+  }
+
+  // Theme card switcher
+  const themeCards = document.querySelectorAll('.theme-card');
+  themeCards.forEach(card => {
+    card.addEventListener('click', () => {
+      themeCards.forEach(c => {
+        c.classList.remove('active', 'shadow-[0_8px_24px_rgba(0,0,0,0.45)]');
+        c.classList.add('opacity-85');
+        const glow = c.querySelector('.theme-glow');
+        if (glow) glow.classList.add('hidden');
+        
+        const radio = c.querySelector('.radio-indicator');
+        radio.className = 'radio-indicator w-6 h-6 rounded-full bg-surface-container-high flex items-center justify-center text-transparent flex-shrink-0';
+        radio.innerHTML = '<span class="material-symbols-outlined text-[16px]">check</span>';
+      });
+
+      card.classList.add('active', 'shadow-[0_8px_24px_rgba(0,0,0,0.45)]');
+      card.classList.remove('opacity-85');
+      const activeGlow = card.querySelector('.theme-glow');
+      if (activeGlow) activeGlow.classList.remove('hidden');
+
+      const activeRadio = card.querySelector('.radio-indicator');
+      activeRadio.className = 'radio-indicator w-6 h-6 rounded-full bg-primary flex items-center justify-center text-on-primary shadow-[0_0_12px_rgba(6,182,212,0.4)] flex-shrink-0';
+      activeRadio.innerHTML = '<span class="material-symbols-outlined text-[16px] font-bold">check</span>';
+    });
+  });
+
+  // Rescan simulation
+  function triggerRescan() {
+    const icon = document.getElementById('rescan-icon');
+    const text = document.getElementById('rescan-text');
+    icon.classList.add('animate-spin');
+    text.textContent = 'Indexing...';
+
+    setTimeout(() => {
+      icon.classList.remove('animate-spin');
+      text.textContent = 'Crate Synced';
+      setTimeout(() => {
+        text.textContent = 'Rescan Crate';
+      }, 2000);
+    }, 1200);
+  }
+</script></main><div class="fixed bottom-20 inset-x-0 z-40 px-3 pb-1"><div class="h-16 w-full rounded-full bg-surface-container/95 backdrop-blur-xl shadow-[0_8px_24px_rgba(0,0,0,0.55)] px-2.5 flex items-center justify-between gap-space-sm"><div class="flex items-center gap- space-sm min-w-0 flex-1"><div class="w-11 h-11 rounded-xl bg-surface-container-high flex-shrink-0 flex items-center justify-center overflow-hidden relative shadow-inner"><span class="material-symbols-outlined text-primary-container text-[24px]">album</span><div class="absolute inset-0 bg-primary-container/10"></div></div><div class="flex flex-col min-w-0 pr-2"><div class="flex items-center gap-1.5"><span class="font-label-lg text-label-lg text-on-surface truncate">Midnight Resonance</span><span class="font-telemetry-sm text-telemetry-sm px-1.5 py-0.2 rounded bg-surface-container-lowest text-tertiary-container tracking-wider flex-shrink-0">24/96</span></div><span class="font-body-sm text-body-sm text-on-surface-variant truncate">Kavinsky &amp; Daft Punk</span></div></div><div class="flex items-center gap-1 flex-shrink-0"><button aria-label="Skip Next" class="w-11 h-11 rounded-full flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors"><span class="material-symbols-outlined text-[22px]">skip_next</span></button><button aria-label="Play or Pause" class="w-11 h-11 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center shadow-[0_0_16px_rgba(6,182,212,0.45)] hover:scale-105 active:scale-95 transition-transform"><span class="material-symbols-outlined text-[24px]">play_arrow</span></button></div></div></div><nav class="fixed bottom-0 w-full z-50 pb-safe bg-surface/90 backdrop-blur-xl shadow-[0_-4px_16px_rgba(0,0,0,0.35)]" data-active-classes="bg-primary-container/15 text-primary font-bold shadow-[0_0_12px_rgba(6,182,212,0.2)]"><div class="h-[72px] px-2 flex items-center justify-around"><a class="flex flex-col items-center justify-center gap-0.5 min-w-[68px] h-12 px-2.5 rounded-full text-on-surface-variant hover:text-on-surface transition-all" data-path="crate" href="#"><span class="material-symbols-outlined text-[22px]">library_music</span><span class="font-label-md text-label-md">Crate</span></a><a class="flex flex-col items-center justify-center gap-0.5 min-w-[68px] h-12 px-2.5 rounded-full text-on-surface-variant hover:text-on-surface transition-all" data-path="vibe-cooker" href="#"><span class="material-symbols-outlined text-[22px]">soup_kitchen</span><span class="font-label-md text-label-md">Cooker</span></a><a class="flex flex-col items-center justify-center gap-0.5 min-w-[68px] h-12 px-2.5 rounded-full text-on-surface-variant hover:text-on-surface transition-all" data-path="the-soundbar" href="#"><span class="material-symbols-outlined text-[22px]">equalizer</span><span class="font-label-md text-label-md">Soundbar</span></a><a class="flex flex-col items-center justify-center gap-0.5 min-w-[68px] h-12 px-2.5 rounded-full text-on-surface-variant hover:text-on-surface transition-all" data-path="add-ons" href="#"><span class="material-symbols-outlined text-[22px]">extension</span><span class="font-label-md text-label-md">Add-ons</span></a></div><div class="w-32 h-1 bg-surface-bright/70 rounded-full mx-auto my-1.5"></div></nav></body></html>

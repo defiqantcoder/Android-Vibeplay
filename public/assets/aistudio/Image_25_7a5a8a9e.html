@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_tab" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500;600&amp;family=Plus+Jakarta+Sans:wght@600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { colors: { "on-tertiary": "#003824", "tertiary-container": "#1bbd85", "on-background": "#e5e1e4", "on-surface": "#e5e1e4", "surface-tint": "#4cd7f6", "surface-dim": "#131315", "error": "#ffb4ab", "inverse-primary": "#00687a", "on-secondary-fixed-variant": "#653e00", "secondary-container": "#ee9800", "tertiary": "#4edea3", "surface-container-high": "#2a2a2c", "on-secondary-fixed": "#2a1700", "inverse-on-surface": "#303032", "inverse-surface": "#e5e1e4", "on-secondary": "#472a00", "tertiary-fixed": "#6ffbbe", "surface-container-low": "#1b1b1d", "surface-container-highest": "#353437", "surface-container": "#201f21", "outline-variant": "#3d494c", "primary-fixed": "#acedff", "on-tertiary-fixed": "#002113", "on-tertiary-container": "#00452e", "on-primary": "#003640", "secondary": "#ffb95f", "background": "#131315", "on-primary-fixed-variant": "#004e5c", "primary-container": "#06b6d4", "on-surface-variant": "#bcc9cd", "secondary-fixed": "#ffddb8", "surface-bright": "#39393b", "on-tertiary-fixed-variant": "#005236", "primary": "#4cd7f6", "secondary-fixed-dim": "#ffb95f", "on-primary-container": "#00424f", "surface": "#131315", "on-error": "#690005", "on-secondary-container": "#5b3800", "surface-variant": "#353437", "tertiary-fixed-dim": "#4edea3", "surface-container-lowest": "#0e0e10", "on-primary-fixed": "#001f26", "primary-fixed-dim": "#4cd7f6", "error-container": "#93000a", "on-error-container": "#ffdad6", "outline": "#869397" }, borderRadius: { "DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px" }, spacing: { "space-xl": "2rem", "space-sm": "0.5rem", "gutter-sm": "0.75rem", "margin": "1.25rem", "space-md": "1rem", "gutter": "1rem", "space-lg": "1.5rem", "space-xs": "0.25rem", "margin-mobile": "1rem" }, fontFamily: { "telemetry-sm": ["JetBrains Mono"], "headline-sm": ["Plus Jakarta Sans"], "body-md": ["Inter"], "label-md": ["Inter"], "label-lg": ["Inter"], "body-sm": ["Inter"], "telemetry-md": ["JetBrains Mono"], "display-lg": ["Plus Jakarta Sans"], "headline-md": ["Plus Jakarta Sans"], "body-lg": ["Inter"], "headline-lg": ["Plus Jakarta Sans"] }, fontSize: { "telemetry-sm": ["10px", { "lineHeight": "14px", "letterSpacing": "0.06em", "fontWeight": "500" }], "headline-sm": ["18px", { "lineHeight": "24px", "fontWeight": "600" }], "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }], "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }], "label-lg": ["14px", { "lineHeight": "18px", "letterSpacing": "0.01em", "fontWeight": "600" }], "body-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }], "telemetry-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.04em", "fontWeight": "600" }], "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.03em", "fontWeight": "800" }], "headline-md": ["22px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "700" }], "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "500" }], "headline-lg": ["30px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "700" }] } } } };</script><style>@layer base{html,body{width:100%;margin:0;padding:0;background-color:#131315;}body{overscroll-behavior:none;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-surface font-body-md text-body-md text-on-surface flex flex-col min-h-screen"><header class="fixed top-0 w-full z-50 pt-safe bg-surface/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 px-margin flex items-center justify-between"><div class="flex items-center gap-space-sm"><div class="w-9 h-9 rounded-full bg-primary-container/20 flex items-center justify-center text-primary"><span class="material-symbols-outlined text-[20px]">graphic_eq</span></div><h1 class="font-headline-sm text-headline-sm text-on-surface tracking-tight">Widget Showcase</h1></div><div class="flex items-center gap-space-xs"><button aria-label="Search" class="w-11 h-11 flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined text-[22px]">tune</span></button><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="flex-1 flex flex-col relative w-full pt-16 pb-28 bg-surface px-margin-mobile"><div class="flex flex-col w-full pb-8 space-y-space-lg">
+<!-- Screen Header & Material Badge -->
+<section class="flex flex-col space-y-space-sm pt-space-xs">
+<div class="flex items-center justify-between">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary font-telemetry-sm text-telemetry-sm tracking-wide">
+<span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+        DYNAMIC COLOR • MATERIAL 3
+      </span>
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-surface-container-highest text-on-surface-variant font-telemetry-sm text-telemetry-sm">
+        API 34+
+      </span>
+</div>
+<div>
+<h2 class="font-headline-md text-headline-md text-on-surface tracking-tight">Android Widgets &amp; Complications</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1 leading-relaxed">
+        Lossless playback control and instant prompt triggers right from your Android Home &amp; Lock screens.
+      </p>
+</div>
+<!-- Segmented Tab Switcher (Material You Pill Bar) -->
+<div class="flex p-1 rounded-full bg-surface-container-lowest gap-1 mt-1">
+<button class="flex-1 py-2 px-3 rounded-full bg-surface-container text-primary font-label-md text-label-md font-semibold text-center transition-all shadow-sm" id="tab-home">
+        Home Screen (Active)
+      </button>
+<button class="flex-1 py-2 px-3 rounded-full text-on-surface-variant hover:text-on-surface font-label-md text-label-md text-center transition-all" id="tab-lock">
+        Lock Screen Glance
+      </button>
+<button class="flex-1 py-2 px-3 rounded-full text-on-surface-variant hover:text-on-surface font-label-md text-label-md text-center transition-all" id="tab-gallery">
+        Widget Gallery
+      </button>
+</div>
+</section>
+<!-- Section 1: 4x2 Turntable Audiophile Widget Showcase -->
+<section class="flex flex-col space-y-space-xs">
+<div class="flex items-center justify-between px-1">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-primary">view_quilt</span>
+<span class="font-label-lg text-label-lg text-on-surface">4×2 Turntable Vinyl Widget</span>
+</div>
+<span class="font-telemetry-sm text-telemetry-sm text-on-surface-variant uppercase tracking-wider">Interactive</span>
+</div>
+<!-- 4x2 Widget Surface -->
+<div class="relative w-full rounded-lg bg-surface-container p-4 shadow-xl overflow-hidden group">
+<!-- Ambient Album Glow Backdrop -->
+<div class="absolute -right-10 -bottom-10 w-44 h-44 rounded-full bg-primary/10 blur-3xl pointer-events-none"></div>
+<div class="absolute -left-12 -top-12 w-40 h-40 rounded-full bg-secondary/10 blur-2xl pointer-events-none"></div>
+<div class="relative flex flex-col space-y-3">
+<!-- Top Main Interactive Cluster: Vinyl + Track Info -->
+<div class="flex items-center gap-4">
+<!-- Left: Rotating Vinyl Record & Tonearm -->
+<div class="relative shrink-0 w-28 h-28 flex items-center justify-center">
+<!-- Vinyl Outer Disc -->
+<div class="relative w-28 h-28 rounded-full bg-surface-container-lowest flex items-center justify-center shadow-lg transition-transform duration-700 animate-[spin_10s_linear_infinite]" id="vinyl-disc">
+<!-- Vinyl Concentric Grooves -->
+<div class="absolute inset-1.5 rounded-full opacity-40 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-surface-bright via-surface-container-low to-surface-container-lowest"></div>
+<div class="absolute inset-3 rounded-full opacity-30 bg-[radial-gradient(circle,_#3d494c_1px,_transparent_1px)] bg-[size:4px_4px]"></div>
+<!-- Center Album Label -->
+<div class="relative w-12 h-12 rounded-full overflow-hidden shadow-inner flex items-center justify-center">
+<img class="w-full h-full object-cover" data-alt="Close up retro punk rock album cover art with neon glowing typography reading Static Hearts on a vibrant dark teal and amber gradient backstage background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD4-QLg5rqHKzDq5sUiG7H2M2FKWlMzxUfSAUl3gUc-YHZYD50UNvnVm5joQOtD0A2e4DTSvqqW9lkTCIag2ONRvk9ig5aramJzglrJ3DZGhM9H4xDknFCNbZR-rxBR5sceoDIanxlfihWEY7VcR3ltiKq4h2m3LzUgEKxk8MHh1lV8HSHnnXxQ2umf_Sz7qRT1xdVu9yJZGZt4W8q1jdBkGxYW_oKGvnvk9ejIhhhhhA7MWUVcfJs"/>
+<!-- Center Spindle Hole -->
+<div class="absolute w-2.5 h-2.5 rounded-full bg-surface-container-lowest shadow-md"></div>
+</div>
+</div>
+<!-- Chrome Tonearm Needle Overlay -->
+<div class="absolute -top-1 right-1 w-7 h-12 pointer-events-none flex flex-col items-end">
+<div class="w-3 h-3 rounded-full bg-outline shadow"></div>
+<div class="w-1 h-8 bg-surface-variant transform rotate-12 origin-top"></div>
+<div class="w-2 h-1 bg-secondary rounded-sm shadow-sm -mt-0.5"></div>
+</div>
+</div>
+<!-- Right: Track Metadata & Audio Fidelity -->
+<div class="flex-1 min-w-0 flex flex-col justify-between h-28 py-0.5">
+<div>
+<div class="flex items-center justify-between gap-1 mb-1">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-surface-container-highest text-primary font-telemetry-sm text-telemetry-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-primary animate-ping"></span>
+                  FLAC 24/96
+                </span>
+<span class="material-symbols-outlined text-[18px] text-secondary">graphic_eq</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface truncate tracking-tight">Dead on Arrival</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate">Fall Out Boy • Take This to Your Grave</p>
+</div>
+<!-- Mini Waveform / Progress Scrub -->
+<div class="w-full space-y-1">
+<div class="w-full bg-surface-container-highest h-1.5 rounded-full overflow-hidden relative cursor-pointer">
+<div class="bg-primary h-full rounded-full w-[54%] transition-all relative">
+<div class="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-on-primary"></div>
+</div>
+</div>
+<div class="flex items-center justify-between text-on-surface-variant font-telemetry-sm text-telemetry-sm">
+<span>01:42</span>
+<span class="text-tertiary">Bit-Perfect Stream</span>
+<span>03:14</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Middle: Tactile Transport Control Dock -->
+<div class="flex items-center justify-between pt-1">
+<button aria-label="Shuffle" class="w-11 h-11 rounded-full flex items-center justify-center text-on-surface-variant hover:text-on-surface active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-[20px] text-tertiary">shuffle</span>
+</button>
+<div class="flex items-center gap-3">
+<button aria-label="Previous" class="w-12 h-12 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-[24px]">skip_previous</span>
+</button>
+<!-- 64dp Primary Play/Pause Target with Aura -->
+<button aria-label="Play/Pause" class="w-14 h-14 rounded-full bg-primary-container text-on-primary flex items-center justify-center shadow-[0_0_24px_rgba(6,182,212,0.35)] active:scale-90 transition-transform" id="btn-turntable-play">
+<span class="material-symbols-outlined text-[30px]" id="icon-turntable-play" style="font-variation-settings: 'FILL' 1;">pause</span>
+</button>
+<button aria-label="Next" class="w-12 h-12 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-[24px]">skip_next</span>
+</button>
+</div>
+<button aria-label="Favorite" class="w-11 h-11 rounded-full flex items-center justify-center text-on-surface-variant hover:text-on-surface active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-[20px] text-secondary" style="font-variation-settings: 'FILL' 1;">favorite</span>
+</button>
+</div>
+<!-- Bottom Hardware Status & Telemetry Bar -->
+<div class="pt-2 flex items-center justify-between text-on-surface-variant">
+<div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container-low text-on-surface">
+<span class="w-2 h-2 rounded-full bg-tertiary shadow-[0_0_6px_rgba(78,222,163,0.8)]"></span>
+<span class="font-telemetry-sm text-telemetry-sm tracking-wide">FiiO KA15 DAC (Bit-Perfect)</span>
+</div>
+<div class="flex items-center gap-1.5 font-label-md text-label-md text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px] text-primary">sensors</span>
+<span class="font-telemetry-sm text-telemetry-sm uppercase">VibePlay Engine</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Section 2: 4x1 Quick Vibe Launcher Pill Widget -->
+<section class="flex flex-col space-y-space-xs">
+<div class="flex items-center justify-between px-1">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-secondary">bolt</span>
+<span class="font-label-lg text-label-lg text-on-surface">4×1 Quick Vibe Launcher Pill</span>
+</div>
+<span class="font-telemetry-sm text-telemetry-sm text-on-surface-variant uppercase">Instant Prompt</span>
+</div>
+<!-- 4x1 Widget Capsule Card -->
+<div class="w-full rounded-full bg-surface-container p-2 shadow-lg flex items-center justify-between gap-2">
+<!-- Left: Interactive Natural Language Prompt Capsule -->
+<button class="flex-1 min-w-0 h-12 rounded-full bg-surface-container-high px-4 flex items-center gap-2.5 hover:bg-surface-bright active:scale-[0.98] transition-all text-left">
+<div class="w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[16px]">mic</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface truncate">What's the vibe?</span>
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant ml-auto shrink-0">auto_awesome</span>
+</button>
+<!-- Right: Quick Instant Presets -->
+<div class="flex items-center gap-1.5 shrink-0 pr-1">
+<!-- Preset 1: Lo-Fi -->
+<button aria-label="Lo-Fi Vibe" class="h-11 px-3 rounded-full bg-secondary-container/20 text-secondary-fixed flex items-center gap-1.5 active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-[16px]">coffee</span>
+<span class="font-label-md text-label-md font-semibold">Lo-Fi</span>
+</button>
+<!-- Preset 2: Workout -->
+<button aria-label="Workout Vibe" class="h-11 px-3 rounded-full bg-secondary/20 text-secondary flex items-center gap-1.5 active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-[16px]">local_fire_department</span>
+<span class="font-label-md text-label-md font-semibold">Workout</span>
+</button>
+<!-- Preset 3: Chill -->
+<button aria-label="Chill Vibe" class="h-11 px-3 rounded-full bg-primary/20 text-primary flex items-center gap-1.5 active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-[16px]">bedtime</span>
+<span class="font-label-md text-label-md font-semibold">Chill</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Section 3: Lock Screen Glanceable & Always-On Complications -->
+<section class="flex flex-col space-y-space-xs">
+<div class="flex items-center justify-between px-1">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-tertiary">lock_clock</span>
+<span class="font-label-lg text-label-lg text-on-surface">Lock Screen &amp; AOD Complications</span>
+</div>
+<span class="font-telemetry-sm text-telemetry-sm text-tertiary">Lossless Direct</span>
+</div>
+<!-- Dual Compact Card Container -->
+<div class="grid grid-cols-1 gap-3">
+<!-- 2x1 Lock Screen Glance Card -->
+<div class="rounded-lg bg-surface-container p-3.5 shadow-md flex items-center justify-between gap-3">
+<!-- Thumbnail with Live Indicator -->
+<div class="relative w-12 h-12 rounded-DEFAULT overflow-hidden shrink-0 bg-surface-container-highest">
+<img class="w-full h-full object-cover" data-alt="Minimalist dark indie electro album artwork featuring glowing turquoise lines on dark obsidian background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCHxjwGriAI-vlMfOyGFuKG-fCVX97RyaXGot7N2n65R1ijNmHXg-GJr3BtBHgjTfCfNA_clfP6nsWi60KA5Hl505b6c4ro2L2YHBgqlJdPowd1eTWtvmMxQ7vEzngRDN-DtHV_R3fOMNRa-KOtMQrKHBpylcMnZk_XdD_vTHdTG3UzBrUUvBY6SFEmCseCb36FyhphRqSPK-TXvjY0MZg8RVomd3rgo1m5AisZ3eZLRytLtBDubj8"/>
+<div class="absolute bottom-0 inset-x-0 h-1.5 bg-primary"></div>
+</div>
+<!-- Meta -->
+<div class="flex-1 min-w-0">
+<div class="flex items-center gap-2">
+<span class="font-headline-sm text-headline-sm text-on-surface truncate">Midnight Pulse</span>
+<span class="px-1.5 py-0.5 rounded-full bg-tertiary/10 text-tertiary font-telemetry-sm text-telemetry-sm shrink-0">96kHz</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate">Tycho • Simulcast</p>
+</div>
+<!-- Action / Waveform mini -->
+<div class="flex items-center gap-2 shrink-0">
+<!-- Animated Bar Waveform SVG -->
+<svg class="w-7 h-5 text-primary shrink-0" fill="currentColor" viewbox="0 0 28 20">
+<rect class="animate-pulse" height="12" rx="1.5" width="3" x="2" y="6"></rect>
+<rect class="animate-pulse" height="16" rx="1.5" style="animation-delay: 150ms;" width="3" x="8" y="2"></rect>
+<rect class="animate-pulse" height="10" rx="1.5" style="animation-delay: 300ms;" width="3" x="14" y="8"></rect>
+<rect class="animate-pulse" height="14" rx="1.5" style="animation-delay: 75ms;" width="3" x="20" y="4"></rect>
+</svg>
+<button aria-label="Toggle Play" class="w-10 h-10 rounded-full bg-surface-container-high text-on-surface flex items-center justify-center active:scale-95">
+<span class="material-symbols-outlined text-[20px]">pause</span>
+</button>
+</div>
+</div>
+<!-- Always-On Display (AOD) Micro-Complication Strip -->
+<div class="rounded-DEFAULT bg-surface-container-lowest p-3 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant">usb</span>
+<span class="font-telemetry-sm text-telemetry-sm text-on-surface">Direct USB-C • Bit-Perfect Mode</span>
+</div>
+<div class="flex items-center gap-1.5 text-tertiary font-telemetry-sm text-telemetry-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+<span>DSD128 Native</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Section 4: Widget Personalization & Add Action Bar -->
+<section class="rounded-lg bg-surface-container-low p-4 flex flex-col space-y-3 shadow-lg">
+<div class="flex items-start justify-between">
+<div>
+<h4 class="font-headline-sm text-headline-sm text-on-surface">Material You Dynamic Theme</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Extract palette from current vinyl sleeve or hardware theme.</p>
+</div>
+<div class="flex -space-x-1.5 items-center">
+<div class="w-6 h-6 rounded-full bg-primary shadow-sm"></div>
+<div class="w-6 h-6 rounded-full bg-secondary shadow-sm"></div>
+<div class="w-6 h-6 rounded-full bg-tertiary shadow-sm"></div>
+</div>
+</div>
+<!-- Color Scheme Selector Pills -->
+<div class="flex items-center gap-2 overflow-x-auto py-1">
+<button class="px-3.5 py-1.5 rounded-full bg-primary/20 text-primary font-label-md text-label-md font-semibold whitespace-nowrap">
+        ● Dynamic Cyan
+      </button>
+<button class="px-3.5 py-1.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-md text-label-md whitespace-nowrap">
+        Monochromatic
+      </button>
+<button class="px-3.5 py-1.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-md text-label-md whitespace-nowrap">
+        Deep OLED Pitch
+      </button>
+</div>
+<!-- Primary Action Button -->
+<div class="pt-2">
+<button class="w-full h-14 rounded-full bg-primary text-on-primary font-label-lg text-label-lg font-bold flex items-center justify-center gap-2 shadow-[0_4px_20px_rgba(76,215,246,0.3)] active:scale-[0.98] transition-transform" id="btn-add-widgets">
+<span class="material-symbols-outlined text-[22px]">add_to_home_screen</span>
+        Add Widgets to Home Screen
+      </button>
+</div>
+</section>
+</div>
+<script>
+  // Simple micro-interactions for the Turntable play toggle and tab switcher
+  const playBtn = document.getElementById('btn-turntable-play');
+  const playIcon = document.getElementById('icon-turntable-play');
+  const vinylDisc = document.getElementById('vinyl-disc');
+  let isPlaying = true;
+
+  if (playBtn && playIcon && vinylDisc) {
+    playBtn.addEventListener('click', () => {
+      isPlaying = !isPlaying;
+      if (isPlaying) {
+        playIcon.textContent = 'pause';
+        vinylDisc.style.animationPlayState = 'running';
+      } else {
+        playIcon.textContent = 'play_arrow';
+        vinylDisc.style.animationPlayState = 'paused';
+      }
+    });
+  }
+
+  // Tab Switcher micro interaction
+  const tabs = [
+    document.getElementById('tab-home'),
+    document.getElementById('tab-lock'),
+    document.getElementById('tab-gallery')
+  ];
+
+  tabs.forEach(tab => {
+    if (tab) {
+      tab.addEventListener('click', () => {
+        tabs.forEach(t => {
+          if (t) {
+            t.className = 'flex-1 py-2 px-3 rounded-full text-on-surface-variant hover:text-on-surface font-label-md text-label-md text-center transition-all';
+          }
+        });
+        tab.className = 'flex-1 py-2 px-3 rounded-full bg-surface-container text-primary font-label-md text-label-md font-semibold text-center transition-all shadow-sm';
+      });
+    }
+  });
+
+  // Haptic feedback placeholder toast on Add Widgets button
+  const addBtn = document.getElementById('btn-add-widgets');
+  if (addBtn) {
+    addBtn.addEventListener('click', () => {
+      const origText = addBtn.innerHTML;
+      addBtn.innerHTML = '<span class="material-symbols-outlined text-[22px]">check_circle</span> Added to Launcher Pin Tray';
+      addBtn.classList.replace('bg-primary', 'bg-tertiary');
+      addBtn.classList.replace('text-on-primary', 'text-on-tertiary');
+      setTimeout(() => {
+        addBtn.innerHTML = origText;
+        addBtn.classList.replace('bg-tertiary', 'bg-primary');
+        addBtn.classList.replace('text-on-tertiary', 'text-on-primary');
+      }, 2000);
+    });
+  }
+</script></main><nav class="fixed bottom-0 w-full z-50 pb-safe bg-surface/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]" data-active-classes="text-primary bg-surface-container-high/60"><div class="flex justify-around items-center h-20 px-space-xs"><a aria-current="page" class="flex flex-col items-center justify-center gap-space-xs min-w-[64px] h-12 rounded-full transition-colors text-primary bg-surface-container-high/60" data-path="widget-showcase" href="#"><span class="material-symbols-outlined text-[24px]">widgets</span><span class="font-label-md text-label-md">Widgets</span></a><a class="flex flex-col items-center justify-center gap-space-xs min-w-[64px] h-12 rounded-full text-on-surface-variant hover:text-on-surface transition-colors" data-path="home-screen-preview" href="#"><span class="material-symbols-outlined text-[24px]">home_app_logo</span><span class="font-label-md text-label-md">Launcher</span></a><a class="flex flex-col items-center justify-center gap-space-xs min-w-[64px] h-12 rounded-full text-on-surface-variant hover:text-on-surface transition-colors" data-path="lock-screen-preview" href="#"><span class="material-symbols-outlined text-[24px]">lock_clock</span><span class="font-label-md text-label-md">Lock Screen</span></a><a class="flex flex-col items-center justify-center gap-space-xs min-w-[64px] h-12 rounded-full text-on-surface-variant hover:text-on-surface transition-colors" data-path="theme-palettes" href="#"><span class="material-symbols-outlined text-[24px]">palette</span><span class="font-label-md text-label-md">Material You</span></a></div></nav></body></html>

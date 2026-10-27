@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>VibePlay Mobile - Track Actions &amp; Acoustic Details</title>
+<!-- Tailwind CSS CDN with forms and container queries -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration -->
+<script data-purpose="tailwind-config" id="tailwind-config">
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            surface: '#1e1e24',
+            surfaceBorder: '#2a2a35',
+            surfaceMuted: '#16161a',
+            cyanCustom: '#06b6d4',
+            amberCustom: '#f59e0b',
+            redCustom: '#ef4444',
+            greenCustom: '#10b981',
+          },
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          }
+        }
+      }
+    };
+  </script>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;family=Plus+Jakarta+Sans:wght@500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style data-purpose="custom-scroll-and-layout">
+    /* Android status bar and gesture navigation feel */
+    body {
+      background-color: #08080a;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    
+    /* Smooth custom scrollbars for sheet content if viewport is constrained */
+    .hide-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .hide-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    /* Radial glow backdrop mimicking audiophile vibe */
+    .sheet-glow {
+      box-shadow: 0 -12px 36px -4px rgba(6, 182, 212, 0.08), 0 -2px 16px rgba(0, 0, 0, 0.75);
+    }
+  </style>
+<meta content="web_standard" name="shell-type"/></head>
+<body class="flex justify-center items-center min-h-screen p-0 m-0 bg-[#08080a] font-sans antialiased text-[#e4e4e7]">
+<!-- BEGIN: MobileFrameContainer -->
+<!-- Target resolution 412x915 portrait (Android viewport standard) -->
+<main class="relative w-[412px] h-[915px] max-h-[915px] bg-[#0c0d11] overflow-hidden flex flex-col justify-end shadow-2xl border border-[#1f2128]"><div class="flex flex-col w-full text-on-surface select-none">
+<!-- Automotive Landscape Dashboard Container (Optimized for In-Car Displays / High-Reach Hitboxes) -->
+<div class="relative w-full overflow-hidden bg-surface-container-lowest p-space-md flex flex-col justify-between">
+<!-- Top Drive Mode Telemetry Header Bar -->
+<header class="flex items-center justify-between w-full h-14 px-space-md mb-space-sm bg-surface-container-low rounded-xl">
+<!-- Status & Safety Indicator -->
+<div class="flex items-center gap-space-md">
+<div class="flex items-center gap-space-xs bg-surface-container-high px-space-md py-1.5 rounded-full">
+<span class="material-symbols-outlined text-primary text-headline-sm" style="font-variation-settings: 'FILL' 1;">directions_car</span>
+<span class="font-headline-sm text-headline-sm text-on-surface tracking-wide">DRIVE MODE ACTIVE</span>
+</div>
+<div class="hidden sm:flex items-center gap-space-xs bg-surface-container px-space-sm py-1.5 rounded-full">
+<span class="w-2.5 h-2.5 rounded-full bg-tertiary shadow-[0_0_8px_rgba(78,222,163,0.8)]"></span>
+<span class="font-telemetry-sm text-telemetry-sm text-tertiary uppercase tracking-wider">Bit-Perfect • 24b/96k Direct DAC</span>
+</div>
+</div>
+<!-- Real-time Status & Exit Car Mode Trigger -->
+<div class="flex items-center gap-space-md">
+<div class="flex items-center gap-space-sm text-on-surface-variant font-telemetry-md text-telemetry-md">
+<span class="material-symbols-outlined text-headline-sm text-primary">navigation</span>
+<span class="font-bold text-on-surface">62 MPH</span>
+<span class="text-outline">/</span>
+<span class="material-symbols-outlined text-headline-sm">signal_cellular_alt</span>
+<span class="font-bold text-on-surface">5G</span>
+<span class="text-outline">/</span>
+<span class="font-bold text-headline-sm text-on-surface" id="car-clock">10:42 PM</span>
+</div>
+<!-- Exit Car Mode Button (Oversized touch target for safety) -->
+<button class="flex items-center justify-center min-w-[56px] min-h-[56px] px-space-md h-12 bg-surface-container-highest hover:bg-surface-bright active:scale-95 transition-transform rounded-xl text-on-surface gap-space-xs" id="exit-btn">
+<span class="font-label-lg text-label-lg font-bold">EXIT</span>
+<span class="material-symbols-outlined text-headline-sm">close</span>
+</button>
+</div>
+</header>
+<!-- Main Two-Column Automotive Cockpit Layout -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-space-md w-full">
+<!-- Left Column: Now Playing & High-Contrast Track Identity (~45% / 5 cols) -->
+<div class="md:col-span-5 flex flex-col justify-between p-space-lg bg-surface-container-low rounded-xl">
+<!-- Artwork & Meta Stack -->
+<div class="flex gap-space-lg items-center md:items-start">
+<!-- Album Cover Art (High contrast, bold, instant glance identification) -->
+<div class="relative w-36 h-36 md:w-44 md:h-44 shrink-0 rounded-lg overflow-hidden bg-surface-container-high shadow-xl">
+<img class="w-full h-full object-cover" data-alt="Static Hearts Electric Youth rock album cover featuring an expressive punk female vocalist with spiky hair jumping on stage playing a teal electric guitar in front of a cheering crowd with dramatic cyan and amber stage spotlights" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB2CpDzoX_AdkdMromEJ_49lDoXgc1QsK1r0TXpM8kEQaWEhY3Tm_tI6ttVuNr4eE_kqHNuunXdR8OrjHV1R_qO_1YeenHoRdmxDTr_FFZjbdp8HELNSQvndkY4pG6tSfKmMgQo26vF4AGfb1drKkBvxbEaYwIFTsqHQupeVsRjnGH-4Rj2GtB1J_O40yb_Pp4PTUafBhw8AputudA2qW_FvGX-nOlaYqKWFeagxLjiuOH0piP3uuk"/>
+<div class="absolute top-2 left-2 bg-surface-container-lowest/80 backdrop-blur-md px-2 py-0.5 rounded-full flex items-center gap-1">
+<span class="material-symbols-outlined text-secondary text-body-sm" style="font-variation-settings: 'FILL' 1;">album</span>
+<span class="font-telemetry-sm text-telemetry-sm text-on-surface font-bold">HI-RES</span>
+</div>
+</div>
+<!-- Metadata & Telemetry -->
+<div class="flex flex-col justify-center min-w-0 flex-1">
+<div class="inline-flex items-center gap-1.5 mb-1 bg-surface-container px-2.5 py-1 rounded-md w-fit">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+<span class="font-telemetry-sm text-telemetry-sm text-primary tracking-widest uppercase">Direct Stream</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg font-extrabold text-on-surface truncate leading-tight tracking-tight mt-1">
+              Dead on Arrival
+            </h1>
+<p class="font-headline-sm text-headline-sm text-on-surface-variant truncate mt-0.5">
+              Fall Out Boy
+            </p>
+<p class="font-body-md text-body-md text-outline truncate mt-0.5">
+              Take This to Your Grave
+            </p>
+<div class="mt-space-sm flex items-center gap-2">
+<span class="bg-surface-variant text-on-surface-variant font-telemetry-sm text-telemetry-sm px-2 py-1 rounded">FLAC 96kHz</span>
+<span class="bg-surface-variant text-on-surface-variant font-telemetry-sm text-telemetry-sm px-2 py-1 rounded">24-Bit Stereo</span>
+</div>
+</div>
+</div>
+<!-- High-Visibility Driving Scrubber (Thick 10px progress line, huge typography) -->
+<div class="mt-space-lg w-full flex flex-col gap-2">
+<div class="relative w-full h-3 bg-surface-container-highest rounded-full overflow-hidden cursor-pointer" id="scrubber-track">
+<div class="absolute left-0 top-0 bottom-0 w-[42%] bg-primary rounded-full shadow-[0_0_12px_rgba(76,215,246,0.6)]" id="scrubber-fill"></div>
+</div>
+<div class="flex justify-between items-center px-1">
+<span class="font-telemetry-md text-telemetry-md font-bold text-primary" id="time-current">1:42</span>
+<span class="font-telemetry-md text-telemetry-md font-semibold text-on-surface-variant">-2:18</span>
+</div>
+</div>
+</div>
+<!-- Right Column: Massive Thumb-Friendly Transport Controls (~55% / 7 cols) -->
+<div class="md:col-span-7 flex flex-col justify-between gap-space-md p-space-lg bg-surface-container-low rounded-xl">
+<!-- Giant Primary Transport Row (80dp - 104dp Hitboxes for Zero Driver Distraction) -->
+<div class="flex items-center justify-around w-full py-space-xs">
+<!-- Favorite Quick Pin (64x64dp) -->
+<button class="flex items-center justify-center w-16 h-16 rounded-full bg-surface-container hover:bg-surface-container-high active:scale-90 transition-transform text-secondary focus:outline-none">
+<span class="material-symbols-outlined text-[34px]" style="font-variation-settings: 'FILL' 1;">favorite</span>
+</button>
+<!-- Skip Previous (80x80dp Target) -->
+<button aria-label="Previous Track" class="flex items-center justify-center w-20 h-20 rounded-full bg-surface-container hover:bg-surface-bright active:scale-95 transition-transform text-on-surface shadow-md focus:outline-none">
+<span class="material-symbols-outlined text-[44px]">skip_previous</span>
+</button>
+<!-- Central Massive Play/Pause (104x104dp Target with Radiant Cyan Glow) -->
+<button aria-label="Play / Pause" class="flex items-center justify-center w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-primary hover:bg-primary-fixed-dim text-on-primary shadow-[0_0_32px_rgba(76,215,246,0.45)] active:scale-95 transition-all focus:outline-none" id="master-play-pause">
+<span class="material-symbols-outlined text-[56px] sm:text-[64px]" id="play-pause-icon" style="font-variation-settings: 'FILL' 1;">pause</span>
+</button>
+<!-- Skip Next (80x80dp Target) -->
+<button aria-label="Next Track" class="flex items-center justify-center w-20 h-20 rounded-full bg-surface-container hover:bg-surface-bright active:scale-95 transition-transform text-on-surface shadow-md focus:outline-none">
+<span class="material-symbols-outlined text-[44px]">skip_next</span>
+</button>
+<!-- 15s Jump Skip (64x64dp) -->
+<button aria-label="Forward 15 seconds" class="flex items-center justify-center w-16 h-16 rounded-full bg-surface-container hover:bg-surface-container-high active:scale-90 transition-transform text-on-surface-variant focus:outline-none">
+<span class="material-symbols-outlined text-[34px]">fast_forward</span>
+</button>
+</div>
+<!-- Voice Assistant / Natural Prompt Bar (Full Width Tactile Target, 64dp Height) -->
+<button class="flex items-center justify-between w-full h-16 px-space-lg bg-surface-container hover:bg-surface-container-high active:bg-surface-bright rounded-full transition-all group focus:outline-none" id="voice-trigger">
+<div class="flex items-center gap-space-md">
+<div class="w-10 h-10 rounded-full bg-primary-container/20 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-headline-md" style="font-variation-settings: 'FILL' 1;">mic</span>
+</div>
+<span class="font-headline-sm text-headline-sm font-bold text-on-surface">
+              "Play Roadtrip Rock" or Tap to Speak
+            </span>
+</div>
+<span class="flex items-center gap-1 font-telemetry-sm text-telemetry-sm text-primary uppercase font-bold tracking-wider">
+            Voice AI
+            <span class="material-symbols-outlined text-body-md">arrow_forward_ios</span>
+</span>
+</button>
+<!-- Quick Automotive Presets Strip (Minimum 60dp Height Buttons) -->
+<div class="grid grid-cols-3 gap-space-sm w-full">
+<!-- Preset 1: Daily Lo-Fi -->
+<button class="flex items-center justify-center gap-space-xs h-14 px-space-sm bg-surface-container hover:bg-surface-container-high active:scale-95 transition rounded-lg text-on-surface focus:outline-none">
+<span class="material-symbols-outlined text-secondary text-headline-sm">coffee</span>
+<div class="flex flex-col text-left truncate">
+<span class="font-label-lg text-label-lg font-bold truncate">Daily Lo-Fi</span>
+<span class="font-telemetry-sm text-telemetry-sm text-outline truncate">Commute Chill</span>
+</div>
+</button>
+<!-- Preset 2: Roadtrip Energy (Active State) -->
+<button class="relative flex items-center justify-center gap-space-xs h-14 px-space-sm bg-primary/15 hover:bg-primary/20 active:scale-95 transition rounded-lg text-primary focus:outline-none">
+<span class="w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_rgba(76,215,246,0.9)] animate-ping absolute top-2 right-2"></span>
+<span class="material-symbols-outlined text-primary text-headline-sm" style="font-variation-settings: 'FILL' 1;">bolt</span>
+<div class="flex flex-col text-left truncate">
+<span class="font-label-lg text-label-lg font-bold text-primary truncate">Roadtrip Boost</span>
+<span class="font-telemetry-sm text-telemetry-sm text-primary/80 truncate">Current Playlist</span>
+</div>
+</button>
+<!-- Preset 3: Crate Radio -->
+<button class="flex items-center justify-center gap-space-xs h-14 px-space-sm bg-surface-container hover:bg-surface-container-high active:scale-95 transition rounded-lg text-on-surface focus:outline-none">
+<span class="material-symbols-outlined text-tertiary text-headline-sm">radio</span>
+<div class="flex flex-col text-left truncate">
+<span class="font-label-lg text-label-lg font-bold truncate">Crate Radio</span>
+<span class="font-telemetry-sm text-telemetry-sm text-outline truncate">Smart Flow</span>
+</div>
+</button>
+</div>
+</div>
+</div>
+<!-- Safety & Hardware Status Footer -->
+<footer class="mt-space-sm px-space-md py-2 flex flex-col sm:flex-row items-center justify-between text-outline gap-2 bg-surface-container-lowest">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-body-md text-secondary">verified_user</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant font-medium">
+          Touch targets locked at 80dp+ for vehicular safety • Driver distraction regulations met
+        </span>
+</div>
+<div class="flex items-center gap-space-md font-telemetry-sm text-telemetry-sm">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-body-md">bluetooth_connected</span>
+          CarPlay / Android Audio USB-C
+        </span>
+<span class="text-tertiary font-bold">100% Vol Lock</span>
+</div>
+</footer>
+</div>
+</div>
+<script>
+  // Simple vehicle cockpit clock and play/pause toggle interaction
+  (function initCarCockpit() {
+    const playPauseBtn = document.getElementById('master-play-pause');
+    const playPauseIcon = document.getElementById('play-pause-icon');
+    const voiceTrigger = document.getElementById('voice-trigger');
+    const exitBtn = document.getElementById('exit-btn');
+    const clockEl = document.getElementById('car-clock');
+    let isPlaying = true;
+
+    // Time ticker
+    function updateClock() {
+      const now = new Date();
+      let hours = now.getHours();
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      hours = hours % 12 || 12;
+      if (clockEl) {
+        clockEl.textContent = `${hours}:${minutes} ${ampm}`;
+      }
+    }
+    updateClock();
+    setInterval(updateClock, 30000);
+
+    // Transport Toggle
+    if (playPauseBtn && playPauseIcon) {
+      playPauseBtn.addEventListener('click', () => {
+        isPlaying = !isPlaying;
+        if (isPlaying) {
+          playPauseIcon.textContent = 'pause';
+          playPauseBtn.classList.remove('bg-surface-bright', 'text-on-surface');
+          playPauseBtn.classList.add('bg-primary', 'text-on-primary');
+        } else {
+          playPauseIcon.textContent = 'play_arrow';
+          playPauseBtn.classList.remove('bg-primary', 'text-on-primary');
+          playPauseBtn.classList.add('bg-surface-bright', 'text-on-surface');
+        }
+      });
+    }
+
+    // Voice assistant touch feedback
+    if (voiceTrigger) {
+      voiceTrigger.addEventListener('click', () => {
+        const textSpan = voiceTrigger.querySelector('.text-on-surface');
+        if (textSpan) {
+          const original = textSpan.textContent;
+          textSpan.textContent = "Listening for driver command...";
+          textSpan.classList.add('text-primary');
+          setTimeout(() => {
+            textSpan.textContent = original;
+            textSpan.classList.remove('text-primary');
+          }, 3000);
+        }
+      });
+    }
+
+    // Exit car mode simulated feedback
+    if (exitBtn) {
+      exitBtn.addEventListener('click', () => {
+        alert("Exiting Drive Mode. Returning to full VibePlay library.");
+      });
+    }
+  })();
+</script></main>
+<!-- END: MobileFrameContainer -->
+</body></html>

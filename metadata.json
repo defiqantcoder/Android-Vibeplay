@@ -1,0 +1,6 @@
+{
+  "name": "VibePlay Mobile",
+  "description": "Audiophile precision bit-perfect mobile music player, conversational heuristic playlist cooker, 10-band parametric DSP soundbar, and USB DAC hardware router.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

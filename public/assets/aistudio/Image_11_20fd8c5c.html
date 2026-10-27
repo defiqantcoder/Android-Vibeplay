@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=412, initial-scale=1.0">
+  <title>VibePlay Mobile - DAC Output Modal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            oled: '#121214',
+            surface: '#1e1e24',
+            'surface-subtle': '#16161b',
+            'surface-elevated': '#25252e',
+            border: '#2a2a35',
+            'border-light': '#363645',
+            cyan: '#06b6d4',
+            amber: '#f59e0b',
+            emerald: '#10b981',
+            textPrimary: '#e4e4e7',
+            textSecondary: '#9ca3af',
+          },
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #0e0e10;
+      color: #e4e4e7;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      margin: 0;
+      padding: 0;
+      width: 412px;
+      height: 915px;
+      overflow: hidden;
+      position: relative;
+    }
+    .custom-scroll::-webkit-scrollbar {
+      display: none;
+    }
+    .toggle-active {
+      background-color: #06b6d4;
+    }
+    .toggle-active .toggle-knob {
+      transform: translateX(20px);
+      background-color: #121214;
+    }
+  </style>
+</head>
+<body class="w-[412px] h-[915px] select-none flex flex-col justify-end bg-oled/90">
+
+  <!-- Background App Screen Preview (Dimmed with blur to give authentic Android modal backdrop context) -->
+  <div class="absolute inset-0 z-0 opacity-40 filter blur-[3px] pointer-events-none p-4 flex flex-col">
+    <!-- Mock Top Bar -->
+    <div class="flex items-center justify-between pt-4 pb-2 border-b border-border/40">
+      <div class="flex items-center space-x-2">
+        <span class="text-cyan font-bold text-lg">✨ vibeplay</span>
+        <span class="w-1.5 h-1.5 rounded-full bg-cyan"></span>
+      </div>
+      <div class="flex items-center space-x-2">
+        <span class="text-xs px-2.5 py-1 rounded-full bg-surface border border-border text-emerald">🎧 USB DAC</span>
+      </div>
+    </div>
+    <!-- Mock Content Behind Sheet -->
+    <div class="mt-6 space-y-4">
+      <div class="h-28 rounded-2xl bg-surface/80 border border-border/50 p-4"></div>
+      <div class="h-16 rounded-xl bg-surface/60 border border-border/40"></div>
+      <div class="h-16 rounded-xl bg-surface/60 border border-border/40"></div>
+      <div class="h-16 rounded-xl bg-surface/60 border border-border/40"></div>
+      <div class="h-16 rounded-xl bg-surface/60 border border-border/40"></div>
+    </div>
+  </div>
+
+  <!-- Android Scrim / Backdrop Overlay -->
+  <div class="absolute inset-0 bg-black/60 backdrop-blur-[2px] z-10 transition-opacity"></div>
+
+  <!-- Modal Bottom Sheet Container -->
+  <section class="relative z-20 w-[412px] bg-surface rounded-t-[28px] border-t border-x border-border shadow-[0_-12px_40px_rgba(0,0,0,0.85)] flex flex-col max-h-[850px] animate-slide-up">
+    
+    <!-- Drag Handle Affordance (Centered 40x4dp capsule) -->
+    <div class="w-full flex items-center justify-center pt-3 pb-2 cursor-grab active:cursor-grabbing">
+      <div class="w-10 h-1 bg-[#4a4a58] rounded-full transition-colors hover:bg-textSecondary"></div>
+    </div>
+
+    <!-- Sheet Header -->
+    <div class="px-6 pt-2 pb-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+          <h2 class="text-xl font-bold tracking-tight text-textPrimary flex items-center gap-2">
+            Audio Output &amp; DAC
+            <span class="text-lg">🎧</span>
+          </h2>
+        </div>
+        <!-- Real-time DAC Bit-Perfect Pill Indicator -->
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald/10 border border-emerald/30 text-[11px] font-mono font-medium text-emerald">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald animate-pulse"></span>
+          BIT-PERFECT
+        </span>
+      </div>
+      <p class="text-[13px] text-textSecondary mt-1 leading-snug">
+        Auto-swaps the moment you connect your USB-C DAC.
+      </p>
+    </div>
+
+    <div class="h-px bg-border/80 mx-6"></div>
+
+    <!-- Scrollable Section: Devices + Settings -->
+    <div class="px-6 py-4 space-y-4 custom-scroll overflow-y-auto max-h-[580px]">
+
+      <!-- Section Label: Active Output Targets -->
+      <div class="flex items-center justify-between">
+        <span class="text-[11px] font-mono tracking-wider text-textSecondary uppercase font-medium">Detected Audio Endpoints</span>
+        <span class="text-[11px] font-mono text-cyan/90">2 Available</span>
+      </div>
+
+      <!-- Device Cards List -->
+      <div class="space-y-2.5">
+        
+        <!-- Card 1 (Selected): FiiO KA15 USB DAC -->
+        <div class="relative group p-4 rounded-2xl bg-surface-elevated border-2 border-cyan/70 shadow-[0_0_20px_rgba(6,182,212,0.15)] flex items-start justify-between cursor-pointer transition-all duration-200">
+          <div class="flex items-start space-x-3.5">
+            <!-- Icon with Glow -->
+            <div class="w-12 h-12 rounded-xl bg-cyan/15 border border-cyan/30 flex items-center justify-center shrink-0 mt-0.5">
+              <span class="text-2xl">🎧</span>
+            </div>
+            <!-- Details -->
+            <div class="flex flex-col">
+              <div class="flex items-center space-x-2">
+                <span class="text-[15px] font-bold text-textPrimary tracking-tight">FiiO KA15 USB DAC</span>
+                <span class="px-1.5 py-0.5 rounded text-[10px] font-mono bg-cyan/20 text-cyan border border-cyan/40">ACTIVE</span>
+              </div>
+              <p class="text-[12px] font-mono text-cyan/90 mt-1 flex items-center gap-1.5">
+                <span>Direct USB Host</span>
+                <span class="text-textSecondary">•</span>
+                <span>32-bit / 768kHz</span>
+                <span class="text-textSecondary">•</span>
+                <span class="text-emerald font-semibold">Bit-Perfect</span>
+              </p>
+              <!-- Telemetry Metrics Bar -->
+              <div class="flex items-center gap-2 mt-2 pt-2 border-t border-border/50 text-[11px] font-mono text-textSecondary">
+                <span>Hardware Vol: <b class="text-textPrimary">78%</b></span>
+                <span>•</span>
+                <span>Clock: <b class="text-textPrimary">Async Dual-Osc</b></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Radio Check & Status Badge -->
+          <div class="flex flex-col items-end justify-between h-full space-y-3 shrink-0">
+            <!-- Selected Radio Circle -->
+            <div class="w-6 h-6 rounded-full bg-cyan flex items-center justify-center shadow-[0_0_8px_rgba(6,182,212,0.8)]">
+              <svg class="w-3.5 h-3.5 text-oled" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <!-- Connected Badge -->
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald/15 border border-emerald/40 text-[10px] font-medium text-emerald">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald"></span>
+              Connected
+            </span>
+          </div>
+        </div>
+
+        <!-- Card 2: Phone Speaker / Bluetooth -->
+        <div class="relative group p-4 rounded-2xl bg-surface-subtle border border-border hover:border-border-light hover:bg-surface-elevated/40 flex items-start justify-between cursor-pointer transition-all duration-200">
+          <div class="flex items-start space-x-3.5">
+            <!-- Icon -->
+            <div class="w-12 h-12 rounded-xl bg-surface border border-border flex items-center justify-center shrink-0 mt-0.5">
+              <span class="text-2xl opacity-80">📱</span>
+            </div>
+            <!-- Details -->
+            <div class="flex flex-col">
+              <div class="flex items-center space-x-2">
+                <span class="text-[15px] font-semibold text-textPrimary">Phone Speaker / Bluetooth</span>
+              </div>
+              <p class="text-[12px] font-mono text-textSecondary mt-1">
+                Android AudioTrack / AAudio Native
+              </p>
+              <div class="flex items-center gap-2 mt-2 pt-2 border-t border-border/30 text-[11px] font-mono text-textSecondary/80">
+                <span>Resampled: 48kHz System Mixer</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Radio Check (Unselected) -->
+          <div class="flex flex-col items-end justify-start shrink-0 pt-0.5">
+            <div class="w-6 h-6 rounded-full border-2 border-border group-hover:border-textSecondary/60 transition-colors"></div>
+            <span class="text-[10px] text-textSecondary/70 mt-3 font-mono">Standby</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Settings & Behavior Switches -->
+      <div class="pt-3">
+        <span class="text-[11px] font-mono tracking-wider text-textSecondary uppercase font-medium block mb-2.5">
+          Audiophile Routing Controls
+        </span>
+
+        <div class="bg-surface-subtle rounded-2xl border border-border divide-y divide-border/60">
+          
+          <!-- Toggle 1: Exclusive USB Audio Access -->
+          <div class="p-4 flex items-center justify-between gap-4">
+            <div class="flex items-start space-x-3">
+              <div class="w-8 h-8 rounded-lg bg-surface border border-border flex items-center justify-center shrink-0 mt-0.5 text-cyan">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              </div>
+              <div>
+                <p class="text-[14px] font-semibold text-textPrimary tracking-tight">Exclusive USB Audio Access</p>
+                <p class="text-[12px] text-textSecondary mt-0.5 leading-snug">
+                  Bypasses Android system audio mixer &amp; SRC resampler for pure bit-perfect playback.
+                </p>
+              </div>
+            </div>
+            
+            <!-- Switch (ON) -->
+            <button class="relative w-12 h-7 rounded-full bg-cyan transition-colors focus:outline-none shrink-0" aria-label="Toggle Exclusive USB Audio Access">
+              <span class="absolute left-1 top-1 w-5 h-5 rounded-full bg-oled transition-transform transform translate-x-5 shadow-sm"></span>
+            </button>
+          </div>
+
+          <!-- Toggle 2: Dynamic Auto-Swap on Plug -->
+          <div class="p-4 flex items-center justify-between gap-4">
+            <div class="flex items-start space-x-3">
+              <div class="w-8 h-8 rounded-lg bg-surface border border-border flex items-center justify-center shrink-0 mt-0.5 text-amber">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+              </div>
+              <div>
+                <p class="text-[14px] font-semibold text-textPrimary tracking-tight">Dynamic Auto-Swap on Plug</p>
+                <p class="text-[12px] text-textSecondary mt-0.5 leading-snug">
+                  Instantly switches routing without playback stutter when USB DAC is inserted.
+                </p>
+              </div>
+            </div>
+
+            <!-- Switch (ON) -->
+            <button class="relative w-12 h-7 rounded-full bg-cyan transition-colors focus:outline-none shrink-0" aria-label="Toggle Dynamic Auto-Swap on Plug">
+              <span class="absolute left-1 top-1 w-5 h-5 rounded-full bg-oled transition-transform transform translate-x-5 shadow-sm"></span>
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- DAC Real-Time Diagnostics Bar -->
+      <div class="p-3 rounded-xl bg-surface-subtle/80 border border-border/80 flex items-center justify-between text-xs">
+        <div class="flex items-center space-x-2">
+          <span class="w-2 h-2 rounded-full bg-emerald"></span>
+          <span class="text-textSecondary font-mono text-[11px]">Stream: Direct PCM 2.0</span>
+        </div>
+        <span class="font-mono text-cyan text-[11px] font-semibold">Latency: ~4.2 ms</span>
+      </div>
+
+    </div>
+
+    <!-- Footer Action Zone (48dp+ touch target, anchored for bottom thumb-zone ergonomics) -->
+    <div class="p-6 pt-3 pb-8 bg-surface border-t border-border flex flex-col space-y-3">
+      <button class="w-full h-13 py-3.5 px-6 rounded-full bg-cyan text-oled font-bold text-[15px] tracking-wide shadow-[0_4px_20px_rgba(6,182,212,0.35)] active:scale-[0.98] transition-transform flex items-center justify-center space-x-2">
+        <span>Done</span>
+      </button>
+
+      <!-- Android Home Navigation Indicator Affordance -->
+      <div class="w-full flex justify-center pt-2">
+        <div class="w-32 h-1 bg-white/20 rounded-full"></div>
+      </div>
+    </div>
+
+  </section>
+
+</body>
+</html>

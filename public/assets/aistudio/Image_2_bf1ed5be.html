@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_tab" name="shell-type"/><title>VibePlay Mobile</title><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@500;600&amp;family=Plus+Jakarta+Sans:wght@600;700;800&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{width:100vw;min-height:100vh;margin:0;padding:0;background-color:#131315;}body{overscroll-behavior-y:contain;-webkit-tap-highlight-color:transparent;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}}::-webkit-scrollbar{display:none;}*{-ms-overflow-style:none;scrollbar-width:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { colors: { "on-tertiary-fixed-variant": "#005236", "surface-tint": "#4cd7f6", "surface-dim": "#131315", "secondary-fixed-dim": "#ffb95f", "surface-container": "#201f21", "tertiary-fixed": "#6ffbbe", "inverse-surface": "#e5e1e4", "on-error-container": "#ffdad6", "primary": "#4cd7f6", "on-secondary": "#472a00", "inverse-on-surface": "#303032", "on-primary-fixed": "#001f26", "background": "#131315", "surface-bright": "#39393b", "on-primary-fixed-variant": "#004e5c", "primary-fixed-dim": "#4cd7f6", "tertiary-fixed-dim": "#4edea3", "error": "#ffb4ab", "tertiary": "#4edea3", "surface-container-high": "#2a2a2c", "surface-container-lowest": "#0e0e10", "outline-variant": "#3d494c", "on-secondary-fixed": "#2a1700", "surface-container-highest": "#353437", "outline": "#869397", "inverse-primary": "#00687a", "on-surface": "#e5e1e4", "primary-fixed": "#acedff", "error-container": "#93000a", "secondary-container": "#ee9800", "surface": "#131315", "on-primary-container": "#00424f", "on-surface-variant": "#bcc9cd", "tertiary-container": "#1bbd85", "on-secondary-container": "#5b3800", "secondary-fixed": "#ffddb8", "surface-variant": "#353437", "on-background": "#e5e1e4", "on-tertiary-fixed": "#002113", "secondary": "#ffb95f", "on-tertiary-container": "#00452e", "on-secondary-fixed-variant": "#653e00", "on-primary": "#003640", "on-tertiary": "#003824", "on-error": "#690005", "primary-container": "#06b6d4", "surface-container-low": "#1b1b1d" }, borderRadius: { "DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px" }, spacing: { "space-xs": "0.25rem", "space-sm": "0.5rem", "space-xl": "2rem", "space-md": "1rem", "margin-mobile": "1rem", "space-lg": "1.5rem", "gutter": "1rem", "gutter-sm": "0.75rem", "margin": "1.25rem" }, fontFamily: { "body-sm": ["Inter"], "body-lg": ["Inter"], "headline-sm": ["Plus Jakarta Sans"], "label-md": ["Inter"], "headline-md": ["Plus Jakarta Sans"], "telemetry-sm": ["JetBrains Mono"], "telemetry-md": ["JetBrains Mono"], "display-lg": ["Plus Jakarta Sans"], "label-lg": ["Inter"], "body-md": ["Inter"], "headline-lg": ["Plus Jakarta Sans"] }, fontSize: { "body-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }], "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "500" }], "headline-sm": ["18px", { "lineHeight": "24px", "fontWeight": "600" }], "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }], "headline-md": ["22px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "700" }], "telemetry-sm": ["10px", { "lineHeight": "14px", "letterSpacing": "0.06em", "fontWeight": "500" }], "telemetry-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.04em", "fontWeight": "600" }], "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.03em", "fontWeight": "800" }], "label-lg": ["14px", { "lineHeight": "18px", "letterSpacing": "0.01em", "fontWeight": "600" }], "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }], "headline-lg": ["30px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "700" }] } } } };</script><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-surface font-body-md text-on-surface antialiased flex flex-col min-h-screen selection:bg-primary-container selection:text-on-primary"><header class="fixed top-0 w-full z-50 pt-safe bg-surface/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.25)]"><div class="h-14 px-margin-mobile flex items-center justify-between"><div class="flex items-center gap-space-sm"><span class="font-headline-md text-headline-md tracking-tight text-on-surface flex items-center gap-1.5"><span>✨</span><span>vibeplay</span></span><div class="w-1.5 h-1.5 rounded-full bg-primary-container shadow-[0_0_8px_rgba(6,182,212,0.8)]"></div></div><div class="flex items-center gap-1"><div class="hidden sm:flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-container-high"><div class="w-2 h-2 rounded-full bg-tertiary-container shadow-[0_0_6px_rgba(27,189,133,0.7)]"></div><span class="font-telemetry-sm text-telemetry-sm text-on-surface font-medium">🎧 USB DAC</span></div><a class="w-11 h-11 flex items-center justify-center rounded-full text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors" href="#"><span class="material-symbols-outlined text-[22px]">search</span></a><a class="w-11 h-11 flex items-center justify-center rounded-full text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors" href="#"><span class="material-symbols-outlined text-[22px]">settings</span></a><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center ml-1"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="flex flex-col relative w-full pt-14 pb-44 px-margin-mobile bg-surface min-h-screen"><div class="w-full flex items-center justify-center pt-space-xs pb-space-sm"><div class="w-6 h-1 rounded-full bg-surface-container-highest/60"></div></div><div class="sr-only">Crate</div><div class="flex flex-col w-full pb-6">
+<!-- Pull-to-refresh subtle visual indicator -->
+<div class="flex items-center justify-center gap-space-xs py-1 text-on-surface-variant/70 opacity-80" id="ptr-indicator">
+<span class="material-symbols-outlined text-[16px] animate-spin text-primary">sync</span>
+<span class="font-telemetry-sm text-telemetry-sm tracking-widest uppercase">Crate sync: verified 4.2 MB/s</span>
+</div>
+<!-- Hero Quick Vibe Switcher: horizontal scrolling pill chips with ergonomic hitboxes -->
+<div class="w-full mt-space-sm mb-space-md overflow-x-auto no-scrollbar py-1">
+<div class="flex items-center gap-space-sm px-0.5" id="vibe-pills" role="tablist">
+<button aria-selected="true" class="vibe-pill flex-shrink-0 h-12 px-space-md rounded-full bg-primary-container text-on-primary-container font-label-lg text-label-lg shadow-[0_0_16px_rgba(6,182,212,0.35)] flex items-center gap-1.5 transition-all" role="tab">
+<span class="material-symbols-outlined text-[18px]">library_music</span>
+<span>All Tracks</span>
+</button>
+<button aria-selected="false" class="vibe-pill flex-shrink-0 h-12 px-space-md rounded-full bg-surface-container text-on-surface-variant font-label-lg text-label-lg hover:bg-surface-container-high transition-all flex items-center gap-1.5" role="tab">
+<span class="material-symbols-outlined text-[18px] text-tertiary">graphic_eq</span>
+<span>Hi-Res (FLAC)</span>
+</button>
+<button aria-selected="false" class="vibe-pill flex-shrink-0 h-12 px-space-md rounded-full bg-surface-container text-on-surface-variant font-label-lg text-label-lg hover:bg-surface-container-high transition-all flex items-center gap-1.5" role="tab">
+<span class="material-symbols-outlined text-[18px] text-secondary">inventory_2</span>
+<span>Recent Crates</span>
+</button>
+<button aria-selected="false" class="vibe-pill flex-shrink-0 h-12 px-space-md rounded-full bg-surface-container text-on-surface-variant font-label-lg text-label-lg hover:bg-surface-container-high transition-all flex items-center gap-1.5" role="tab">
+<span class="material-symbols-outlined text-[18px]">psychology</span>
+<span>Deep Focus</span>
+</button>
+<button aria-selected="false" class="vibe-pill flex-shrink-0 h-12 px-space-md rounded-full bg-surface-container text-on-surface-variant font-label-lg text-label-lg hover:bg-surface-container-high transition-all flex items-center gap-1.5" role="tab">
+<span class="material-symbols-outlined text-[18px]">nightlife</span>
+<span>Late Night Drive</span>
+</button>
+</div>
+</div>
+<!-- Section: Now In Heavy Rotation -->
+<section class="flex flex-col w-full mb-space-lg">
+<div class="flex items-center justify-between px-0.5 mb-space-sm">
+<div class="flex items-center gap-2">
+<span class="font-headline-sm text-headline-sm text-on-surface tracking-tight">Heavy Rotation</span>
+<span class="font-telemetry-sm text-telemetry-sm px-2 py-0.5 rounded-full bg-surface-container-high text-primary tracking-wide">32 READY</span>
+</div>
+<button aria-label="Shuffle Rotation" class="h-10 px-3 rounded-full bg-surface-container hover:bg-surface-container-high flex items-center gap-1 text-on-surface-variant hover:text-on-surface transition-all">
+<span class="material-symbols-outlined text-[18px] text-secondary">shuffle</span>
+<span class="font-label-md text-label-md">Mix</span>
+</button>
+</div>
+<!-- Rotation Carousel / Snap Grid -->
+<div class="w-full overflow-x-auto no-scrollbar py-1">
+<div class="flex gap-space-md w-max">
+<!-- Card 1 -->
+<article class="w-72 rounded-[20px] bg-surface-container p-3.5 shadow-[0_8px_24px_rgba(0,0,0,0.45)] flex flex-col relative group transition-transform active:scale-[0.98]">
+<div class="relative w-full aspect-square rounded-[16px] overflow-hidden bg-surface-container-low mb-3">
+<img class="w-full h-full object-cover" data-alt="Cyberpunk high fidelity vinyl player glowing with neon cyan and warm amber accents, moody dark cinematic lighting in high dynamic range, intricate mechanical turntable arm, OLED darkroom aesthetic" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBVjnlHRFiUV8uQOFNKUBRfAE4aq3yXUraFdG87g9urQxHsSHwJRJRkjs18uhhk5ja5r61fMN0rZ39jBYcvC3p5FEX_VUjz5vXqTWktpsNZNYLf8wnz9ImkfQDbKk0i5BzU6IpnvuQR4_p1ZfioixSrcyZ2yptHMPkFzihJa7jmyAaNCyEeFSitgN1LQX0ffRGXadTIHRBR6bT6CgRm8Ne7ydDQh15_NsTd-MDMQac7Fo5htxO2m60"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest/90 via-transparent to-transparent"></div>
+<!-- Telemetry floating badge -->
+<div class="absolute top-2.5 right-2.5 flex items-center gap-1 px-2 py-1 rounded-full bg-surface-container-lowest/80 backdrop-blur-md text-tertiary shadow-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary animate-pulse"></span>
+<span class="font-telemetry-sm text-telemetry-sm font-semibold">FLAC 24/96</span>
+</div>
+<!-- Tempo Telemetry -->
+<div class="absolute bottom-2.5 left-2.5 px-2 py-0.5 rounded-full bg-surface-container-lowest/70 backdrop-blur-md text-on-surface-variant font-telemetry-sm text-telemetry-sm">
+              128 BPM • DSD
+            </div>
+<!-- Quick Play Button Hover/Persistent Thumb Reach -->
+<button aria-label="Play Track" class="rotation-play-btn absolute bottom-2.5 right-2.5 w-12 h-12 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center shadow-[0_0_16px_rgba(6,182,212,0.45)] hover:scale-105 active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-[24px]">play_arrow</span>
+</button>
+</div>
+<div class="flex items-start justify-between gap-2">
+<div class="min-w-0 flex-1">
+<h3 class="font-headline-sm text-headline-sm text-on-surface truncate">Hyperion Nocturne</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate">Arcadia Sound Lab feat. M83</p>
+</div>
+<button aria-label="Favorite" class="like-btn w-10 h-10 -mr-1 flex items-center justify-center rounded-full text-on-surface-variant hover:text-secondary transition-colors" data-liked="false">
+<span class="material-symbols-outlined text-[20px]">favorite_border</span>
+</button>
+</div>
+</article>
+<!-- Card 2 -->
+<article class="w-72 rounded-[20px] bg-surface-container p-3.5 shadow-[0_8px_24px_rgba(0,0,0,0.45)] flex flex-col relative group transition-transform active:scale-[0.98]">
+<div class="relative w-full aspect-square rounded-[16px] overflow-hidden bg-surface-container-low mb-3">
+<img class="w-full h-full object-cover" data-alt="Abstract deep space nebula emitting turquoise and gold sound waves, minimal Japanese audio album cover art typography, dark textured background with subtle film grain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCbs7Ep-FZXhtRtgJGV4QPW87uImLPgxt5V5wRQNSQUOvx9Hu7UoQmC3WhFdwWEf35Oa-OHHnRMs9k7YTBvqW4DtSn_r2t9PqDLbUBFU3FGf10zBvlgxjlBqzbeB-hEZGgozLxU7nwOWbnsgKJlsxs1tQIib0ckRT875bVCUv7zQBlX9nw54j43-f3O3RMvs4X_J0aC2bqTPmFpaKa6ktPS-wqKGO3NRz34HddKgIFd6A7lgroitFE"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest/90 via-transparent to-transparent"></div>
+<!-- Telemetry floating badge -->
+<div class="absolute top-2.5 right-2.5 flex items-center gap-1 px-2 py-1 rounded-full bg-surface-container-lowest/80 backdrop-blur-md text-secondary shadow-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span class="font-telemetry-sm text-telemetry-sm font-semibold">DSD 256</span>
+</div>
+<!-- Tempo Telemetry -->
+<div class="absolute bottom-2.5 left-2.5 px-2 py-0.5 rounded-full bg-surface-container-lowest/70 backdrop-blur-md text-on-surface-variant font-telemetry-sm text-telemetry-sm">
+              96 BPM • 11.2 MHz
+            </div>
+<!-- Quick Play Button -->
+<button aria-label="Play Track" class="rotation-play-btn absolute bottom-2.5 right-2.5 w-12 h-12 rounded-full bg-surface-container-high text-on-surface hover:bg-primary-container hover:text-on-primary-container flex items-center justify-center shadow-md transition-all">
+<span class="material-symbols-outlined text-[24px]">play_arrow</span>
+</button>
+</div>
+<div class="flex items-start justify-between gap-2">
+<div class="min-w-0 flex-1">
+<h3 class="font-headline-sm text-headline-sm text-on-surface truncate">Analog Horizons</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate">Sora Takahashi</p>
+</div>
+<button aria-label="Favorite" class="like-btn w-10 h-10 -mr-1 flex items-center justify-center rounded-full text-secondary transition-colors" data-liked="true">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">favorite</span>
+</button>
+</div>
+</article>
+<!-- Card 3 -->
+<article class="w-72 rounded-[20px] bg-surface-container p-3.5 shadow-[0_8px_24px_rgba(0,0,0,0.45)] flex flex-col relative group transition-transform active:scale-[0.98]">
+<div class="relative w-full aspect-square rounded-[16px] overflow-hidden bg-surface-container-low mb-3">
+<img class="w-full h-full object-cover" data-alt="Monolithic brutalist audio speaker tower inside a dark subterranean water chamber, moody teal water reflections, gold rim illumination, cinematic minimalist photography" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBregkPkUeRLLHkD2V5bJ0OhkaV27pThJlzkcFCuWezYkLaMAHwg-98HoRlIGJDwPSpe9AwYu5RlRerj_ILlGj7cjUQCEApYBn5jTE9C4J2xUg2m0ELa7EFtGVJO73YmQVbCI7-HXarXfGkBwGI7mDkFev8ToJby__TSNWSupsxOOr_9IbKXcdsF3mScc5My1PF6RcTskBrgTJMBeBAOAWjDC1yTECNBxAIeUbtbBEEu3guxa3T5B8"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest/90 via-transparent to-transparent"></div>
+<!-- Telemetry floating badge -->
+<div class="absolute top-2.5 right-2.5 flex items-center gap-1 px-2 py-1 rounded-full bg-surface-container-lowest/80 backdrop-blur-md text-tertiary shadow-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+<span class="font-telemetry-sm text-telemetry-sm font-semibold">FLAC 24/192</span>
+</div>
+<!-- Tempo Telemetry -->
+<div class="absolute bottom-2.5 left-2.5 px-2 py-0.5 rounded-full bg-surface-container-lowest/70 backdrop-blur-md text-on-surface-variant font-telemetry-sm text-telemetry-sm">
+              140 BPM • LOSSLESS
+            </div>
+<!-- Quick Play Button -->
+<button aria-label="Play Track" class="rotation-play-btn absolute bottom-2.5 right-2.5 w-12 h-12 rounded-full bg-surface-container-high text-on-surface hover:bg-primary-container hover:text-on-primary-container flex items-center justify-center shadow-md transition-all">
+<span class="material-symbols-outlined text-[24px]">play_arrow</span>
+</button>
+</div>
+<div class="flex items-start justify-between gap-2">
+<div class="min-w-0 flex-1">
+<h3 class="font-headline-sm text-headline-sm text-on-surface truncate">Vessel in the Deep</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate">Modeselektor &amp; Jon Hopkins</p>
+</div>
+<button aria-label="Favorite" class="like-btn w-10 h-10 -mr-1 flex items-center justify-center rounded-full text-on-surface-variant hover:text-secondary transition-colors" data-liked="false">
+<span class="material-symbols-outlined text-[20px]">favorite_border</span>
+</button>
+</div>
+</article>
+</div>
+</div>
+</section>
+<!-- Section: Recent Playlist Crates (Ergonomic 2-Column Bento / Grid) -->
+<section class="flex flex-col w-full mb-space-lg">
+<div class="flex items-center justify-between px-0.5 mb-space-sm">
+<div class="flex items-center gap-2">
+<span class="font-headline-sm text-headline-sm text-on-surface tracking-tight">Active Crates</span>
+<span class="font-telemetry-sm text-telemetry-sm text-on-surface-variant">4 FOLDERS</span>
+</div>
+<button aria-label="New Crate" class="w-10 h-10 rounded-full bg-surface-container hover:bg-surface-container-high flex items-center justify-center text-primary transition-colors">
+<span class="material-symbols-outlined text-[20px]">create_new_folder</span>
+</button>
+</div>
+<div class="grid grid-cols-2 gap-space-sm w-full">
+<!-- Crate Tile 1 -->
+<div class="rounded-[20px] bg-surface-container p-3 flex flex-col justify-between hover:bg-surface-container-high/70 transition-all cursor-pointer">
+<div class="flex items-start justify-between mb-2">
+<div class="w-10 h-10 rounded-[14px] bg-primary-container/15 text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[22px]">headphones</span>
+</div>
+<span class="font-telemetry-sm text-telemetry-sm px-1.5 py-0.5 rounded bg-surface-container-lowest text-tertiary">96kHz</span>
+</div>
+<div>
+<h4 class="font-label-lg text-label-lg text-on-surface truncate font-semibold">Studio Monitor Ref</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">48 master cuts</p>
+</div>
+</div>
+<!-- Crate Tile 2 -->
+<div class="rounded-[20px] bg-surface-container p-3 flex flex-col justify-between hover:bg-surface-container-high/70 transition-all cursor-pointer">
+<div class="flex items-start justify-between mb-2">
+<div class="w-10 h-10 rounded-[14px] bg-secondary-container/20 text-secondary flex items-center justify-center">
+<span class="material-symbols-outlined text-[22px]">waves</span>
+</div>
+<span class="font-telemetry-sm text-telemetry-sm px-1.5 py-0.5 rounded bg-surface-container-lowest text-secondary">WARM EQ</span>
+</div>
+<div>
+<h4 class="font-label-lg text-label-lg text-on-surface truncate font-semibold">Tube Amp Velvet</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">26 warm tracks</p>
+</div>
+</div>
+<!-- Crate Tile 3 -->
+<div class="rounded-[20px] bg-surface-container p-3 flex flex-col justify-between hover:bg-surface-container-high/70 transition-all cursor-pointer">
+<div class="flex items-start justify-between mb-2">
+<div class="w-10 h-10 rounded-[14px] bg-tertiary-container/20 text-tertiary flex items-center justify-center">
+<span class="material-symbols-outlined text-[22px]">speed</span>
+</div>
+<span class="font-telemetry-sm text-telemetry-sm px-1.5 py-0.5 rounded bg-surface-container-lowest text-on-surface-variant">132 BPM</span>
+</div>
+<div>
+<h4 class="font-label-lg text-label-lg text-on-surface truncate font-semibold">Modular Techno Live</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">18 stems</p>
+</div>
+</div>
+<!-- Crate Tile 4 -->
+<div class="rounded-[20px] bg-surface-container p-3 flex flex-col justify-between hover:bg-surface-container-high/70 transition-all cursor-pointer">
+<div class="flex items-start justify-between mb-2">
+<div class="w-10 h-10 rounded-[14px] bg-surface-container-highest text-on-surface-variant flex items-center justify-center">
+<span class="material-symbols-outlined text-[22px]">cloud_download</span>
+</div>
+<span class="font-telemetry-sm text-telemetry-sm px-1.5 py-0.5 rounded bg-surface-container-lowest text-primary">OFFLINE</span>
+</div>
+<div>
+<h4 class="font-label-lg text-label-lg text-on-surface truncate font-semibold">Lossless Stash</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">11.4 GB cached</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Section: Master Track Queue & Crate List -->
+<section class="flex flex-col w-full">
+<div class="flex items-center justify-between px-0.5 mb-space-sm">
+<div class="flex items-center gap-2">
+<span class="font-headline-sm text-headline-sm text-on-surface tracking-tight">Audio Stash</span>
+<span class="font-telemetry-sm text-telemetry-sm text-on-surface-variant">1,248 TRACKS</span>
+</div>
+<!-- Sort / Filter Action -->
+<div class="flex items-center gap-1">
+<button class="h-10 px-3 rounded-full bg-surface-container hover:bg-surface-container-high flex items-center gap-1 text-on-surface-variant transition-colors" id="sort-toggle-btn">
+<span class="material-symbols-outlined text-[18px]">swap_vert</span>
+<span class="font-label-md text-label-md">Bitrate</span>
+</button>
+</div>
+</div>
+<!-- Track List Container -->
+<div class="flex flex-col gap-1.5 w-full" id="track-stash-list">
+<!-- Track Item 1 (Active Stream Example) -->
+<div class="track-row flex items-center justify-between p-2 rounded-[20px] bg-surface-container hover:bg-surface-container-high transition-colors group cursor-pointer" data-id="1">
+<div class="flex items-center gap-3 min-w-0 flex-1">
+<!-- Artwork / Equalizer Indicator -->
+<div class="relative w-12 h-12 rounded-[14px] overflow-hidden bg-surface-container-lowest flex-shrink-0">
+<div class="w-full h-full bg-primary/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-[24px]">graphic_eq</span>
+</div>
+<div class="absolute bottom-1 right-1 w-2 h-2 rounded-full bg-primary animate-ping"></div>
+</div>
+<!-- Title & Artist Meta -->
+<div class="flex flex-col min-w-0 pr-2">
+<div class="flex items-center gap-1.5">
+<span class="font-label-lg text-label-lg text-primary truncate font-bold">Genesis of Light</span>
+<span class="font-telemetry-sm text-telemetry-sm px-1 rounded bg-surface-container-lowest text-tertiary flex-shrink-0">24/192</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">Max Cooper • Emergence</span>
+<span class="font-telemetry-sm text-telemetry-sm text-on-surface-variant/60">05:42</span>
+</div>
+</div>
+</div>
+<!-- Right side touch actions -->
+<div class="flex items-center gap-0.5 flex-shrink-0">
+<button aria-label="Favorite Genesis of Light" class="like-btn w-12 h-12 flex items-center justify-center rounded-full text-secondary transition-colors" data-liked="true">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">favorite</span>
+</button>
+<button aria-label="Track Context Menu" class="menu-btn w-12 h-12 flex items-center justify-center rounded-full text-on-surface-variant hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</div>
+</div>
+<!-- Track Item 2 -->
+<div class="track-row flex items-center justify-between p-2 rounded-[20px] bg-surface-container/60 hover:bg-surface-container-high transition-colors group cursor-pointer" data-id="2">
+<div class="flex items-center gap-3 min-w-0 flex-1">
+<div class="w-12 h-12 rounded-[14px] overflow-hidden bg-surface-container-lowest flex-shrink-0 flex items-center justify-center">
+<span class="material-symbols-outlined text-on-surface-variant/70 text-[24px]">music_note</span>
+</div>
+<div class="flex flex-col min-w-0 pr-2">
+<div class="flex items-center gap-1.5">
+<span class="font-label-lg text-label-lg text-on-surface truncate font-semibold">Resonance Field</span>
+<span class="font-telemetry-sm text-telemetry-sm px-1 rounded bg-surface-container-lowest text-on-surface-variant flex-shrink-0">DSD64</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">Kiasmos • Blurred EP</span>
+<span class="font-telemetry-sm text-telemetry-sm text-on-surface-variant/60">04:18</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-0.5 flex-shrink-0">
+<button aria-label="Favorite Resonance Field" class="like-btn w-12 h-12 flex items-center justify-center rounded-full text-on-surface-variant hover:text-secondary transition-colors" data-liked="false">
+<span class="material-symbols-outlined text-[20px]">favorite_border</span>
+</button>
+<button aria-label="Track Context Menu" class="menu-btn w-12 h-12 flex items-center justify-center rounded-full text-on-surface-variant hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</div>
+</div>
+<!-- Track Item 3 -->
+<div class="track-row flex items-center justify-between p-2 rounded-[20px] bg-surface-container/60 hover:bg-surface-container-high transition-colors group cursor-pointer" data-id="3">
+<div class="flex items-center gap-3 min-w-0 flex-1">
+<div class="w-12 h-12 rounded-[14px] overflow-hidden bg-surface-container-lowest flex-shrink-0 flex items-center justify-center">
+<span class="material-symbols-outlined text-on-surface-variant/70 text-[24px]">album</span>
+</div>
+<div class="flex flex-col min-w-0 pr-2">
+<div class="flex items-center gap-1.5">
+<span class="font-label-lg text-label-lg text-on-surface truncate font-semibold">Modular Horizons Pt. 2</span>
+<span class="font-telemetry-sm text-telemetry-sm px-1 rounded bg-surface-container-lowest text-tertiary flex-shrink-0">24/48</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">Caterina Barbieri • Ecstatic</span>
+<span class="font-telemetry-sm text-telemetry-sm text-on-surface-variant/60">06:05</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-0.5 flex-shrink-0">
+<button aria-label="Favorite Modular Horizons" class="like-btn w-12 h-12 flex items-center justify-center rounded-full text-on-surface-variant hover:text-secondary transition-colors" data-liked="false">
+<span class="material-symbols-outlined text-[20px]">favorite_border</span>
+</button>
+<button aria-label="Track Context Menu" class="menu-btn w-12 h-12 flex items-center justify-center rounded-full text-on-surface-variant hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</div>
+</div>
+<!-- Track Item 4 -->
+<div class="track-row flex items-center justify-between p-2 rounded-[20px] bg-surface-container/60 hover:bg-surface-container-high transition-colors group cursor-pointer" data-id="4">
+<div class="flex items-center gap-3 min-w-0 flex-1">
+<div class="w-12 h-12 rounded-[14px] overflow-hidden bg-surface-container-lowest flex-shrink-0 flex items-center justify-center">
+<span class="material-symbols-outlined text-on-surface-variant/70 text-[24px]">graphic_eq</span>
+</div>
+<div class="flex flex-col min-w-0 pr-2">
+<div class="flex items-center gap-1.5">
+<span class="font-label-lg text-label-lg text-on-surface truncate font-semibold">Subterranean Drift</span>
+<span class="font-telemetry-sm text-telemetry-sm px-1 rounded bg-surface-container-lowest text-secondary flex-shrink-0">DSD128</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">Lorn • The Maze to Nowhere</span>
+<span class="font-telemetry-sm text-telemetry-sm text-on-surface-variant/60">03:49</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-0.5 flex-shrink-0">
+<button aria-label="Favorite Subterranean Drift" class="like-btn w-12 h-12 flex items-center justify-center rounded-full text-secondary transition-colors" data-liked="true">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">favorite</span>
+</button>
+<button aria-label="Track Context Menu" class="menu-btn w-12 h-12 flex items-center justify-center rounded-full text-on-surface-variant hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</div>
+</div>
+<!-- Track Item 5 -->
+<div class="track-row flex items-center justify-between p-2 rounded-[20px] bg-surface-container/60 hover:bg-surface-container-high transition-colors group cursor-pointer" data-id="5">
+<div class="flex items-center gap-3 min-w-0 flex-1">
+<div class="w-12 h-12 rounded-[14px] overflow-hidden bg-surface-container-lowest flex-shrink-0 flex items-center justify-center">
+<span class="material-symbols-outlined text-on-surface-variant/70 text-[24px]">audio_file</span>
+</div>
+<div class="flex flex-col min-w-0 pr-2">
+<div class="flex items-center gap-1.5">
+<span class="font-label-lg text-label-lg text-on-surface truncate font-semibold">Solaris Echoes</span>
+<span class="font-telemetry-sm text-telemetry-sm px-1 rounded bg-surface-container-lowest text-tertiary flex-shrink-0">24/96</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">Tycho • Epoch (Lossless Re-amp)</span>
+<span class="font-telemetry-sm text-telemetry-sm text-on-surface-variant/60">04:32</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-0.5 flex-shrink-0">
+<button aria-label="Favorite Solaris Echoes" class="like-btn w-12 h-12 flex items-center justify-center rounded-full text-on-surface-variant hover:text-secondary transition-colors" data-liked="false">
+<span class="material-symbols-outlined text-[20px]">favorite_border</span>
+</button>
+<button aria-label="Track Context Menu" class="menu-btn w-12 h-12 flex items-center justify-center rounded-full text-on-surface-variant hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Delight Micro-Interaction Toast Container -->
+<div class="fixed bottom-36 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full bg-surface-container-highest/95 backdrop-blur-md text-on-surface shadow-[0_8px_24px_rgba(0,0,0,0.6)] flex items-center gap-2 pointer-events-none opacity-0 translate-y-3 transition-all duration-300 z-50" id="crate-toast">
+<span class="material-symbols-outlined text-primary text-[18px]" id="toast-icon">check_circle</span>
+<span class="font-label-md text-label-md" id="toast-text">Loaded into live playback</span>
+</div>
+</div>
+<script>
+  (function initCrateInteractions() {
+    // Vibe filter pills toggle behavior
+    const pillButtons = document.querySelectorAll('#vibe-pills .vibe-pill');
+    pillButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        pillButtons.forEach(p => {
+          p.setAttribute('aria-selected', 'false');
+          p.className = 'vibe-pill flex-shrink-0 h-12 px-space-md rounded-full bg-surface-container text-on-surface-variant font-label-lg text-label-lg hover:bg-surface-container-high transition-all flex items-center gap-1.5';
+        });
+        btn.setAttribute('aria-selected', 'true');
+        btn.className = 'vibe-pill flex-shrink-0 h-12 px-space-md rounded-full bg-primary-container text-on-primary-container font-label-lg text-label-lg shadow-[0_0_16px_rgba(6,182,212,0.35)] flex items-center gap-1.5 transition-all';
+        showToast('Filter set: ' + btn.textContent.trim(), 'filter_list');
+      });
+    });
+
+    // Favorite heart toggle
+    const likeButtons = document.querySelectorAll('.like-btn');
+    likeButtons.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isLiked = btn.getAttribute('data-liked') === 'true';
+        const icon = btn.querySelector('.material-symbols-outlined');
+        if (isLiked) {
+          btn.setAttribute('data-liked', 'false');
+          btn.classList.remove('text-secondary');
+          btn.classList.add('text-on-surface-variant');
+          icon.textContent = 'favorite_border';
+          icon.style.fontVariationSettings = "'FILL' 0";
+          showToast('Removed from favorites', 'favorite_border');
+        } else {
+          btn.setAttribute('data-liked', 'true');
+          btn.classList.remove('text-on-surface-variant');
+          btn.classList.add('text-secondary');
+          icon.textContent = 'favorite';
+          icon.style.fontVariationSettings = "'FILL' 1";
+          btn.classList.add('scale-125');
+          setTimeout(() => btn.classList.remove('scale-125'), 200);
+          showToast('Added to Crate Favorites', 'favorite');
+        }
+      });
+    });
+
+    // Play action buttons
+    const playButtons = document.querySelectorAll('.rotation-play-btn');
+    playButtons.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const article = btn.closest('article');
+        const trackTitle = article ? article.querySelector('h3').textContent : 'Track';
+        showToast('Buffering FLAC stream: ' + trackTitle, 'play_circle');
+      });
+    });
+
+    // Track rows tap to cue
+    const trackRows = document.querySelectorAll('.track-row');
+    trackRows.forEach(row => {
+      row.addEventListener('click', () => {
+        const title = row.querySelector('.font-label-lg').textContent;
+        showToast('Now Playing: ' + title, 'graphic_eq');
+      });
+    });
+
+    // Toast messenger
+    let toastTimeout;
+    function showToast(message, iconName) {
+      const toast = document.getElementById('crate-toast');
+      const toastText = document.getElementById('toast-text');
+      const toastIcon = document.getElementById('toast-icon');
+      if (!toast || !toastText || !toastIcon) return;
+
+      toastText.textContent = message;
+      toastIcon.textContent = iconName || 'check_circle';
+
+      clearTimeout(toastTimeout);
+      toast.classList.remove('opacity-0', 'translate-y-3');
+      toast.classList.add('opacity-100', 'translate-y-0');
+
+      toastTimeout = setTimeout(() => {
+        toast.classList.remove('opacity-100', 'translate-y-0');
+        toast.classList.add('opacity-0', 'translate-y-3');
+      }, 2200);
+    }
+  })();
+</script></main><div class="fixed bottom-20 inset-x-0 z-40 px-3 pb-1"><div class="h-16 w-full rounded-full bg-surface-container/95 backdrop-blur-xl shadow-[0_8px_24px_rgba(0,0,0,0.55)] px-2.5 flex items-center justify-between gap-space-sm"><div class="flex items-center gap- space-sm min-w-0 flex-1"><div class="w-11 h-11 rounded-xl bg-surface-container-high flex-shrink-0 flex items-center justify-center overflow-hidden relative shadow-inner"><span class="material-symbols-outlined text-primary-container text-[24px]">album</span><div class="absolute inset-0 bg-primary-container/10"></div></div><div class="flex flex-col min-w-0 pr-2"><div class="flex items-center gap-1.5"><span class="font-label-lg text-label-lg text-on-surface truncate">Midnight Resonance</span><span class="font-telemetry-sm text-telemetry-sm px-1.5 py-0.2 rounded bg-surface-container-lowest text-tertiary-container tracking-wider flex-shrink-0">24/96</span></div><span class="font-body-sm text-body-sm text-on-surface-variant truncate">Kavinsky &amp; Daft Punk</span></div></div><div class="flex items-center gap-1 flex-shrink-0"><button aria-label="Skip Next" class="w-11 h-11 rounded-full flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors"><span class="material-symbols-outlined text-[22px]">skip_next</span></button><button aria-label="Play or Pause" class="w-11 h-11 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center shadow-[0_0_16px_rgba(6,182,212,0.45)] hover:scale-105 active:scale-95 transition-transform"><span class="material-symbols-outlined text-[24px]">play_arrow</span></button></div></div></div><nav class="fixed bottom-0 w-full z-50 pb-safe bg-surface/90 backdrop-blur-xl shadow-[0_-4px_16px_rgba(0,0,0,0.35)]" data-active-classes="bg-primary-container/15 text-primary font-bold shadow-[0_0_12px_rgba(6,182,212,0.2)]"><div class="h-[72px] px-2 flex items-center justify-around"><a aria-current="page" class="flex flex-col items-center justify-center gap-0.5 min-w-[68px] h-12 px-2.5 rounded-full transition-all bg-primary-container/15 text-primary font-bold shadow-[0_0_12px_rgba(6,182,212,0.2)]" data-path="crate" href="#"><span class="material-symbols-outlined text-[22px]">library_music</span><span class="font-label-md text-label-md">Crate</span></a><a class="flex flex-col items-center justify-center gap-0.5 min-w-[68px] h-12 px-2.5 rounded-full text-on-surface-variant hover:text-on-surface transition-all" data-path="vibe-cooker" href="#"><span class="material-symbols-outlined text-[22px]">soup_kitchen</span><span class="font-label-md text-label-md">Cooker</span></a><a class="flex flex-col items-center justify-center gap-0.5 min-w-[68px] h-12 px-2.5 rounded-full text-on-surface-variant hover:text-on-surface transition-all" data-path="the-soundbar" href="#"><span class="material-symbols-outlined text-[22px]">equalizer</span><span class="font-label-md text-label-md">Soundbar</span></a><a class="flex flex-col items-center justify-center gap-0.5 min-w-[68px] h-12 px-2.5 rounded-full text-on-surface-variant hover:text-on-surface transition-all" data-path="add-ons" href="#"><span class="material-symbols-outlined text-[22px]">extension</span><span class="font-label-md text-label-md">Add-ons</span></a></div><div class="w-32 h-1 bg-surface-bright/70 rounded-full mx-auto my-1.5"></div></nav></body></html>

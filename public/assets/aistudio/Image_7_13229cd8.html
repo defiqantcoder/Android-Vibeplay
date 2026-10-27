@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>VibePlay Mobile - Now Playing</title>
+<!-- Tailwind CSS CDN with forms and container queries -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts: Inter & JetBrains Mono -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind Custom Configuration -->
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            oled: '#0e0e10',
+            surface: '#16161a',
+            surfaceElevated: '#1e1e24',
+            borderSubtle: '#23232c',
+            textPrimary: '#e4e4e7',
+            textMuted: '#9ca3af',
+            accentCyan: '#06b6d4',
+            accentAmber: '#f59e0b',
+            statusEmerald: '#10b981',
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          boxShadow: {
+            glowCyan: '0 0 25px -4px rgba(6, 182, 212, 0.45)',
+            glowHero: '0 10px 30px -5px rgba(6, 182, 212, 0.55), 0 0 15px 2px rgba(6, 182, 212, 0.3)',
+            artworkHalo: '0 20px 60px -15px rgba(6, 182, 212, 0.3), 0 15px 45px -10px rgba(245, 158, 11, 0.25)',
+          }
+        }
+      }
+    }
+  </script>
+<!-- BEGIN: Custom Stylesheets -->
+<style data-purpose="typography-and-reset">
+    * {
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      box-sizing: border-box;
+    }
+    body {
+      background-color: #050507;
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      color: #e4e4e7;
+    }
+  </style>
+<style data-purpose="ambient-and-glow">
+    /* Subtle pulsing effect for hi-res streaming indicator */
+    @keyframes pulse-subtle {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.6; transform: scale(0.92); }
+    }
+    .animate-indicator-pulse {
+      animation: pulse-subtle 2.4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+
+    /* Ambient dual-tone color aura behind album artwork */
+    .artwork-aura-cyan {
+      background: radial-gradient(circle at 35% 35%, rgba(6, 182, 212, 0.35) 0%, transparent 68%);
+      filter: blur(48px);
+    }
+    .artwork-aura-amber {
+      background: radial-gradient(circle at 65% 65%, rgba(245, 158, 11, 0.28) 0%, transparent 68%);
+      filter: blur(52px);
+    }
+
+    /* Vinyl sheen overlay border */
+    .vinyl-sheen-border {
+      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.18), 0 12px 36px rgba(0, 0, 0, 0.7);
+    }
+  </style>
+<!-- END: Custom Stylesheets -->
+</head>
+<body>
+<!-- BEGIN: SmartphoneViewportFrame (412x915 Target Android Viewport) -->
+<main class="relative w-[412px] h-[915px] max-h-[915px] bg-oled overflow-hidden flex flex-col justify-between shadow-2xl rounded-[36px] border border-borderSubtle/60" data-purpose="android-viewport-container">
+<!-- Ambient Backlight Gradient Layer -->
+<div aria-hidden="true" class="absolute -top-10 left-0 w-full h-[520px] pointer-events-none z-0">
+<div class="absolute inset-0 artwork-aura-cyan"></div>
+<div class="absolute inset-0 artwork-aura-amber"></div>
+</div>
+<!-- BEGIN: TopStatusAndAppBar -->
+<header class="relative z-10 pt-3 px-5 flex flex-col gap-2 shrink-0" data-purpose="top-navigation-bar">
+<!-- Android Hardware System Status Bar Bar (Simulated clock, icons) -->
+<div class="flex justify-between items-center text-xs text-textMuted/80 font-mono tracking-tight pt-1">
+<span class="font-semibold text-textPrimary text-[13px]">10:42</span>
+<div class="flex items-center space-x-2 text-[11px]">
+<span class="text-accentCyan font-bold tracking-wider">Hi-Res</span>
+<!-- Signal Icon -->
+<svg class="w-3.5 h-3.5 fill-current" viewbox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L12 22l7.03-4.39C20.26 16.07 21 14.12 21 12c0-4.97-4.03-9-9-9z"></path></svg>
+<!-- Battery Icon -->
+<div class="w-5 h-2.5 border border-textMuted/80 rounded-sm p-0.5 flex items-center">
+<div class="h-full w-4/5 bg-accentCyan rounded-2xs"></div>
+</div>
+</div>
+</div>
+<!-- Main App Top Bar (48dp height equivalent) -->
+<div class="h-12 flex items-center justify-between mt-1">
+<!-- Left: Tactile dismiss chevron-down button -->
+<button aria-label="Dismiss to Mini-Player" class="w-10 h-10 rounded-full bg-surface/80 border border-borderSubtle flex items-center justify-center text-textPrimary hover:bg-surfaceElevated active:scale-95 transition-all shadow-sm" type="button">
+<svg class="w-5 h-5 text-textPrimary" fill="none" stroke="currentColor" stroke-width="2.2" viewbox="0 0 24 24">
+<path d="M19.5 8.25l-7.5 7.5-7.5-7.5" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+<!-- Center: Now Spinning Subtitle Pill -->
+<div class="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-surface/90 border border-borderSubtle/80 backdrop-blur-md shadow-inner" data-purpose="current-mode-chip">
+<span class="w-2 h-2 rounded-full bg-accentCyan animate-indicator-pulse"></span>
+<span class="text-[11px] font-mono font-bold tracking-widest text-textPrimary uppercase">
+            NOW SPINNING ☕
+          </span>
+</div>
+<!-- Right: Favorite & Lyrics Action Icons (44x44dp touch area) -->
+<div class="flex items-center space-x-1">
+<!-- Favorite button (Filled amber glow) -->
+<button aria-label="Remove from Favorites" class="w-10 h-10 rounded-full bg-surface/60 border border-borderSubtle/60 flex items-center justify-center hover:bg-surfaceElevated active:scale-95 transition-all" type="button">
+<svg class="w-5 h-5 text-accentAmber fill-accentAmber filter drop-shadow-[0_0_8px_rgba(245,158,11,0.5)]" viewbox="0 0 24 24">
+<path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path>
+</svg>
+</button>
+<!-- Lyrics toggle button -->
+<button aria-label="Toggle Synced Lyrics" class="w-10 h-10 rounded-full bg-surface/60 border border-borderSubtle/60 flex items-center justify-center text-textMuted hover:text-textPrimary hover:bg-surfaceElevated active:scale-95 transition-all" type="button">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M7.5 8.25h9m-9 3H12m-9.75 6.75V4.5A2.25 2.25 0 014.5 2.25h15A2.25 2.25 0 0121.75 4.5v10.5A2.25 2.25 0 0119.5 17.25h-11.25L3.75 20.25z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+</div>
+</div>
+</header>
+<!-- END: TopStatusAndAppBar -->
+<!-- BEGIN: ArtworkStage -->
+<section class="relative z-10 flex flex-col items-center justify-center px-6 mt-1" data-purpose="album-artwork-display">
+<!-- Top subtle swipe hint bar -->
+<div class="w-8 h-1 rounded-full bg-borderSubtle/80 mb-3 opacity-60"></div>
+<!-- Album Artwork Container (~316px square) -->
+<div class="relative group">
+<!-- Tactile Outer vinyl disc rim illusion -->
+<div class="relative w-[316px] h-[316px] rounded-[24px] p-1 bg-gradient-to-b from-white/10 to-black/60 shadow-artworkHalo">
+<img alt="Album cover art for pop-punk alternative rock track, energetic vinyl aesthetic, deep cyan teal and warm amber cinematic lighting, modern gritty indie music artwork, high quality album art illustration" class="w-full h-full object-cover rounded-[22px] vinyl-sheen-border select-none" loading="eager" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAzzHCyKlsFuGr2Dz2u2_0h1o0PjRwzWiRA05d98pRJY14bwFZ20AphOyU3aaULTeiPinoTZgz0lRkSDYafAm6rnuqDPqgUgPpVEMDw0ILZCzQmxh2Rai80XFzMyaWorC4HXfJacBaGvT9O0CXOto91txaJ3k9010s0aiKWLs3qp8pBvph3PZw_Gq68QCSznJpI-oYoumlJfa6OtSoJzUjXB53Ei5TZBVh9iNyjV6ETBKH92opQrSE"/>
+<!-- Subtle sheen gloss glass gradient reflection on top half -->
+<div class="absolute inset-1 rounded-[22px] bg-gradient-to-tr from-transparent via-white/5 to-white/15 pointer-events-none"></div>
+</div>
+</div>
+</section>
+<!-- END: ArtworkStage -->
+<!-- BEGIN: MetadataAndTelemetry -->
+<section class="relative z-10 px-6 mt-3" data-purpose="track-metadata-and-telemetry">
+<!-- Track Title & Lossless Tag Header -->
+<div class="flex items-start justify-between">
+<div class="flex-1 pr-3">
+<h1 class="text-[23px] leading-tight font-extrabold text-textPrimary tracking-tight line-clamp-1">
+            Dead on Arrival
+          </h1>
+<p class="text-[15px] font-medium text-textMuted mt-1 line-clamp-1">
+            Fall Out Boy <span class="text-textMuted/40 mx-1">•</span> Take This to Your Grave
+          </p>
+</div>
+<!-- Audiophile Direct Lossless Capsule -->
+<div class="flex flex-col items-end shrink-0">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-surfaceElevated border border-accentCyan/30 text-accentCyan text-[11px] font-mono font-bold tracking-tight shadow-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-statusEmerald animate-pulse"></span>
+            24b/96k Direct
+          </span>
+<span class="text-[10px] text-accentAmber font-mono mt-1 font-semibold flex items-center gap-0.5">
+            Hi-Res FLAC ✨
+          </span>
+</div>
+</div>
+<!-- Performance & Energy Telemetry Tags -->
+<div class="flex items-center gap-2 mt-3 font-mono text-[11px]">
+<div class="px-2.5 py-1 rounded-md bg-surface/90 border border-borderSubtle text-textMuted flex items-center gap-1.5">
+<span class="text-accentCyan font-bold">156</span> BPM ⚡
+        </div>
+<div class="px-2.5 py-1 rounded-md bg-surface/90 border border-borderSubtle text-textMuted flex items-center gap-1.5">
+<span class="text-accentAmber font-bold">High</span> Energy 🔥
+        </div>
+<div class="px-2.5 py-1 rounded-md bg-surface/90 border border-borderSubtle text-textMuted flex items-center gap-1">
+<span class="text-statusEmerald">Bit-Perfect</span>
+</div>
+</div>
+</section>
+<!-- END: MetadataAndTelemetry -->
+<!-- BEGIN: AudiophileWaveformScrubber -->
+<section class="relative z-10 px-6 mt-2" data-purpose="waveform-audio-scrubber">
+<!-- Interactive Stylized Waveform Bars (Played: Cyan-Amber gradient, Unplayed: Slate) -->
+<div class="h-10 w-full flex items-end justify-between gap-[3px] py-1 cursor-pointer" data-purpose="waveform-visualizer">
+<!-- 36 Bar Samples -->
+<div class="w-1.5 rounded-full bg-accentCyan h-[22%]"></div>
+<div class="w-1.5 rounded-full bg-accentCyan h-[40%]"></div>
+<div class="w-1.5 rounded-full bg-accentCyan h-[68%]"></div>
+<div class="w-1.5 rounded-full bg-accentCyan h-[50%]"></div>
+<div class="w-1.5 rounded-full bg-accentCyan h-[85%]"></div>
+<div class="w-1.5 rounded-full bg-accentCyan h-[72%]"></div>
+<div class="w-1.5 rounded-full bg-accentCyan h-[95%]"></div>
+<div class="w-1.5 rounded-full bg-accentCyan h-[62%]"></div>
+<div class="w-1.5 rounded-full bg-accentCyan h-[48%]"></div>
+<div class="w-1.5 rounded-full bg-accentCyan h-[78%]"></div>
+<div class="w-1.5 rounded-full bg-accentCyan h-[90%]"></div>
+<div class="w-1.5 rounded-full bg-accentCyan h-[65%]"></div>
+<div class="w-1.5 rounded-full bg-accentCyan h-[82%]"></div>
+<div class="w-1.5 rounded-full bg-accentAmber h-[100%] shadow-[0_0_8px_rgba(245,158,11,0.6)]"></div>
+<div class="w-1.5 rounded-full bg-accentAmber h-[88%]"></div>
+<div class="w-1.5 rounded-full bg-accentAmber h-[75%]"></div>
+<div class="w-1.5 rounded-full bg-accentAmber h-[92%]"></div>
+<div class="w-1.5 rounded-full bg-accentAmber h-[80%]"></div>
+<div class="w-1.5 rounded-full bg-accentAmber h-[58%]"></div>
+<div class="w-1.5 rounded-full bg-accentAmber h-[84%]"></div>
+<div class="w-1.5 rounded-full bg-accentAmber h-[70%]"></div>
+<!-- Playhead boundary at ~60% mark -->
+<div class="w-1.5 rounded-full bg-[#272733] h-[64%]"></div>
+<div class="w-1.5 rounded-full bg-[#272733] h-[78%]"></div>
+<div class="w-1.5 rounded-full bg-[#272733] h-[92%]"></div>
+<div class="w-1.5 rounded-full bg-[#272733] h-[85%]"></div>
+<div class="w-1.5 rounded-full bg-[#272733] h-[55%]"></div>
+<div class="w-1.5 rounded-full bg-[#272733] h-[70%]"></div>
+<div class="w-1.5 rounded-full bg-[#272733] h-[88%]"></div>
+<div class="w-1.5 rounded-full bg-[#272733] h-[65%]"></div>
+<div class="w-1.5 rounded-full bg-[#272733] h-[50%]"></div>
+<div class="w-1.5 rounded-full bg-[#272733] h-[74%]"></div>
+<div class="w-1.5 rounded-full bg-[#272733] h-[60%]"></div>
+<div class="w-1.5 rounded-full bg-[#272733] h-[45%]"></div>
+<div class="w-1.5 rounded-full bg-[#272733] h-[68%]"></div>
+<div class="w-1.5 rounded-full bg-[#272733] h-[40%]"></div>
+<div class="w-1.5 rounded-full bg-[#272733] h-[25%]"></div>
+</div>
+<!-- Linear Scrub Track & Handle Thumb -->
+<div class="relative w-full h-1.5 bg-[#23232c] rounded-full mt-2 flex items-center cursor-pointer group">
+<!-- Elapsed Track Gradient -->
+<div class="h-full rounded-full bg-gradient-to-r from-accentCyan via-cyan-400 to-accentAmber w-[58%]"></div>
+<!-- Active Glowing Drag Thumb -->
+<div class="absolute left-[58%] -translate-x-1/2 w-4 h-4 rounded-full bg-white border-2 border-accentCyan shadow-glowCyan group-hover:scale-125 transition-transform flex items-center justify-center">
+<div class="w-1.5 h-1.5 rounded-full bg-accentCyan"></div>
+</div>
+</div>
+<!-- Timecode Telemetry Row -->
+<div class="flex justify-between items-center mt-2 font-mono text-[12px] font-semibold tracking-wider">
+<span class="text-accentCyan tabular-nums">02:14</span>
+<span class="text-textMuted/70 tabular-nums">-01:34</span>
+</div>
+</section>
+<!-- END: AudiophileWaveformScrubber -->
+<!-- BEGIN: PlaybackControls (Ergonomic Thumb-Zone) -->
+<section class="relative z-10 px-6 py-1" data-purpose="thumb-zone-controls">
+<div class="flex items-center justify-between">
+<!-- Shuffle Button (Active with Cyan Dot/Glow) -->
+<button aria-label="Shuffle Enabled" class="w-12 h-12 rounded-full flex flex-col items-center justify-center text-accentCyan hover:bg-surface active:scale-90 transition-all" type="button">
+<svg class="w-5 h-5 drop-shadow-[0_0_6px_rgba(6,182,212,0.6)]" fill="none" stroke="currentColor" stroke-width="2.2" viewbox="0 0 24 24">
+<path d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 00-3.7-3.7 48.678 48.678 0 00-7.324 0 4.006 4.006 0 00-3.7 3.7c-.017.22-.032.441-.046.662M4.5 12c0 1.232.046 2.453.138 3.662a4.006 4.006 0 003.7 3.7 48.656 48.656 0 007.324 0 4.006 4.006 0 003.7-3.7c.017-.22.032-.441.046-.662M19.5 4.5l-3 3m3-3l-3-3M4.5 19.5l3-3m-3 3l3 3" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="w-1.5 h-1.5 rounded-full bg-accentCyan mt-1"></span>
+</button>
+<!-- Previous Track Button (48x48dp tactile touch target) -->
+<button aria-label="Previous Track" class="w-12 h-12 rounded-full flex items-center justify-center text-textPrimary hover:bg-surface active:scale-90 transition-all" type="button">
+<svg class="w-7 h-7" fill="currentColor" viewbox="0 0 24 24">
+<path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"></path>
+</svg>
+</button>
+<!-- Hero Play/Pause Button (64x64dp gradient circle) -->
+<button aria-label="Pause" class="w-16 h-16 rounded-full bg-gradient-to-tr from-accentCyan to-[#38bdf8] flex items-center justify-center text-oled shadow-glowHero active:scale-95 transition-transform hover:brightness-110" type="button">
+<!-- Pause Icon (Dual tactile bars) -->
+<svg class="w-8 h-8 fill-oled" viewbox="0 0 24 24">
+<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path>
+</svg>
+</button>
+<!-- Next Track Button (48x48dp tactile touch target) -->
+<button aria-label="Next Track" class="w-12 h-12 rounded-full flex items-center justify-center text-textPrimary hover:bg-surface active:scale-90 transition-all" type="button">
+<svg class="w-7 h-7" fill="currentColor" viewbox="0 0 24 24">
+<path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"></path>
+</svg>
+</button>
+<!-- Repeat Mode Button (Toggle mode) -->
+<button aria-label="Repeat All" class="w-12 h-12 rounded-full flex flex-col items-center justify-center text-textMuted hover:text-textPrimary hover:bg-surface active:scale-90 transition-all" type="button">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewbox="0 0 24 24">
+<path d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="w-1.5 h-1.5 rounded-full bg-transparent mt-1"></span>
+</button>
+</div>
+</section>
+<!-- END: PlaybackControls -->
+<!-- BEGIN: HardwareOutputRoutingAndFooter -->
+<footer class="relative z-10 px-6 pb-2 flex flex-col items-center" data-purpose="output-hardware-dock">
+<!-- Hardware Output DAC Telemetry Capsule -->
+<button aria-label="Audio Output Route: FiiO KA15" class="w-full h-11 px-4 rounded-xl bg-surfaceElevated/90 border border-borderSubtle/80 flex items-center justify-between text-xs text-textMuted hover:border-accentCyan/40 active:scale-[0.99] transition-all shadow-md" type="button">
+<!-- Left: DAC icon and streaming status light -->
+<div class="flex items-center space-x-2.5 truncate">
+<span class="w-2.5 h-2.5 rounded-full bg-statusEmerald shadow-[0_0_8px_#10b981] animate-pulse"></span>
+<span class="text-textPrimary font-medium truncate">
+            Playing to: <span class="text-white font-semibold">FiiO KA15</span>
+</span>
+<span class="px-1.5 py-0.5 rounded text-[10px] bg-accentCyan/15 text-accentCyan font-mono font-bold tracking-tight">
+            Bit-Perfect ✨
+          </span>
+</div>
+<!-- Right: Routing selector chevron -->
+<svg class="w-4 h-4 text-textMuted shrink-0 ml-1" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M8.25 4.5l7.5 7.5-7.5 7.5" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+<!-- Android Standard Home Navigation Gesture Pill Indicator -->
+<div class="w-20 h-1 bg-white/30 rounded-full mt-3 mb-1" data-purpose="android-gesture-pill"></div>
+</footer>
+<!-- END: HardwareOutputRoutingAndFooter -->
+</main>
+<!-- END: SmartphoneViewportFrame -->
+<!-- BEGIN: Interactive Logic for Controls -->
+<script data-purpose="playback-interactivity">
+    // Add lightweight tactile click response for demo interactivity
+    document.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        // Toggle play/pause visual icon demo if clicked
+        if (this.getAttribute('aria-label') === 'Pause') {
+          this.setAttribute('aria-label', 'Play');
+          this.innerHTML = `
+            <svg class="w-8 h-8 fill-oled ml-0.5" viewBox="0 0 24 24">
+              <path d="M8 5v14l11-7z"/>
+            </svg>
+          `;
+        } else if (this.getAttribute('aria-label') === 'Play') {
+          this.setAttribute('aria-label', 'Pause');
+          this.innerHTML = `
+            <svg class="w-8 h-8 fill-oled" viewBox="0 0 24 24">
+              <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+            </svg>
+          `;
+        }
+      });
+    });
+  </script>
+<!-- END: Interactive Logic for Controls -->
+</body></html>

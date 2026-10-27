@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_tab" name="shell-type"/><title>VibePlay Mobile</title><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@500;600&amp;family=Plus+Jakarta+Sans:wght@600;700;800&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{width:100vw;min-height:100vh;margin:0;padding:0;background-color:#131315;}body{overscroll-behavior-y:contain;-webkit-tap-highlight-color:transparent;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}}::-webkit-scrollbar{display:none;}*{-ms-overflow-style:none;scrollbar-width:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { colors: { "on-tertiary-fixed-variant": "#005236", "surface-tint": "#4cd7f6", "surface-dim": "#131315", "secondary-fixed-dim": "#ffb95f", "surface-container": "#201f21", "tertiary-fixed": "#6ffbbe", "inverse-surface": "#e5e1e4", "on-error-container": "#ffdad6", "primary": "#4cd7f6", "on-secondary": "#472a00", "inverse-on-surface": "#303032", "on-primary-fixed": "#001f26", "background": "#131315", "surface-bright": "#39393b", "on-primary-fixed-variant": "#004e5c", "primary-fixed-dim": "#4cd7f6", "tertiary-fixed-dim": "#4edea3", "error": "#ffb4ab", "tertiary": "#4edea3", "surface-container-high": "#2a2a2c", "surface-container-lowest": "#0e0e10", "outline-variant": "#3d494c", "on-secondary-fixed": "#2a1700", "surface-container-highest": "#353437", "outline": "#869397", "inverse-primary": "#00687a", "on-surface": "#e5e1e4", "primary-fixed": "#acedff", "error-container": "#93000a", "secondary-container": "#ee9800", "surface": "#131315", "on-primary-container": "#00424f", "on-surface-variant": "#bcc9cd", "tertiary-container": "#1bbd85", "on-secondary-container": "#5b3800", "secondary-fixed": "#ffddb8", "surface-variant": "#353437", "on-background": "#e5e1e4", "on-tertiary-fixed": "#002113", "secondary": "#ffb95f", "on-tertiary-container": "#00452e", "on-secondary-fixed-variant": "#653e00", "on-primary": "#003640", "on-tertiary": "#003824", "on-error": "#690005", "primary-container": "#06b6d4", "surface-container-low": "#1b1b1d" }, borderRadius: { "DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px" }, spacing: { "space-xs": "0.25rem", "space-sm": "0.5rem", "space-xl": "2rem", "space-md": "1rem", "margin-mobile": "1rem", "space-lg": "1.5rem", "gutter": "1rem", "gutter-sm": "0.75rem", "margin": "1.25rem" }, fontFamily: { "body-sm": ["Inter"], "body-lg": ["Inter"], "headline-sm": ["Plus Jakarta Sans"], "label-md": ["Inter"], "headline-md": ["Plus Jakarta Sans"], "telemetry-sm": ["JetBrains Mono"], "telemetry-md": ["JetBrains Mono"], "display-lg": ["Plus Jakarta Sans"], "label-lg": ["Inter"], "body-md": ["Inter"], "headline-lg": ["Plus Jakarta Sans"] }, fontSize: { "body-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }], "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "500" }], "headline-sm": ["18px", { "lineHeight": "24px", "fontWeight": "600" }], "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }], "headline-md": ["22px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "700" }], "telemetry-sm": ["10px", { "lineHeight": "14px", "letterSpacing": "0.06em", "fontWeight": "500" }], "telemetry-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.04em", "fontWeight": "600" }], "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.03em", "fontWeight": "800" }], "label-lg": ["14px", { "lineHeight": "18px", "letterSpacing": "0.01em", "fontWeight": "600" }], "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }], "headline-lg": ["30px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "700" }] } } } };</script><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-surface font-body-md text-on-surface antialiased flex flex-col min-h-screen selection:bg-primary-container selection:text-on-primary"><header class="fixed top-0 w-full z-50 pt-safe bg-surface/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.25)]"><div class="h-14 px-margin-mobile flex items-center justify-between"><div class="flex items-center gap-space-sm"><span class="font-headline-md text-headline-md tracking-tight text-on-surface flex items-center gap-1.5"><span>✨</span><span>vibeplay</span></span><div class="w-1.5 h-1.5 rounded-full bg-primary-container shadow-[0_0_8px_rgba(6,182,212,0.8)]"></div></div><div class="flex items-center gap-1"><div class="hidden sm:flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-container-high"><div class="w-2 h-2 rounded-full bg-tertiary-container shadow-[0_0_6px_rgba(27,189,133,0.7)]"></div><span class="font-telemetry-sm text-telemetry-sm text-on-surface font-medium">🎧 USB DAC</span></div><a class="w-11 h-11 flex items-center justify-center rounded-full text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors" href="#"><span class="material-symbols-outlined text-[22px]">search</span></a><a class="w-11 h-11 flex items-center justify-center rounded-full text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors" href="#"><span class="material-symbols-outlined text-[22px]">settings</span></a><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center ml-1"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="flex flex-col relative w-full pt-14 pb-44 px-margin-mobile bg-surface min-h-screen"><div class="flex flex-col w-full">
+<!-- Sticky Quick-Sort Pill Carousel -->
+<div class="sticky top-0 z-30 -mx-margin-mobile px-margin-mobile py-2 bg-surface/90 backdrop-blur-md">
+<div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5" id="sort-filter-bar">
+<button class="h-9 px-3.5 rounded-full flex items-center gap-1.5 bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors flex-shrink-0 active:scale-95">
+<span class="font-label-md text-label-md">Sort: Title</span>
+<span class="text-xs">🔤</span>
+</button>
+<button class="h-9 px-3.5 rounded-full flex items-center gap-1.5 bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors flex-shrink-0 active:scale-95">
+<span class="font-label-md text-label-md">BPM</span>
+<span class="text-xs">⚡</span>
+</button>
+<button class="h-9 px-3.5 rounded-full flex items-center gap-1.5 bg-primary-container/20 text-primary-fixed shadow-[0_0_12px_rgba(6,182,212,0.3)] font-semibold flex-shrink-0 active:scale-95">
+<span class="font-label-md text-label-md">Energy</span>
+<span class="text-xs">🔥</span>
+</button>
+<button class="h-9 px-3.5 rounded-full flex items-center gap-1.5 bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors flex-shrink-0 active:scale-95">
+<span class="font-label-md text-label-md">Hi-Res FLAC</span>
+<span class="text-xs">✨</span>
+</button>
+<button class="h-9 px-3.5 rounded-full flex items-center gap-1.5 bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-colors flex-shrink-0 active:scale-95">
+<span class="font-label-md text-label-md">Recent</span>
+</button>
+<button class="h-9 px-3.5 rounded-full flex items-center gap-1.5 bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-colors flex-shrink-0 active:scale-95">
+<span class="font-label-md text-label-md">Keys / Camelot</span>
+<span class="text-xs">🎹</span>
+</button>
+</div>
+</div>
+<!-- Library Header & Telemetry Stats Bar -->
+<div class="flex items-center justify-between py-3 mt-1 mb-2 px-1">
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-tertiary shadow-[0_0_8px_rgba(78,222,163,0.8)]"></div>
+<span class="font-telemetry-sm text-telemetry-sm text-on-surface-variant uppercase tracking-wider font-semibold">
+        428 Tracks in Crate • Lossless Synced
+      </span>
+</div>
+<div class="flex items-center gap-1">
+<button aria-label="Shuffle Crate" class="w-9 h-9 rounded-full bg-surface-container flex items-center justify-center text-primary hover:bg-surface-container-high transition-transform active:scale-90 shadow-sm">
+<span class="material-symbols-outlined text-[18px]">shuffle</span>
+</button>
+<button aria-label="Multi-select" class="w-9 h-9 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors active:scale-90">
+<span class="material-symbols-outlined text-[18px]">checklist</span>
+</button>
+</div>
+</div>
+<!-- Track Cards Stream -->
+<div class="flex flex-col gap-2 w-full pb-6">
+<!-- ITEM 1: Special "Now Playing" Row -->
+<div class="relative w-full rounded-2xl bg-surface-container/90 hover:bg-surface-container-high overflow-hidden shadow-lg transition-all group active:scale-[0.99] cursor-pointer">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-primary shadow-[0_0_12px_rgba(6,182,212,0.9)]"></div>
+<div class="h-[72px] px-3.5 py-2.5 flex items-center justify-between gap-3 bg-primary-container/10">
+<!-- Thumbnail + Equalizer Animation -->
+<div class="relative w-[52px] h-[52px] rounded-xl overflow-hidden flex-shrink-0 bg-surface-container-lowest shadow-inner">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Futuristic cyberpunk vinyl record sleeve glowing with bright cyan neon lines and deep ultraviolet tones, high fidelity geometric album art design" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBPc8hfg1Yg4a612c3eU5_HqWhUlkucZ5vaX7JcKgLVsDsRgo7FQfw04O5IR_MHj4svTsIsNnTzAB8AtooSuCtly0_0M6UV3T6kOldsK7scEDTahA0_1NXjp4ZJHoGytx49IZSeR69OWbvmTOL2TAr6LcwzelmUBnvCQYgvgs3GJFtv3grcAfx4aaAL5eNAlXZeBvzWAryj4f-IaOPO_CdQxcuIwpUsdgfMJKcIXooWy7mOLkk7-hk"/>
+<div class="absolute inset-0 bg-surface-dim/60 backdrop-blur-[1px] flex items-center justify-center gap-[3px]">
+<span class="w-[3px] h-3.5 bg-primary rounded-full animate-bounce" style="animation-delay: 0.1s;"></span>
+<span class="w-[3px] h-5 bg-primary rounded-full animate-bounce" style="animation-delay: 0.25s;"></span>
+<span class="w-[3px] h-2.5 bg-primary rounded-full animate-bounce" style="animation-delay: 0.15s;"></span>
+<span class="w-[3px] h-4 bg-primary rounded-full animate-bounce" style="animation-delay: 0.3s;"></span>
+</div>
+</div>
+<!-- Center Metadata -->
+<div class="flex flex-col min-w-0 flex-1 justify-center">
+<div class="flex items-center gap-1.5">
+<span class="font-headline-sm text-body-lg text-primary truncate font-bold">Hyperion Nocturne</span>
+<span class="flex-shrink-0 w-1.5 h-1.5 rounded-full bg-primary animate-ping"></span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">Arcadia Sound Lab feat. M83</span>
+<div class="flex items-center gap-1.5 mt-1">
+<span class="font-telemetry-sm text-telemetry-sm px-1.5 py-0.5 rounded bg-secondary/15 text-secondary font-medium tracking-tight">128 BPM ⚡</span>
+<span class="font-telemetry-sm text-telemetry-sm px-1.5 py-0.5 rounded bg-surface-container-lowest text-primary tracking-wide font-medium">24/96 FLAC ✨</span>
+</div>
+</div>
+<!-- Right Side: Energy Level & Action -->
+<div class="flex items-center gap-1 flex-shrink-0">
+<!-- 5-Segment Energy Mini-Bar (4/5) -->
+<div class="flex flex-col gap-[2px] items-center px-1" title="Energy Level 4/5">
+<div class="w-3.5 h-[3px] rounded-full bg-primary shadow-[0_0_6px_rgba(6,182,212,0.8)]"></div>
+<div class="w-3.5 h-[3px] rounded-full bg-primary shadow-[0_0_6px_rgba(6,182,212,0.8)]"></div>
+<div class="w-3.5 h-[3px] rounded-full bg-primary shadow-[0_0_6px_rgba(6,182,212,0.8)]"></div>
+<div class="w-3.5 h-[3px] rounded-full bg-primary shadow-[0_0_6px_rgba(6,182,212,0.8)]"></div>
+<div class="w-3.5 h-[3px] rounded-full bg-surface-bright/40"></div>
+</div>
+<button aria-label="Track options" class="w-11 h-11 rounded-full flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</div>
+</div>
+</div>
+<!-- ITEM 2 -->
+<div class="h-[72px] px-3.5 py-2.5 flex items-center justify-between gap-3 rounded-2xl bg-surface-container/60 hover:bg-surface-container transition-all group active:scale-[0.99] cursor-pointer">
+<div class="w-[52px] h-[52px] rounded-xl overflow-hidden flex-shrink-0 bg-surface-container-lowest relative">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Cosmic ambient space nebula album artwork with deep indigo dust, glowing teal particle networks, and high dynamic range starry depth" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDzAXgY4WqpagDhlDh-JIrs4HEVrNehiZrs1EPHBk_IhLANZ1v5Rclb2CJSphz7MDW1dZtwKVs2qgnireGOQ4ERC5niJCki_pWEkoCjL0PYwa4TPIkoWEdKeyh8hYTzhDFH931d9CtLTJvmtFHS28lJ9GU-EOP3WxBmFxwTTzQzVWkODnB2pk2URxJ3hKV-mGaRT-PJNvF6o2rK0vkAj9MB4IzA_pXxvggWUYxXle6Ok7vqbYlpvHI"/>
+</div>
+<div class="flex flex-col min-w-0 flex-1 justify-center">
+<span class="font-headline-sm text-body-lg text-on-surface truncate font-semibold">Genesis of Light</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">Max Cooper • Emergence</span>
+<div class="flex items-center gap-1.5 mt-1">
+<span class="font-telemetry-sm text-telemetry-sm px-1.5 py-0.5 rounded bg-surface-container-high text-secondary-fixed-dim font-medium tracking-tight">124 BPM ⚡</span>
+<span class="font-telemetry-sm text-telemetry-sm px-1.5 py-0.5 rounded bg-surface-container-lowest text-primary tracking-wide font-medium">24/192 FLAC ✨</span>
+</div>
+</div>
+<div class="flex items-center gap-1 flex-shrink-0">
+<!-- Energy Mini-Bar (3/5) -->
+<div class="flex flex-col gap-[2px] items-center px-1" title="Energy Level 3/5">
+<div class="w-3.5 h-[3px] rounded-full bg-primary/80"></div>
+<div class="w-3.5 h-[3px] rounded-full bg-primary/80"></div>
+<div class="w-3.5 h-[3px] rounded-full bg-primary/80"></div>
+<div class="w-3.5 h-[3px] rounded-full bg-surface-bright/40"></div>
+<div class="w-3.5 h-[3px] rounded-full bg-surface-bright/40"></div>
+</div>
+<button aria-label="Track options" class="w-11 h-11 rounded-full flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</div>
+</div>
+<!-- ITEM 3 -->
+<div class="h-[72px] px-3.5 py-2.5 flex items-center justify-between gap-3 rounded-2xl bg-surface-container/60 hover:bg-surface-container transition-all group active:scale-[0.99] cursor-pointer">
+<div class="w-[52px] h-[52px] rounded-xl overflow-hidden flex-shrink-0 bg-surface-container-lowest relative">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Extreme macro shot of vintage modular synthesizer cables patched into aluminum faceplate jacks with subtle amber status LED glows" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDuwq1baDVlvSAJPU1tbmFk60DM1SD7elJJZQn9Y80MSbqsMLxZk_Qtw-5kzf4GjPYV5n5fIbtqPapUBurjcIC0oGkqZw_cWNih3-ifWMnODIk3Zz_tsOhDA_mCb8FCiY34Py44rIVmIbtNnqIrNTCRAy892cDIsX-ucd0JpIBxJUcvJHibqj8JIj_79dHXhcFhh7pWcTKYFtf4-bX5eU-TBK5lRoGoqGfhH55t_zQHrpVCO4xCAG4"/>
+</div>
+<div class="flex flex-col min-w-0 flex-1 justify-center">
+<span class="font-headline-sm text-body-lg text-on-surface truncate font-semibold">Modular Horizon</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">Caterina Barbieri</span>
+<div class="flex items-center gap-1.5 mt-1">
+<span class="font-telemetry-sm text-telemetry-sm px-1.5 py-0.5 rounded bg-surface-container-high text-secondary-fixed-dim font-medium tracking-tight">138 BPM ⚡</span>
+<span class="font-telemetry-sm text-telemetry-sm px-1.5 py-0.5 rounded bg-surface-container-lowest text-primary tracking-wide font-medium">FLAC ✨</span>
+</div>
+</div>
+<div class="flex items-center gap-1 flex-shrink-0">
+<!-- Energy Mini-Bar (5/5 Peak) -->
+<div class="flex flex-col gap-[2px] items-center px-1" title="Energy Level 5/5">
+<div class="w-3.5 h-[3px] rounded-full bg-primary shadow-[0_0_4px_rgba(6,182,212,0.9)]"></div>
+<div class="w-3.5 h-[3px] rounded-full bg-primary shadow-[0_0_4px_rgba(6,182,212,0.9)]"></div>
+<div class="w-3.5 h-[3px] rounded-full bg-primary shadow-[0_0_4px_rgba(6,182,212,0.9)]"></div>
+<div class="w-3.5 h-[3px] rounded-full bg-primary shadow-[0_0_4px_rgba(6,182,212,0.9)]"></div>
+<div class="w-3.5 h-[3px] rounded-full bg-primary shadow-[0_0_4px_rgba(6,182,212,0.9)]"></div>
+</div>
+<button aria-label="Track options" class="w-11 h-11 rounded-full flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</div>
+</div>
+<!-- ITEM 4 -->
+<div class="h-[72px] px-3.5 py-2.5 flex items-center justify-between gap-3 rounded-2xl bg-surface-container/60 hover:bg-surface-container transition-all group active:scale-[0.99] cursor-pointer">
+<div class="w-[52px] h-[52px] rounded-xl overflow-hidden flex-shrink-0 bg-surface-container-lowest relative">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Dark monochromatic cinematic industrial texture, moody concrete monolith shadows with subtle grainy mist and dark metallic reflections" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBdjerDhG6YtwkejKYvuR7FmP2z27wpYa0wkWLwMszpp2ezQtLNdhiIsiwRiBfdB4AR0APVT76dB8UF70hWx9RxswibNOVq_4XoF1HCtNlGXBsDv0LemcHr5xm_dkiOuveB4GurpsZ0HhQbksc7RmPKaKJhipz7WSBlrmlP0ggeDi6eE3mVtPL45cS2QzT1E0zF22Z21q5nBfjdJFLaZAN28JBkoi0o8CPLrxDp59JLEtHpww_8yg4"/>
+</div>
+<div class="flex flex-col min-w-0 flex-1 justify-center">
+<span class="font-headline-sm text-body-lg text-on-surface truncate font-semibold">Subterranean Pulse</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">Lorn • The Maze to Nowhere</span>
+<div class="flex items-center gap-1.5 mt-1">
+<span class="font-telemetry-sm text-telemetry-sm px-1.5 py-0.5 rounded bg-surface-container-high text-secondary-fixed-dim font-medium tracking-tight">92 BPM ⚡</span>
+<span class="font-telemetry-sm text-telemetry-sm px-1.5 py-0.5 rounded bg-surface-container-lowest text-tertiary-container tracking-wide font-medium">DSD128 ✨</span>
+</div>
+</div>
+<div class="flex items-center gap-1 flex-shrink-0">
+<!-- Energy Mini-Bar (2/5) -->
+<div class="flex flex-col gap-[2px] items-center px-1" title="Energy Level 2/5">
+<div class="w-3.5 h-[3px] rounded-full bg-primary/70"></div>
+<div class="w-3.5 h-[3px] rounded-full bg-primary/70"></div>
+<div class="w-3.5 h-[3px] rounded-full bg-surface-bright/40"></div>
+<div class="w-3.5 h-[3px] rounded-full bg-surface-bright/40"></div>
+<div class="w-3.5 h-[3px] rounded-full bg-surface-bright/40"></div>
+</div>
+<button aria-label="Track options" class="w-11 h-11 rounded-full flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</div>
+</div>
+<!-- ITEM 5 -->
+<div class="h-[72px] px-3.5 py-2.5 flex items-center justify-between gap-3 rounded-2xl bg-surface-container/60 hover:bg-surface-container transition-all group active:scale-[0.99] cursor-pointer">
+<div class="w-[52px] h-[52px] rounded-xl overflow-hidden flex-shrink-0 bg-surface-container-lowest relative">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Warm atmospheric analog sunrise gradient over calm ocean horizon with geometric retro sun disc and warm orange-magenta horizon tint" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDrO-LebKCQyHdDO_MzNP6pnw0J7zr4UVzgfFSjWLhTfgfZLLoOhC4QRDLfu2uCBdoXUJvT0-J6j-Bsx9VvgOHs44TbDOeZcmtRN7uIOsa4gUXlJF897qu_pmGaA0Pvzek329wamIqJNNKGhp-2XvD3pc_PySnQoIWi9qS8Lk_FaMUKgtXIkINjC5t9MxM0ZbKmefpq-7IQIPi-LCUa_qvmO1Roabjay3DrQF-ZMVmHC0SbQfkZYV0"/>
+</div>
+<div class="flex flex-col min-w-0 flex-1 justify-center">
+<span class="font-headline-sm text-body-lg text-on-surface truncate font-semibold">Solaris Echoes</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">Tycho • Epoch Master</span>
+<div class="flex items-center gap-1.5 mt-1">
+<span class="font-telemetry-sm text-telemetry-sm px-1.5 py-0.5 rounded bg-surface-container-high text-secondary-fixed-dim font-medium tracking-tight">110 BPM ⚡</span>
+<span class="font-telemetry-sm text-telemetry-sm px-1.5 py-0.5 rounded bg-surface-container-lowest text-primary tracking-wide font-medium">24/96 FLAC ✨</span>
+</div>
+</div>
+<div class="flex items-center gap-1 flex-shrink-0">
+<!-- Energy Mini-Bar (3/5) -->
+<div class="flex flex-col gap-[2px] items-center px-1" title="Energy Level 3/5">
+<div class="w-3.5 h-[3px] rounded-full bg-primary/80"></div>
+<div class="w-3.5 h-[3px] rounded-full bg-primary/80"></div>
+<div class="w-3.5 h-[3px] rounded-full bg-primary/80"></div>
+<div class="w-3.5 h-[3px] rounded-full bg-surface-bright/40"></div>
+<div class="w-3.5 h-[3px] rounded-full bg-surface-bright/40"></div>
+</div>
+<button aria-label="Track options" class="w-11 h-11 rounded-full flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</div>
+</div>
+<!-- ITEM 6 -->
+<div class="h-[72px] px-3.5 py-2.5 flex items-center justify-between gap-3 rounded-2xl bg-surface-container/60 hover:bg-surface-container transition-all group active:scale-[0.99] cursor-pointer">
+<div class="w-[52px] h-[52px] rounded-xl overflow-hidden flex-shrink-0 bg-surface-container-lowest relative">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Retro-futuristic sports car speeding down an illuminated Tokyo expressway at night, red taillight streaks and towering neon skyscrapers" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD1GojkSbieF1zi6CYY5PkLrOMmmJ0GcMadq0JtxFTkoyyRq3mKAZQKYNPH_3mx60_Jbxyd6o-DRIDbj6b2_91y0C0HfFMBZyqIS-n52mB8-VHFR0peAWTMIRswcPddU1ngl0bUSaZUvWecXPS719c4C3efOVESCy9ccL4fYdZCHif8V8dT9DERFBUTJju7FV2YcMQyarHdsc1RRB1YazWAm_ixQNGgVlpzR2eretMGOxuw-GWImSI"/>
+</div>
+<div class="flex flex-col min-w-0 flex-1 justify-center">
+<span class="font-headline-sm text-body-lg text-on-surface truncate font-semibold">Midnight Resonance</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">Kavinsky &amp; Daft Punk</span>
+<div class="flex items-center gap-1.5 mt-1">
+<span class="font-telemetry-sm text-telemetry-sm px-1.5 py-0.5 rounded bg-surface-container-high text-secondary-fixed-dim font-medium tracking-tight">118 BPM ⚡</span>
+<span class="font-telemetry-sm text-telemetry-sm px-1.5 py-0.5 rounded bg-surface-container-lowest text-primary tracking-wide font-medium">24/48 FLAC ✨</span>
+</div>
+</div>
+<div class="flex items-center gap-1 flex-shrink-0">
+<!-- Energy Mini-Bar (4/5) -->
+<div class="flex flex-col gap-[2px] items-center px-1" title="Energy Level 4/5">
+<div class="w-3.5 h-[3px] rounded-full bg-primary/90"></div>
+<div class="w-3.5 h-[3px] rounded-full bg-primary/90"></div>
+<div class="w-3.5 h-[3px] rounded-full bg-primary/90"></div>
+<div class="w-3.5 h-[3px] rounded-full bg-primary/90"></div>
+<div class="w-3.5 h-[3px] rounded-full bg-surface-bright/40"></div>
+</div>
+<button aria-label="Track options" class="w-11 h-11 rounded-full flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</div>
+</div>
+<!-- ITEM 7 -->
+<div class="h-[72px] px-3.5 py-2.5 flex items-center justify-between gap-3 rounded-2xl bg-surface-container/60 hover:bg-surface-container transition-all group active:scale-[0.99] cursor-pointer">
+<div class="w-[52px] h-[52px] rounded-xl overflow-hidden flex-shrink-0 bg-surface-container-lowest relative">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Minimalist abstract dark techno cover art with mathematically precise geometric wave contours on ultra matte black background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBP2OySjoT9Eh3sKTsI8dyW8IJlo5rq3ATlBTQqkPpBPVmj3L-UaIFNuL02PcFzB5ccbdsloDfkWF4iNAohpJtW884FMIejEPeOLwZU2tuRSI5Vf1sKYUy2WlhFGEfza14d4DXgOrqi3CBOkkEFTePnxYzVLkZ8D-AiIEpCFIlmvDIJ-2WYq1pl1yGyztsMSFOrywA9KmMaKVENqaTWRwyCzmCrNWlZa8626EYq3abQe7epA6uiybE"/>
+</div>
+<div class="flex flex-col min-w-0 flex-1 justify-center">
+<span class="font-headline-sm text-body-lg text-on-surface truncate font-semibold">Resonance Field</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">Kiasmos • Blurred EP</span>
+<div class="flex items-center gap-1.5 mt-1">
+<span class="font-telemetry-sm text-telemetry-sm px-1.5 py-0.5 rounded bg-surface-container-high text-secondary-fixed-dim font-medium tracking-tight">120 BPM ⚡</span>
+<span class="font-telemetry-sm text-telemetry-sm px-1.5 py-0.5 rounded bg-surface-container-lowest text-tertiary-container tracking-wide font-medium">DSD64 ✨</span>
+</div>
+</div>
+<div class="flex items-center gap-1 flex-shrink-0">
+<!-- Energy Mini-Bar (4/5) -->
+<div class="flex flex-col gap-[2px] items-center px-1" title="Energy Level 4/5">
+<div class="w-3.5 h-[3px] rounded-full bg-primary/90"></div>
+<div class="w-3.5 h-[3px] rounded-full bg-primary/90"></div>
+<div class="w-3.5 h-[3px] rounded-full bg-primary/90"></div>
+<div class="w-3.5 h-[3px] rounded-full bg-primary/90"></div>
+<div class="w-3.5 h-[3px] rounded-full bg-surface-bright/40"></div>
+</div>
+<button aria-label="Track options" class="w-11 h-11 rounded-full flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</div>
+</div>
+</div>
+<!-- End of List Tactile Cushion for Safe Scrolling Above Dock -->
+<div class="flex flex-col items-center justify-center py-6 gap-2 opacity-60">
+<div class="w-1.5 h-1.5 rounded-full bg-surface-bright"></div>
+<span class="font-telemetry-sm text-telemetry-sm text-on-surface-variant tracking-widest uppercase">
+      ALL 428 TRACKS INDEXED
+    </span>
+</div>
+</div>
+<script>
+  // Interactive pill selection toggle
+  document.querySelectorAll('#sort-filter-bar button').forEach(button => {
+    button.addEventListener('click', () => {
+      document.querySelectorAll('#sort-filter-bar button').forEach(btn => {
+        btn.classList.remove('bg-primary-container/20', 'text-primary-fixed', 'shadow-[0_0_12px_rgba(6,182,212,0.3)]', 'font-semibold');
+        btn.classList.add('bg-surface-container', 'text-on-surface');
+      });
+      button.classList.remove('bg-surface-container', 'text-on-surface');
+      button.classList.add('bg-primary-container/20', 'text-primary-fixed', 'shadow-[0_0_12px_rgba(6,182,212,0.3)]', 'font-semibold');
+    });
+  });
+</script></main><div class="fixed bottom-20 inset-x-0 z-40 px-3 pb-1"><div class="h-16 w-full rounded-full bg-surface-container/95 backdrop-blur-xl shadow-[0_8px_24px_rgba(0,0,0,0.55)] px-2.5 flex items-center justify-between gap-space-sm"><div class="flex items-center gap- space-sm min-w-0 flex-1"><div class="w-11 h-11 rounded-xl bg-surface-container-high flex-shrink-0 flex items-center justify-center overflow-hidden relative shadow-inner"><span class="material-symbols-outlined text-primary-container text-[24px]">album</span><div class="absolute inset-0 bg-primary-container/10"></div></div><div class="flex flex-col min-w-0 pr-2"><div class="flex items-center gap-1.5"><span class="font-label-lg text-label-lg text-on-surface truncate">Midnight Resonance</span><span class="font-telemetry-sm text-telemetry-sm px-1.5 py-0.2 rounded bg-surface-container-lowest text-tertiary-container tracking-wider flex-shrink-0">24/96</span></div><span class="font-body-sm text-body-sm text-on-surface-variant truncate">Kavinsky &amp; Daft Punk</span></div></div><div class="flex items-center gap-1 flex-shrink-0"><button aria-label="Skip Next" class="w-11 h-11 rounded-full flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors"><span class="material-symbols-outlined text-[22px]">skip_next</span></button><button aria-label="Play or Pause" class="w-11 h-11 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center shadow-[0_0_16px_rgba(6,182,212,0.45)] hover:scale-105 active:scale-95 transition-transform"><span class="material-symbols-outlined text-[24px]">play_arrow</span></button></div></div></div><nav class="fixed bottom-0 w-full z-50 pb-safe bg-surface/90 backdrop-blur-xl shadow-[0_-4px_16px_rgba(0,0,0,0.35)]" data-active-classes="bg-primary-container/15 text-primary font-bold shadow-[0_0_12px_rgba(6,182,212,0.2)]"><div class="h-[72px] px-2 flex items-center justify-around"><a class="flex flex-col items-center justify-center gap-0.5 min-w-[68px] h-12 px-2.5 rounded-full text-on-surface-variant hover:text-on-surface transition-all" data-path="crate" href="#"><span class="material-symbols-outlined text-[22px]">library_music</span><span class="font-label-md text-label-md">Crate</span></a><a class="flex flex-col items-center justify-center gap-0.5 min-w-[68px] h-12 px-2.5 rounded-full text-on-surface-variant hover:text-on-surface transition-all" data-path="vibe-cooker" href="#"><span class="material-symbols-outlined text-[22px]">soup_kitchen</span><span class="font-label-md text-label-md">Cooker</span></a><a class="flex flex-col items-center justify-center gap-0.5 min-w-[68px] h-12 px-2.5 rounded-full text-on-surface-variant hover:text-on-surface transition-all" data-path="the-soundbar" href="#"><span class="material-symbols-outlined text-[22px]">equalizer</span><span class="font-label-md text-label-md">Soundbar</span></a><a class="flex flex-col items-center justify-center gap-0.5 min-w-[68px] h-12 px-2.5 rounded-full text-on-surface-variant hover:text-on-surface transition-all" data-path="add-ons" href="#"><span class="material-symbols-outlined text-[22px]">extension</span><span class="font-label-md text-label-md">Add-ons</span></a></div><div class="w-32 h-1 bg-surface-bright/70 rounded-full mx-auto my-1.5"></div></nav></body></html>
