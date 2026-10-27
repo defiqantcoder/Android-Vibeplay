@@ -39,6 +39,9 @@ class WearSyncManager(private val context: Context) : DataClient.OnDataChangedLi
     private val _playbackState = MutableStateFlow(WearPlaybackState())
     val playbackState: StateFlow<WearPlaybackState> = _playbackState.asStateFlow()
 
+    private val _tracks = MutableStateFlow<List<com.vibeplay.core.model.Track>>(emptyList())
+    val tracks: StateFlow<List<com.vibeplay.core.model.Track>> = _tracks.asStateFlow()
+
     fun register() {
         dataClient.addListener(this)
         fetchInitialData()
@@ -55,6 +58,8 @@ class WearSyncManager(private val context: Context) : DataClient.OnDataChangedLi
                 for (item in dataItemBuffer) {
                     if (item.uri.path == WearSyncProtocol.DATA_PATH_PLAYBACK) {
                         parseDataMap(DataMapItem.fromDataItem(item).dataMap)
+                    } else if (item.uri.path == WearSyncProtocol.DATA_PATH_CRATE_ITEMS) {
+                        parseCrateItems(DataMapItem.fromDataItem(item).dataMap)
                     }
                 }
                 dataItemBuffer.release()
@@ -64,12 +69,38 @@ class WearSyncManager(private val context: Context) : DataClient.OnDataChangedLi
 
     override fun onDataChanged(dataEvents: DataEventBuffer) {
         for (event in dataEvents) {
-            if (event.type == DataEvent.TYPE_CHANGED &&
-                event.dataItem.uri.path == WearSyncProtocol.DATA_PATH_PLAYBACK
-            ) {
-                parseDataMap(DataMapItem.fromDataItem(event.dataItem).dataMap)
+            if (event.type == DataEvent.TYPE_CHANGED) {
+                if (event.dataItem.uri.path == WearSyncProtocol.DATA_PATH_PLAYBACK) {
+                    parseDataMap(DataMapItem.fromDataItem(event.dataItem).dataMap)
+                } else if (event.dataItem.uri.path == WearSyncProtocol.DATA_PATH_CRATE_ITEMS) {
+                    parseCrateItems(DataMapItem.fromDataItem(event.dataItem).dataMap)
+                }
             }
         }
+    }
+
+    private fun parseCrateItems(dataMap: DataMap) {
+        val tracksList = dataMap.getDataMapArrayList("tracks") ?: return
+        val newTracks = tracksList.map { trackData ->
+            com.vibeplay.core.model.Track(
+                id = trackData.getString(WearSyncProtocol.KEY_TRACK_ID) ?: "",
+                title = trackData.getString(WearSyncProtocol.KEY_TITLE) ?: "",
+                artist = trackData.getString(WearSyncProtocol.KEY_ARTIST) ?: "",
+                album = trackData.getString(WearSyncProtocol.KEY_ALBUM) ?: "",
+                bpm = trackData.getDouble(WearSyncProtocol.KEY_BPM, 120.0).toInt(),
+                format = trackData.getString("format") ?: "FLAC",
+                // Provide defaults for remaining required fields
+                duration = "0:00",
+                durationMs = 0L,
+                key = "1A",
+                energy = 0.5,
+                danceability = 0.5,
+                crateId = "crate",
+                sampleRate = "44.1 kHz",
+                bitDepth = "16-bit"
+            )
+        }
+        _tracks.value = newTracks
     }
 
     private fun parseDataMap(dataMap: DataMap) {

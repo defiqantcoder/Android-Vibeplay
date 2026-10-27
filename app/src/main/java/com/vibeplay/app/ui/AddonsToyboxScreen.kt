@@ -119,6 +119,51 @@ fun SettingsScreen(
             Text("Audiophile Settings", fontWeight = FontWeight.Bold, color = TextPrimary, fontSize = 20.sp)
         }
 
+        // Library Path Settings
+        item {
+            Text("LIBRARY DIRECTORY", fontWeight = FontWeight.Bold, color = TextMuted, fontSize = 12.sp)
+            Spacer(modifier = Modifier.height(8.dp))
+
+            val context = androidx.compose.ui.platform.LocalContext.current
+            val sharedPrefs = context.getSharedPreferences("vibeplay_prefs", android.content.Context.MODE_PRIVATE)
+            var currentPath by remember { mutableStateOf(sharedPrefs.getString("library_path", "/home/sinnoh/music-test") ?: "/home/sinnoh/music-test") }
+            var inputPath by remember { mutableStateOf(currentPath) }
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(ContainerSurface)
+                    .border(1.dp, ContainerBorder, RoundedCornerShape(12.dp))
+                    .padding(16.dp)
+            ) {
+                OutlinedTextField(
+                    value = inputPath,
+                    onValueChange = { inputPath = it },
+                    label = { Text("Local FLAC Directory Path") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = TealPrimary,
+                        unfocusedBorderColor = ContainerBorder,
+                        focusedLabelColor = TealPrimary
+                    )
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Button(
+                    onClick = {
+                        currentPath = inputPath
+                        sharedPrefs.edit().putString("library_path", currentPath).apply()
+                        viewModel.scanLocalMusicFolder(java.io.File(currentPath))
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = TealPrimary),
+                    modifier = Modifier.align(Alignment.End)
+                ) {
+                    Text("Save & Scan", color = Color.Black, fontWeight = FontWeight.Bold)
+                }
+            }
+        }
+
         // Theme Switcher
         item {
             Text("INTERFACE THEME", fontWeight = FontWeight.Bold, color = TextMuted, fontSize = 12.sp)

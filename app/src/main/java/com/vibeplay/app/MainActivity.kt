@@ -53,6 +53,7 @@ class MainActivity : ComponentActivity() {
                     )
                 }
                 return VibePlayViewModel(
+                    context = applicationContext,
                     audioEngine = app.audioEngine,
                     wearBridge = wearBridge,
                     hardwareManager = hardwareManager
