@@ -837,6 +837,7 @@ interface DacModalProps {
   onSelectDacModel: (dacId: string) => void;
   onAddCustomDac: (modelName: string, specs: string) => void;
   onProbeHardware: () => void;
+  onPairWebUsbDac?: () => void;
   onSelectEndpointType: (type: 'usb-dac' | 'phone-speaker') => void;
   onToggleExclusiveUsb: () => void;
   onToggleAutoSwap: () => void;
@@ -857,6 +858,7 @@ export const DacOutputModal: React.FC<DacModalProps> = ({
   onSelectDacModel,
   onAddCustomDac,
   onProbeHardware,
+  onPairWebUsbDac,
   onSelectEndpointType,
   onToggleExclusiveUsb,
   onToggleAutoSwap,
@@ -865,7 +867,7 @@ export const DacOutputModal: React.FC<DacModalProps> = ({
   onSimulateUnplug,
   onClose,
 }) => {
-  const [showModelSelector, setShowModelSelector] = useState(false);
+  const [showModelSelector, setShowModelSelector] = useState(true);
   const [customModelInput, setCustomModelInput] = useState('');
   const isBitPerfect =
     activeEndpointType === 'usb-dac' && exclusiveUsbAccess && !dolbyAtmosEnabled;
@@ -885,7 +887,7 @@ export const DacOutputModal: React.FC<DacModalProps> = ({
         <div className="px-5 pt-1 pb-3">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-bold tracking-tight text-[#e4e4e7] flex items-center gap-2">
-              Audio Output &amp; DAC <span>🎧</span>
+              Audio Output &amp; Any-DAC <span>🎧</span>
             </h2>
             {dolbyAtmosEnabled ? (
               <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-secondary/15 border border-secondary/40 text-[11px] font-mono font-medium text-secondary">
@@ -904,7 +906,7 @@ export const DacOutputModal: React.FC<DacModalProps> = ({
             )}
           </div>
           <p className="text-[12px] text-[#9ca3af] mt-1 leading-snug">
-            Dynamic USB-C OTG &amp; hardware endpoint recognition for any DAC model.
+            Universal USB-C OTG &amp; UAC 1.0/2.0/3.0 dynamic recognition for any DAC brand.
           </p>
         </div>
 
@@ -912,38 +914,86 @@ export const DacOutputModal: React.FC<DacModalProps> = ({
 
         {/* Scrollable Content */}
         <div className="px-5 py-3.5 space-y-3.5 overflow-y-auto no-scrollbar max-h-[580px]">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-2 flex-wrap">
             <span className="text-[11px] font-mono tracking-wider text-[#9ca3af] uppercase font-medium">
-              Detected Audio Endpoints
+              Universal DAC Discovery ({availableDacs.length} Endpoints)
             </span>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 flex-wrap">
+              {onPairWebUsbDac && (
+                <button
+                  type="button"
+                  onClick={onPairWebUsbDac}
+                  className="text-[10px] font-mono px-2 py-1 rounded-lg bg-primary/15 border border-primary/40 text-primary hover:bg-primary/25 flex items-center gap-1 font-semibold"
+                  title="Pair any physical USB DAC via USB descriptor inspection"
+                >
+                  <span className="material-symbols-outlined text-[13px]">
+                    usb
+                  </span>
+                  Pair USB DAC
+                </button>
+              )}
               <button
                 type="button"
                 onClick={onProbeHardware}
-                className="text-[11px] font-mono text-primary hover:underline flex items-center gap-1"
+                className="text-[10px] font-mono px-2 py-1 rounded-lg bg-[#25252e] border border-[#363645] text-[#e4e4e7] hover:border-primary flex items-center gap-1"
               >
-                <span className="material-symbols-outlined text-[13px]">
-                  usb
+                <span className="material-symbols-outlined text-[13px] text-primary">
+                  radar
                 </span>
-                Scan USB-C
+                Scan Bus
               </button>
               <button
                 type="button"
                 onClick={() => setShowModelSelector((s) => !s)}
-                className="text-[11px] font-mono px-2 py-0.5 rounded bg-[#25252e] border border-[#363645] text-[#e4e4e7] hover:border-primary"
+                className="text-[10px] font-mono px-2 py-1 rounded-lg bg-[#25252e] border border-[#363645] text-[#e4e4e7] hover:border-primary"
               >
-                {showModelSelector ? 'Hide Models' : 'Change DAC Model'}
+                {showModelSelector ? 'Hide DACs' : 'Any DAC List'}
               </button>
             </div>
           </div>
 
-          {/* Dynamic USB DAC Model Picker Drawer */}
+          {/* Dynamic USB DAC Model Picker & Universal Any-DAC Hot-Mounter */}
           {showModelSelector && (
             <div className="p-3 rounded-2xl bg-[#16161b] border border-[#2a2a35] space-y-2">
-              <span className="text-[10px] font-mono uppercase tracking-wider text-primary block">
-                Dynamic USB-C DAC Hardware Profiles ({availableDacs.length} Models)
-              </span>
-              <div className="grid grid-cols-1 gap-1.5 max-h-40 overflow-y-auto no-scrollbar">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-mono uppercase tracking-wider text-primary block">
+                  Universal USB Audio Class (UAC 1.0/2.0/3.0) Endpoints
+                </span>
+                <span className="text-[9px] font-mono text-[#9ca3af]">
+                  Auto-detects any brand
+                </span>
+              </div>
+
+              {/* Custom Any-DAC Model Hot-Probe Input */}
+              <div className="flex items-center gap-1.5">
+                <input
+                  type="text"
+                  value={customModelInput}
+                  onChange={(e) => setCustomModelInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && customModelInput.trim()) {
+                      onAddCustomDac(customModelInput.trim(), '32-bit/384kHz');
+                      setCustomModelInput('');
+                    }
+                  }}
+                  placeholder="Type ANY DAC (e.g. RME ADI-2, Schiit Modi, Apple USB-C, SMSL)..."
+                  className="flex-1 h-8 px-2.5 rounded-lg bg-[#121214] border border-[#2a2a35] text-xs text-white placeholder:text-[#9ca3af]/50 focus:outline-none focus:border-primary"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (customModelInput.trim()) {
+                      onAddCustomDac(customModelInput.trim(), '32-bit/384kHz');
+                      setCustomModelInput('');
+                    }
+                  }}
+                  className="h-8 px-3 rounded-lg bg-primary text-[#121214] text-xs font-bold shrink-0 hover:brightness-110"
+                >
+                  Recognize &amp; Mount
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 gap-1.5 max-h-40 overflow-y-auto no-scrollbar pt-1">
                 {availableDacs.map((dac) => (
                   <button
                     key={dac.id}
@@ -959,11 +1009,16 @@ export const DacOutputModal: React.FC<DacModalProps> = ({
                     }`}
                   >
                     <div className="truncate pr-2">
-                      <div className="font-semibold text-[#e4e4e7] truncate">
-                        {dac.modelName}
+                      <div className="font-semibold text-[#e4e4e7] truncate flex items-center gap-1.5">
+                        <span>{dac.modelName}</span>
+                        {dac.usbVidPid && (
+                          <span className="text-[9px] font-mono text-primary/80">
+                            [{dac.usbVidPid}]
+                          </span>
+                        )}
                       </div>
                       <div className="text-[10px] font-mono text-[#9ca3af] truncate">
-                        {dac.chipset} • {dac.maxBitDepth}/{dac.maxSampleRate}
+                        {dac.vendor} · {dac.chipset} · {dac.maxBitDepth}/{dac.maxSampleRate}
                       </div>
                     </div>
                     {activeDac.id === dac.id && (
@@ -973,28 +1028,6 @@ export const DacOutputModal: React.FC<DacModalProps> = ({
                     )}
                   </button>
                 ))}
-              </div>
-              {/* Custom DAC Model Hot-Probe Input */}
-              <div className="flex items-center gap-1.5 pt-1">
-                <input
-                  type="text"
-                  value={customModelInput}
-                  onChange={(e) => setCustomModelInput(e.target.value)}
-                  placeholder="Plug custom USB DAC model (e.g. DragonFly Cobalt)..."
-                  className="flex-1 h-8 px-2.5 rounded-lg bg-[#121214] border border-[#2a2a35] text-xs text-white placeholder:text-[#9ca3af]/50 focus:outline-none focus:border-primary"
-                />
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (customModelInput.trim()) {
-                      onAddCustomDac(customModelInput.trim(), '32-bit/384kHz');
-                      setCustomModelInput('');
-                    }
-                  }}
-                  className="h-8 px-3 rounded-lg bg-primary text-[#121214] text-xs font-bold shrink-0"
-                >
-                  Mount
-                </button>
               </div>
             </div>
           )}
@@ -1042,9 +1075,16 @@ export const DacOutputModal: React.FC<DacModalProps> = ({
                       {dolbyAtmosEnabled ? 'Atmos Spatial' : 'Bit-Perfect'}
                     </span>
                   </p>
-                  <div className="flex items-center gap-2 mt-2 pt-2 border-t border-[#2a2a35]/50 text-[10px] font-mono text-[#9ca3af]">
+                  <div className="flex items-center gap-2 mt-2 pt-2 border-t border-[#2a2a35]/50 text-[10px] font-mono text-[#9ca3af] flex-wrap">
                     <span>
-                      Hardware Vol:{' '}
+                      VID:PID:{' '}
+                      <b className="text-primary">
+                        {activeDac.usbVidPid || '20B1:UAC2'}
+                      </b>
+                    </span>
+                    <span>•</span>
+                    <span>
+                      Vol:{' '}
                       <b className="text-[#e4e4e7]">
                         {activeDac.defaultHardwareVol}%
                       </b>

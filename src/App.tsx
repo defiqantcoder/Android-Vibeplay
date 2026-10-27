@@ -8,19 +8,22 @@ import {
   INITIAL_ADDONS,
   INITIAL_CRATES,
   INITIAL_DUPLICATE_GROUPS,
+  INITIAL_EQ_BANDS,
   INITIAL_TRACKS,
   INITIAL_USB_DAC_MODELS,
   Track,
   UsbDacEndpoint,
   cookHeuristicMixtape,
+  parseAnyDacHardwareProfile,
 } from './data/vibeplayData';
 import {
   probeConnectedAudioHardware,
+  requestWebUsbDacHardware,
+  subscribeToHardwareHotplug,
   vibeAudioEngine,
 } from './utils/audioEngine';
 import {
   generateAiEqCurve,
-  generateAiMixtape,
   sequenceHarmonicDjQueue,
 } from './utils/aiEngine';
 import {
@@ -103,7 +106,7 @@ export default function App() {
   >('music');
 
   // 10-Band Parametric Equalizer (The Soundbar) State
-  const [eqBands, setEqBands] = useState<EqBand[]>(EQ_PRESETS[0].bands);
+  const [eqBands, setEqBands] = useState<EqBand[]>(INITIAL_EQ_BANDS);
   const [activePresetId, setActivePresetId] = useState<string>('warm-tape');
   const [selectedBandIndex, setSelectedBandIndex] = useState<number>(5);
   const [dspEnabled, setDspEnabled] = useState<boolean>(true);
@@ -209,16 +212,50 @@ export default function App() {
     [availableDacs, activeDacId]
   );
 
+  // Route Web Audio output sink to the active hardware DAC sinkId when available
+  useEffect(() => {
+    const targetSink =
+      activeEndpointType === 'usb-dac' ? activeDac?.sinkId : '';
+    vibeAudioEngine.setHardwareSink(targetSink);
+  }, [activeDac, activeEndpointType]);
+
+  // Subscribe to real-time OS MediaDevices & WebUSB hot-plug / unplug events for ANY DAC
+  useEffect(() => {
+    let mounted = true;
+    const runInitialAndHotplugScan = async () => {
+      const updated = await probeConnectedAudioHardware(availableDacs);
+      if (!mounted) return;
+      if (updated.length > availableDacs.length) {
+        setAvailableDacs(updated);
+        if (autoSwapOnPlug && updated[0]) {
+          setActiveDacId(updated[0].id);
+          setActiveEndpointType('usb-dac');
+        }
+      }
+    };
+    runInitialAndHotplugScan();
+    const unsubscribe = subscribeToHardwareHotplug(runInitialAndHotplugScan);
+    return () => {
+      mounted = false;
+      unsubscribe();
+    };
+  }, [autoSwapOnPlug, availableDacs]);
+
   // Sync Web Audio DSP Engine whenever EQ, Bit-Perfect, or Dolby Atmos changes
   useEffect(() => {
-    const isBitPerfectBypass =
+    const bitPerfectActive =
       activeEndpointType === 'usb-dac' &&
       exclusiveUsbAccess &&
-      !dolbyAtmosEnabled &&
-      !forceDspOnDac;
+      !dolbyAtmosEnabled;
 
-    vibeAudioEngine.updateEqBands(eqBands, dspEnabled, isBitPerfectBypass);
-    vibeAudioEngine.setDolbyAtmos(dolbyAtmosEnabled, dolbyAtmosProfile);
+    vibeAudioEngine.updateDspChain(
+      eqBands,
+      dspEnabled,
+      bitPerfectActive,
+      forceDspOnDac,
+      dolbyAtmosEnabled,
+      dolbyAtmosProfile
+    );
   }, [
     eqBands,
     dspEnabled,
@@ -242,10 +279,7 @@ export default function App() {
           const nextTrack = tracks[(idx + 1) % tracks.length];
           if (nextTrack) {
             setActiveTrackId(nextTrack.id);
-            vibeAudioEngine.startProceduralStream(
-              nextTrack.bpm,
-              nextTrack.camelotKey
-            );
+            vibeAudioEngine.startPlayback(nextTrack);
           }
           return 0;
         }
@@ -266,12 +300,9 @@ export default function App() {
     const nextPlaying = !isPlaying;
     setIsPlaying(nextPlaying);
     if (nextPlaying) {
-      vibeAudioEngine.startProceduralStream(
-        activeTrack.bpm,
-        activeTrack.camelotKey
-      );
+      vibeAudioEngine.startPlayback(activeTrack);
     } else {
-      vibeAudioEngine.pause();
+      vibeAudioEngine.stopPlayback();
     }
   };
 
@@ -279,7 +310,7 @@ export default function App() {
     setActiveTrackId(selected.id);
     setCurrentTimeSec(0);
     setIsPlaying(true);
-    vibeAudioEngine.startProceduralStream(selected.bpm, selected.camelotKey);
+    vibeAudioEngine.startPlayback(selected);
     showToast(`Now Playing: ${selected.title} (${selected.shortFormat})`);
   };
 
@@ -361,11 +392,11 @@ export default function App() {
     setActiveOverlay(null);
     if (intent.type === 'play') {
       setIsPlaying(true);
-      vibeAudioEngine.startProceduralStream(activeTrack.bpm, activeTrack.camelotKey);
+      vibeAudioEngine.startPlayback(activeTrack);
       showToast('Assistant: Resumed playback');
     } else if (intent.type === 'pause') {
       setIsPlaying(false);
-      vibeAudioEngine.pause();
+      vibeAudioEngine.stopPlayback();
       showToast('Assistant: Paused playback');
     } else if (intent.type === 'next') {
       handleNextTrack();
@@ -429,7 +460,6 @@ export default function App() {
     const promptText = `Biometric pulse tempo matching ${targetBpm} BPM workout rhythm, high kinetic drive, lossless`;
     setCookPrompt(promptText);
     setActiveTab('cooker');
-    // Also find track closest to target BPM and cue it
     const closest = [...tracks].sort(
       (a, b) => Math.abs(a.bpm - targetBpm) - Math.abs(b.bpm - targetBpm)
     )[0];
@@ -441,62 +471,62 @@ export default function App() {
 
   // Dynamic USB DAC Hardware Probe
   const handleProbeHardware = async () => {
-    const detectedNames = await probeConnectedAudioHardware();
-    if (detectedNames.length > 0) {
-      const firstLabel = detectedNames[0];
-      const customId = `probed-${Date.now()}`;
-      const newEndpoint: UsbDacEndpoint = {
-        id: customId,
-        modelName: firstLabel.includes('DAC')
-          ? firstLabel
-          : `${firstLabel} USB DAC`,
-        vendor: 'USB-C OTG Hardware',
-        chipset: 'UAC2 Native Audio Sink',
-        maxSampleRate: '384kHz',
-        maxBitDepth: '32-bit',
-        clockArchitecture: 'Async USB Isochronous',
-        latencyMs: 3.9,
-        defaultHardwareVol: 82,
-        interfaceType: 'Direct USB Host',
-        isConnected: true,
-      };
-      setAvailableDacs((prev) => [newEndpoint, ...prev]);
-      setActiveDacId(customId);
+    const updatedDacs = await probeConnectedAudioHardware(availableDacs);
+    setAvailableDacs(updatedDacs);
+    if (updatedDacs.length > availableDacs.length) {
+      const newest = updatedDacs[0];
+      setActiveDacId(newest.id);
       setActiveEndpointType('usb-dac');
-      showToast(`Detected Hardware Endpoint: ${newEndpoint.modelName}`);
+      showToast(
+        `Detected Hardware DAC: ${newest.modelName} [${newest.usbVidPid || 'UAC 2.0'}]`
+      );
     } else {
       showToast(
-        `Verified USB-C OTG Sink: ${activeDac.modelName} (${activeDac.maxBitDepth}/${activeDac.maxSampleRate})`
+        `USB-C OTG Bus Scanned • ${availableDacs.length} Universal DAC Endpoints Ready`
       );
     }
   };
 
-  const handleAddCustomDac = (modelName: string, specs: string) => {
-    const id = `custom-${Date.now()}`;
-    const [bitDepth, sampleRate] = specs.split('/');
-    const customDac: UsbDacEndpoint = {
-      id,
-      modelName: modelName.includes('DAC') ? modelName : `${modelName} USB DAC`,
-      vendor: 'Custom USB-C OTG',
-      chipset: 'UAC 2.0 Direct Bridge',
-      maxSampleRate: sampleRate || '384kHz',
-      maxBitDepth: bitDepth || '32-bit',
-      clockArchitecture: 'Async Dual-Crystal',
-      latencyMs: 3.6,
-      defaultHardwareVol: 80,
-      interfaceType: 'Direct USB Host',
-      isConnected: true,
-    };
+  // WebUSB Direct Hardware Descriptor Pairing for ANY physical USB DAC
+  const handlePairWebUsbDac = async () => {
+    const pairedDac = await requestWebUsbDacHardware();
+    if (pairedDac) {
+      setAvailableDacs((prev) => [
+        pairedDac,
+        ...prev.filter((d) => d.usbVidPid !== pairedDac.usbVidPid),
+      ]);
+      setActiveDacId(pairedDac.id);
+      setActiveEndpointType('usb-dac');
+      showToast(
+        `Paired Physical USB DAC: ${pairedDac.modelName} (${pairedDac.usbVidPid})`
+      );
+    } else {
+      showToast(
+        'WebUSB chooser closed or restricted in preview iframe — use "Recognize & Mount" below to test any DAC model'
+      );
+    }
+  };
+
+  const handleAddCustomDac = (modelName: string) => {
+    const customDac = parseAnyDacHardwareProfile(
+      modelName,
+      undefined,
+      undefined,
+      undefined,
+      'Android UsbManager + Dynamic UAC 2.0'
+    );
     setAvailableDacs((prev) => [customDac, ...prev]);
-    setActiveDacId(id);
+    setActiveDacId(customDac.id);
     setActiveEndpointType('usb-dac');
-    showToast(`Mounted USB DAC: ${customDac.modelName}`);
+    showToast(
+      `Recognized & Mounted: ${customDac.modelName} (${customDac.chipset} · ${customDac.maxBitDepth}/${customDac.maxSampleRate})`
+    );
   };
 
   // Simulate USB DAC Abrupt Unplug
   const handleSimulateUnplug = () => {
     setIsPlaying(false);
-    vibeAudioEngine.pause();
+    vibeAudioEngine.stopPlayback();
     setActiveOverlay('dac-disconnected');
   };
 
@@ -575,6 +605,9 @@ export default function App() {
   const handleUploadLocalAudio = (file: File) => {
     const newId = `local-${Date.now()}`;
     const cleanTitle = file.name.replace(/\.[^/.]+$/, '');
+    const objectUrl = URL.createObjectURL(file);
+    vibeAudioEngine.registerLocalFile(newId, objectUrl);
+
     const newTrack: Track = {
       id: newId,
       title: cleanTitle,
@@ -582,32 +615,39 @@ export default function App() {
       album: 'Imported Lossless Stem',
       bpm: 122,
       camelotKey: '8A',
+      musicalKey: 'A Minor',
       energy: 0.78,
+      energyBars: 4,
       danceability: 0.74,
-      energySegments: 4,
       formatBadge: 'FLAC 24/96',
       shortFormat: '24/96',
       sampleRate: '96kHz',
       bitDepth: '24-bit',
       bitrateKbps: 3028,
       fileSizeMb: Math.max(12, Math.round(file.size / (1024 * 1024))),
+      acoustId: `local-${Date.now()}`,
+      lufs: -9.4,
       durationSec: 215,
       durationLabel: '03:35',
       liked: true,
+      isHiRes: true,
       artworkUrl: '/assets/aistudio/Image_5_ac32a477.jpeg',
       vibeCategory: ['all', 'hires', 'recent'],
       crateId: 'crate-stash',
       moodLabel: 'Custom',
       moodEmoji: '🎧',
       tempoLabel: 'Allegro',
+      energyLabel: 'High',
+      danceLabel: 'Groove',
       waveform: INITIAL_TRACKS[0].waveform,
+      synthNotes: INITIAL_TRACKS[0].synthNotes,
       lyrics: INITIAL_TRACKS[0].lyrics,
     };
     setTracks((prev) => [newTrack, ...prev]);
     setActiveTrackId(newId);
     setCurrentTimeSec(0);
     setIsPlaying(true);
-    vibeAudioEngine.playLocalFile(file);
+    vibeAudioEngine.startPlayback(newTrack);
     showToast(`Playing imported audio: ${cleanTitle}`);
   };
 
@@ -992,6 +1032,7 @@ export default function App() {
                         badgeColor: 'primary',
                         icon: 'folder_special',
                         iconBg: 'bg-primary-container/15 text-primary',
+                        trackIds: tracks.map((t) => t.id),
                       },
                     ]);
                   }}
@@ -1035,6 +1076,7 @@ export default function App() {
                         badgeColor: 'secondary',
                         icon: 'soup_kitchen',
                         iconBg: 'bg-secondary-container/20 text-secondary',
+                        trackIds: cookedMixtape.scoredTracks.map((s) => s.track.id),
                       },
                       ...prev,
                     ]);
@@ -1084,7 +1126,12 @@ export default function App() {
                     const found = EQ_PRESETS.find((p) => p.id === presetId);
                     if (found) {
                       setActivePresetId(found.id);
-                      setEqBands(found.bands.map((b) => ({ ...b })));
+                      setEqBands((prev) =>
+                        prev.map((b, i) => ({
+                          ...b,
+                          gainDb: found.gains[i] ?? 0,
+                        }))
+                      );
                     }
                   }}
                   onSelectBand={setSelectedBandIndex}
@@ -1096,8 +1143,9 @@ export default function App() {
                   onCycleBandFilter={(idx) => {
                     const order: EqBand['filterType'][] = [
                       'Bell Peak',
-                      'Low Shelf',
-                      'High Shelf',
+                      'Low-Shelf',
+                      'High-Shelf',
+                      'Notch',
                     ];
                     setEqBands((prev) =>
                       prev.map((b, i) => {
@@ -1112,14 +1160,11 @@ export default function App() {
                     );
                   }}
                   onResetFlat={() => {
-                    const flatPreset = EQ_PRESETS.find(
-                      (p) => p.id === 'flat-reference'
+                    setActivePresetId('flat-reference');
+                    setEqBands((prev) =>
+                      prev.map((b) => ({ ...b, gainDb: 0 }))
                     );
-                    if (flatPreset) {
-                      setActivePresetId('flat-reference');
-                      setEqBands(flatPreset.bands.map((b) => ({ ...b })));
-                      showToast('Reset all 10 bands to 0.0 dB Flat Reference');
-                    }
+                    showToast('Reset all 10 bands to 0.0 dB Flat Reference');
                   }}
                   onApplyAiEqCurve={handleApplyAiEq}
                   onShowToast={showToast}
@@ -1363,6 +1408,7 @@ export default function App() {
                 }}
                 onAddCustomDac={handleAddCustomDac}
                 onProbeHardware={handleProbeHardware}
+                onPairWebUsbDac={handlePairWebUsbDac}
                 onSelectEndpointType={(type) => {
                   setActiveEndpointType(type);
                   showToast(
@@ -1511,7 +1557,7 @@ export default function App() {
                   setDuplicateGroups((prev) =>
                     prev.map((g) => ({ ...g, resolved: true }))
                   );
-                  showToast('All duplicate groups purged • 50.8 MB reclaimed!');
+                  showToast('All duplicate groups purged • 81.2 MB reclaimed!');
                 }}
                 onClose={() => setActiveOverlay(null)}
               />
