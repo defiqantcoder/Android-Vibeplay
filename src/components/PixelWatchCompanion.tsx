@@ -1,15 +1,18 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { CrateFolder, Track, UsbDacEndpoint } from '../data/vibeplayData';
 import { formatTime } from './OverlaysAndModals';
+import { watchHaptics, HapticType } from '../utils/haptics';
 
 /**
  * Pixel Watch 3 (44mm Edition) Companion Component
  * Optimized specifically for the Pixel Watch 3 44mm variation:
  * - 456×456px Circular Actua AMOLED Display (320 ppi, 2,000 nits, ultra-slim 1.4mm bezel)
- * - Physical Rotating Digital Crown Knob with scroll inertia and rotary volume/seeking
+ * - Tactile Multi-Sensory Haptic Responses (device vibration + synthesized mechanical detent tick + visual bezel ripple)
+ * - Interactive Wrist Crate & Music Collection Browser with Search (Voice dictation + Quick-filter tags + Text input)
+ * - Physical Rotating Digital Crown with smooth scroll inertia and rotary volume/seeking
  * - 5 Wear OS 5 Tiles:
  *   1. Circular Now Playing (radial SVG arc scrubber, center vinyl artwork, rotary crown volume)
- *   2. Wrist Crate & Music Collection Browser (explore crates, playlists, and all tracks on wrist)
+ *   2. Wrist Crate & Music Collection Browser + Search (explore crates, playlists, and all tracks on wrist)
  *   3. Biometric Heart-Rate & Cadence BPM Sync (live pulse graph + tempo auto-sync)
  *   4. Quick Vibe Cooker Voice & One-Touch Tiles (Pixel voice mic + vibe capsules)
  *   5. USB DAC & Dolby Atmos Remote Output Tile (remote hardware switch & Bit-Perfect toggle)
@@ -67,6 +70,17 @@ export const PixelWatchCompanion: React.FC<PixelWatchCompanionProps> = ({
   const [browserTab, setBrowserTab] = useState<'crates' | 'tracks'>('tracks');
   const [selectedCrateId, setSelectedCrateId] = useState<string | null>(null);
 
+  // Search state on the watch
+  const [watchSearchQuery, setWatchSearchQuery] = useState<string>('');
+  const [activeQuickFilter, setActiveQuickFilter] = useState<string | null>(null);
+  const [showSearchInput, setShowSearchInput] = useState<boolean>(false);
+  const [isVoiceSearching, setIsVoiceSearching] = useState<boolean>(false);
+
+  // Tactile Haptic Feedback State
+  const [bezelRipple, setBezelRipple] = useState<'crown' | 'tap' | 'cue' | null>(null);
+  const [hapticSoundEnabled, setHapticSoundEnabled] = useState<boolean>(true);
+  const rippleTimeoutRef = useRef<number | null>(null);
+
   // Biometrics simulation (Pixel Watch 3 Cardio & Heart Rate Sensor)
   const [simulatedHeartRate, setSimulatedHeartRate] = useState<number>(134);
   const [simulatedCadence, setSimulatedCadence] = useState<number>(168);
@@ -75,6 +89,18 @@ export const PixelWatchCompanion: React.FC<PixelWatchCompanionProps> = ({
   // Crown rotation visual angle
   const [crownAngle, setCrownAngle] = useState<number>(0);
   const [voiceListening, setVoiceListening] = useState<boolean>(false);
+
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  // Trigger tactile haptics + visual bezel ripple
+  const triggerHaptic = (type: HapticType = 'tap') => {
+    watchHaptics.trigger(type);
+    setBezelRipple(type === 'crown_tick' ? 'crown' : type === 'cue' ? 'cue' : 'tap');
+    if (rippleTimeoutRef.current) clearTimeout(rippleTimeoutRef.current);
+    rippleTimeoutRef.current = window.setTimeout(() => {
+      setBezelRipple(null);
+    }, 280);
+  };
 
   // Heart-rate subtle oscillation
   useEffect(() => {
@@ -93,41 +119,113 @@ export const PixelWatchCompanion: React.FC<PixelWatchCompanionProps> = ({
     1,
     Math.max(0, currentTimeSec / Math.max(1, track.durationSec))
   );
-  const progressDegrees = progressFraction * 360;
 
   // Arc stroke dash for r=216px (Circumference = 2 * PI * 216 ≈ 1357px)
   const radius = 216;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (progressFraction * circumference);
 
+  // Digital Crown Rotation Handler with Discrete Tactile Detent Clicks
   const rotateCrown = (delta: number) => {
     setCrownAngle((prev) => (prev + delta) % 360);
+    triggerHaptic('crown_tick');
+
     if (activeScreen === 'now-playing') {
       setWatchVolume((prev) => {
         const next = Math.min(100, Math.max(0, prev + (delta > 0 ? 4 : -4)));
         onShowToast(`Watch Crown: Volume ${next}%`);
         return next;
       });
+    } else if (activeScreen === 'crate-browser' && scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop += delta * 1.5;
     }
   };
 
   const isBitPerfect =
     activeEndpointType === 'usb-dac' && exclusiveUsbAccess && !dolbyAtmosEnabled;
 
-  const filteredCollectionTracks = tracks.filter((t) => {
-    if (selectedCrateId) return t.crateId === selectedCrateId;
-    return true;
-  });
+  // Filter tracks based on crate, search query, and quick filter chips
+  const filteredCollectionTracks = useMemo(() => {
+    return tracks.filter((t) => {
+      if (selectedCrateId && t.crateId !== selectedCrateId) return false;
+
+      // Quick filter chips
+      if (activeQuickFilter === 'hires' && !t.shortFormat.includes('FLAC') && !t.shortFormat.includes('24/')) {
+        return false;
+      }
+      if (activeQuickFilter === 'dsd' && !t.shortFormat.includes('DSD')) {
+        return false;
+      }
+      if (activeQuickFilter === 'fast' && t.bpm < 120) {
+        return false;
+      }
+      if (activeQuickFilter === 'chill' && t.energy > 0.6) {
+        return false;
+      }
+      if (activeQuickFilter === 'camelot' && !['8A', '8B', '9A', '9B'].includes(t.camelotKey)) {
+        return false;
+      }
+
+      // Search Query
+      if (watchSearchQuery.trim()) {
+        const q = watchSearchQuery.toLowerCase();
+        const match =
+          t.title.toLowerCase().includes(q) ||
+          t.artist.toLowerCase().includes(q) ||
+          t.album.toLowerCase().includes(q) ||
+          t.camelotKey.toLowerCase().includes(q) ||
+          t.formatBadge.toLowerCase().includes(q);
+        if (!match) return false;
+      }
+
+      return true;
+    });
+  }, [tracks, selectedCrateId, activeQuickFilter, watchSearchQuery]);
+
+  // Voice Search Handler
+  const handleVoiceSearch = () => {
+    setIsVoiceSearching(true);
+    triggerHaptic('tap');
+    onShowToast('Watch Mic: Listening for search query...');
+
+    // Simulate voice dictation capture on watch
+    setTimeout(() => {
+      setIsVoiceSearching(false);
+      const sampleQueries = ['Genesis', 'Max Cooper', 'DSD', 'Hyperion', 'FLAC', '92 BPM'];
+      const picked = sampleQueries[Math.floor(Math.random() * sampleQueries.length)];
+      setWatchSearchQuery(picked);
+      setBrowserTab('tracks');
+      triggerHaptic('cue');
+      onShowToast(`Voice Search: "${picked}"`);
+    }, 1200);
+  };
 
   return (
     <div className="flex flex-col items-center justify-center p-2 select-none">
-      {/* Hardware Chassis Badge */}
+      {/* Hardware Chassis Badge & Tactile Settings */}
       <div className="flex items-center gap-2 mb-2 px-3 py-1 rounded-full bg-[#16161a] border border-[#23232c] text-[11px] font-mono text-[#9ca3af]">
         <span className="w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_rgba(6,182,212,0.8)] animate-pulse"></span>
         <span className="text-white font-semibold">Pixel Watch 3 (44mm)</span>
         <span className="text-primary font-bold">456×456 AMOLED</span>
         <span>•</span>
-        <span className="text-tertiary">Actua Display</span>
+        <button
+          onClick={() => {
+            const next = !hapticSoundEnabled;
+            setHapticSoundEnabled(next);
+            watchHaptics.setSoundEnabled(next);
+            triggerHaptic('tap');
+            onShowToast(`Watch Haptic Sound: ${next ? 'ON' : 'Muted'}`);
+          }}
+          className={`flex items-center gap-1 hover:text-white transition-colors ${
+            hapticSoundEnabled ? 'text-tertiary' : 'text-[#6b7280]'
+          }`}
+          title="Toggle Synthesized Mechanical Detent Click Audio"
+        >
+          <span className="material-symbols-outlined text-[13px]">
+            {hapticSoundEnabled ? 'vibration' : 'notifications_off'}
+          </span>
+          <span>{hapticSoundEnabled ? 'Haptics + Audio' : 'Vibe Only'}</span>
+        </button>
       </div>
 
       {/* 44mm Watch Case Outer Frame */}
@@ -136,14 +234,25 @@ export const PixelWatchCompanion: React.FC<PixelWatchCompanionProps> = ({
         <div className="absolute -top-12 w-44 h-16 rounded-t-2xl bg-gradient-to-b from-[#1b1b22] to-[#141418] border-t border-x border-[#2c2c36]/60 shadow-lg"></div>
         <div className="absolute -bottom-12 w-44 h-16 rounded-b-2xl bg-gradient-to-t from-[#1b1b22] to-[#141418] border-b border-x border-[#2c2c36]/60 shadow-lg"></div>
 
-        {/* Physical Matte Aluminum Bezel (478px outer case) */}
-        <div className="relative w-[476px] h-[476px] rounded-full bg-gradient-to-tr from-[#16161b] via-[#23232c] to-[#111114] p-[10px] shadow-[0_20px_60px_rgba(0,0,0,0.9),0_0_0_2px_rgba(255,255,255,0.06)] flex items-center justify-center">
-          
-          {/* Rotating Digital Crown (Right side hardware affordance with 3D rotation) */}
+        {/* Physical Matte Aluminum Bezel (476px outer case) */}
+        <div
+          className={`relative w-[476px] h-[476px] rounded-full bg-gradient-to-tr from-[#16161b] via-[#23232c] to-[#111114] p-[10px] shadow-[0_20px_60px_rgba(0,0,0,0.9),0_0_0_2px_rgba(255,255,255,0.06)] flex items-center justify-center transition-all duration-200 ${
+            bezelRipple === 'crown'
+              ? 'ring-2 ring-primary/80 shadow-[0_0_24px_rgba(6,182,212,0.6)]'
+              : bezelRipple === 'cue'
+              ? 'ring-2 ring-tertiary/90 shadow-[0_0_28px_rgba(78,222,163,0.7)]'
+              : bezelRipple === 'tap'
+              ? 'ring-1 ring-white/40 shadow-[0_0_16px_rgba(255,255,255,0.3)]'
+              : ''
+          }`}
+        >
+          {/* Rotating Digital Crown (Right side hardware affordance with 3D rotation and tactile detents) */}
           <div
-            onClick={() => rotateCrown(30)}
-            title="Click to rotate Digital Crown (Volume & Scroll)"
-            className="absolute -right-3.5 top-1/2 -translate-y-1/2 w-6 h-16 rounded-r-lg bg-gradient-to-r from-[#202026] via-[#353542] to-[#18181f] border-r border-y border-[#4a4a58] shadow-[0_4px_12px_rgba(0,0,0,0.6)] cursor-pointer flex flex-col justify-around py-1.5 active:scale-95 group z-40"
+            onClick={() => rotateCrown(28)}
+            title="Click or scroll to rotate Digital Crown (Tactile Detent Feedback)"
+            className={`absolute -right-3.5 top-1/2 -translate-y-1/2 w-6 h-16 rounded-r-lg bg-gradient-to-r from-[#202026] via-[#353542] to-[#18181f] border-r border-y border-[#4a4a58] shadow-[0_4px_12px_rgba(0,0,0,0.6)] cursor-pointer flex flex-col justify-around py-1.5 active:scale-95 group z-40 transition-all ${
+              bezelRipple === 'crown' ? 'border-primary shadow-[0_0_14px_rgba(6,182,212,0.8)]' : ''
+            }`}
           >
             {[...Array(6)].map((_, i) => (
               <div
@@ -156,9 +265,10 @@ export const PixelWatchCompanion: React.FC<PixelWatchCompanionProps> = ({
             ))}
           </div>
 
-          {/* Physical Side Assistant / Recents Button (Top right side of bezel) */}
+          {/* Physical Side Assistant / Recents Button */}
           <button
             onClick={() => {
+              triggerHaptic('tap');
               setActiveScreen((prev) =>
                 prev === 'crate-browser' ? 'now-playing' : 'crate-browser'
               );
@@ -170,7 +280,18 @@ export const PixelWatchCompanion: React.FC<PixelWatchCompanionProps> = ({
 
           {/* 456x456 Circular AMOLED Display Surface */}
           <div className="relative w-[456px] h-[456px] rounded-full bg-black overflow-hidden flex flex-col items-center justify-between p-4 shadow-inner border border-white/5">
-            
+            {/* Visual Bezel Ripple Pulse Layer */}
+            {bezelRipple && (
+              <div
+                aria-hidden="true"
+                className={`absolute inset-0 rounded-full pointer-events-none transition-opacity duration-300 ${
+                  bezelRipple === 'cue'
+                    ? 'border-2 border-tertiary/60 shadow-[inset_0_0_24px_rgba(78,222,163,0.3)] animate-pulse'
+                    : 'border-2 border-primary/50 shadow-[inset_0_0_20px_rgba(6,182,212,0.25)]'
+                }`}
+              />
+            )}
+
             {/* Top Status Curved Header */}
             <div className="w-full flex items-center justify-between px-7 pt-2 z-20 text-[11px] font-mono text-[#9ca3af]">
               <span className="font-bold text-white tracking-wider">10:42</span>
@@ -198,7 +319,6 @@ export const PixelWatchCompanion: React.FC<PixelWatchCompanionProps> = ({
                   className="absolute inset-0 w-full h-full -rotate-90 pointer-events-none"
                   viewBox="0 0 456 456"
                 >
-                  {/* Outer track background */}
                   <circle
                     cx="228"
                     cy="228"
@@ -207,7 +327,6 @@ export const PixelWatchCompanion: React.FC<PixelWatchCompanionProps> = ({
                     stroke="#1e1e24"
                     strokeWidth="5"
                   />
-                  {/* Dynamic Arc Progress with Cyan Glow */}
                   <circle
                     cx="228"
                     cy="228"
@@ -239,7 +358,6 @@ export const PixelWatchCompanion: React.FC<PixelWatchCompanionProps> = ({
                       <div className="w-2.5 h-2.5 rounded-full bg-primary"></div>
                     </div>
                   </div>
-                  {/* Format telemetry badge */}
                   <span className="absolute -bottom-2 px-2 py-0.5 rounded-full bg-[#1e1e24]/90 border border-primary/40 text-[9px] font-mono text-primary font-bold shadow-md">
                     {track.shortFormat}
                   </span>
@@ -264,10 +382,13 @@ export const PixelWatchCompanion: React.FC<PixelWatchCompanionProps> = ({
                   </div>
                 </div>
 
-                {/* Transport Controls */}
+                {/* Transport Controls with Tactile Haptics */}
                 <div className="flex items-center justify-center gap-4 pt-1 pb-1">
                   <button
-                    onClick={onPrev}
+                    onClick={() => {
+                      triggerHaptic('tap');
+                      onPrev();
+                    }}
                     aria-label="Previous"
                     className="w-10 h-10 rounded-full bg-[#1e1e24] text-white flex items-center justify-center active:scale-90 hover:bg-[#2a2a35] transition-transform"
                   >
@@ -277,7 +398,10 @@ export const PixelWatchCompanion: React.FC<PixelWatchCompanionProps> = ({
                   </button>
 
                   <button
-                    onClick={onTogglePlay}
+                    onClick={() => {
+                      triggerHaptic('cue');
+                      onTogglePlay();
+                    }}
                     aria-label="Play or Pause"
                     className="w-14 h-14 rounded-full bg-primary text-[#0e0e10] flex items-center justify-center shadow-[0_0_20px_rgba(6,182,212,0.45)] active:scale-95 transition-transform"
                   >
@@ -290,7 +414,10 @@ export const PixelWatchCompanion: React.FC<PixelWatchCompanionProps> = ({
                   </button>
 
                   <button
-                    onClick={onNext}
+                    onClick={() => {
+                      triggerHaptic('tap');
+                      onNext();
+                    }}
                     aria-label="Next"
                     className="w-10 h-10 rounded-full bg-[#1e1e24] text-white flex items-center justify-center active:scale-90 hover:bg-[#2a2a35] transition-transform"
                   >
@@ -302,52 +429,118 @@ export const PixelWatchCompanion: React.FC<PixelWatchCompanionProps> = ({
               </div>
             )}
 
-            {/* SCREEN 2: Wrist Crate & Music Collection Browser (Optimized for Pixel Watch 3 44mm) */}
+            {/* SCREEN 2: Wrist Crate & Music Collection Browser + Wrist Search */}
             {activeScreen === 'crate-browser' && (
               <div className="relative w-full flex-1 flex flex-col justify-between py-1 z-10">
-                {/* Header Subtabs (Crates vs All Tracks) */}
-                <div className="flex items-center justify-center gap-1.5 mb-1 px-8">
-                  <button
-                    onClick={() => {
-                      setBrowserTab('tracks');
-                      setSelectedCrateId(null);
-                    }}
-                    className={`px-3 py-1 rounded-full text-[11px] font-mono transition-colors ${
-                      browserTab === 'tracks' && !selectedCrateId
-                        ? 'bg-primary text-[#0e0e10] font-bold shadow-sm'
-                        : 'bg-[#1e1e24] text-[#9ca3af]'
-                    }`}
-                  >
-                    Audio Stash ({tracks.length})
-                  </button>
-                  <button
-                    onClick={() => setBrowserTab('crates')}
-                    className={`px-3 py-1 rounded-full text-[11px] font-mono transition-colors ${
-                      browserTab === 'crates'
-                        ? 'bg-primary text-[#0e0e10] font-bold shadow-sm'
-                        : 'bg-[#1e1e24] text-[#9ca3af]'
-                    }`}
-                  >
-                    Crates ({crates.length})
-                  </button>
+                {/* Search Bar & Subtabs Cluster */}
+                <div className="flex flex-col gap-1.5 px-6 mb-1">
+                  {/* Top Search Controls Bar */}
+                  <div className="flex items-center gap-1.5">
+                    {/* Voice Dictation Search Button */}
+                    <button
+                      onClick={handleVoiceSearch}
+                      title="Dictate search query on wrist"
+                      className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 transition-all active:scale-90 ${
+                        isVoiceSearching
+                          ? 'bg-error text-white animate-pulse'
+                          : 'bg-primary/20 text-primary hover:bg-primary/30'
+                      }`}
+                    >
+                      <span className="material-symbols-outlined text-[15px]">
+                        mic
+                      </span>
+                    </button>
+
+                    {/* Circular Search Input Bar */}
+                    <div className="flex-1 h-7 rounded-full bg-[#181820] border border-[#2a2a35] flex items-center px-2 gap-1.5 text-xs">
+                      <span className="material-symbols-outlined text-[14px] text-[#9ca3af]">
+                        search
+                      </span>
+                      <input
+                        type="text"
+                        value={watchSearchQuery}
+                        onChange={(e) => {
+                          setWatchSearchQuery(e.target.value);
+                          setBrowserTab('tracks');
+                          triggerHaptic('tap');
+                        }}
+                        placeholder="Search collection..."
+                        className="flex-1 bg-transparent text-[11px] text-white focus:outline-none placeholder:text-[#9ca3af]/60"
+                      />
+                      {watchSearchQuery && (
+                        <button
+                          onClick={() => {
+                            setWatchSearchQuery('');
+                            triggerHaptic('tap');
+                          }}
+                          className="text-[#9ca3af] hover:text-white"
+                        >
+                          <span className="material-symbols-outlined text-[14px]">
+                            close
+                          </span>
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Mode Toggle Pills (Stash vs Crates) */}
+                    <button
+                      onClick={() => {
+                        triggerHaptic('tap');
+                        setBrowserTab((t) => (t === 'crates' ? 'tracks' : 'crates'));
+                        setSelectedCrateId(null);
+                      }}
+                      className="px-2 py-0.5 rounded-full bg-[#202028] text-[10px] font-mono text-primary font-bold shrink-0 hover:bg-[#282834]"
+                    >
+                      {browserTab === 'crates' ? 'Tracks' : 'Crates'}
+                    </button>
+                  </div>
+
+                  {/* Quick Filter Tags Strip (Designed for Circular Screen) */}
+                  <div className="flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5">
+                    {[
+                      { id: 'hires', label: '✨ Hi-Res' },
+                      { id: 'dsd', label: '🎧 DSD' },
+                      { id: 'fast', label: '⚡ >120 BPM' },
+                      { id: 'chill', label: '☕ Chill' },
+                      { id: 'camelot', label: '🎹 Camelot' },
+                    ].map((f) => (
+                      <button
+                        key={f.id}
+                        onClick={() => {
+                          triggerHaptic('tap');
+                          setActiveQuickFilter((prev) => (prev === f.id ? null : f.id));
+                          setBrowserTab('tracks');
+                        }}
+                        className={`px-2 py-0.5 rounded-full text-[9px] font-mono whitespace-nowrap transition-colors ${
+                          activeQuickFilter === f.id
+                            ? 'bg-primary text-[#0e0e10] font-bold shadow-[0_0_8px_rgba(6,182,212,0.4)]'
+                            : 'bg-[#181820] text-[#9ca3af] hover:text-white'
+                        }`}
+                      >
+                        {f.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
-                {/* Scrollable Container with Rotary Crown Support */}
+                {/* Scrollable Container with Rotary Crown & Haptic Response */}
                 <div
+                  ref={scrollContainerRef}
                   onWheel={(e) => {
                     rotateCrown(e.deltaY > 0 ? 20 : -20);
                   }}
-                  className="flex-1 overflow-y-auto no-scrollbar px-6 space-y-1.5 max-h-[290px]"
+                  className="flex-1 overflow-y-auto no-scrollbar px-6 space-y-1.5 max-h-[265px]"
                 >
                   {browserTab === 'crates' && !selectedCrateId && (
                     <div className="space-y-1.5">
                       <span className="text-[10px] font-mono uppercase text-primary block text-center">
-                        Active Crates &amp; Folders
+                        Active Crates &amp; Folders ({crates.length})
                       </span>
                       {crates.map((crate) => (
                         <div
                           key={crate.id}
                           onClick={() => {
+                            triggerHaptic('tap');
                             setSelectedCrateId(crate.id);
                             setBrowserTab('tracks');
                             onShowToast(`Wrist Filter: ${crate.name}`);
@@ -379,85 +572,95 @@ export const PixelWatchCompanion: React.FC<PixelWatchCompanionProps> = ({
 
                   {browserTab === 'tracks' && (
                     <div className="space-y-1.5">
-                      {selectedCrateId && (
-                        <div className="flex items-center justify-between px-1 mb-1">
+                      <div className="flex items-center justify-between px-1 mb-0.5 text-[10px] font-mono text-[#9ca3af]">
+                        <span>
+                          {selectedCrateId
+                            ? crates.find((c) => c.id === selectedCrateId)?.name
+                            : 'Audio Stash'}
+                          : <b className="text-white">{filteredCollectionTracks.length}</b> matches
+                        </span>
+                        {selectedCrateId && (
                           <button
-                            onClick={() => setSelectedCrateId(null)}
-                            className="text-[10px] font-mono text-primary flex items-center gap-0.5"
-                          >
-                            <span className="material-symbols-outlined text-[13px]">
-                              arrow_back
-                            </span>
-                            All Stash
-                          </button>
-                          <span className="text-[10px] font-mono text-[#9ca3af]">
-                            {filteredCollectionTracks.length} tracks
-                          </span>
-                        </div>
-                      )}
-
-                      {filteredCollectionTracks.map((t) => {
-                        const isCurrent = t.id === track.id;
-                        return (
-                          <div
-                            key={t.id}
                             onClick={() => {
-                              onSelectTrack(t);
-                              onShowToast(`Watch cued: ${t.title}`);
+                              triggerHaptic('tap');
+                              setSelectedCrateId(null);
                             }}
-                            className={`p-2 rounded-2xl flex items-center justify-between cursor-pointer active:scale-98 transition-all ${
-                              isCurrent
-                                ? 'bg-primary/20 border border-primary/60 shadow-[0_0_12px_rgba(6,182,212,0.3)]'
-                                : 'bg-[#181820] hover:bg-[#22222c] border border-[#2a2a35]'
-                            }`}
+                            className="text-primary hover:underline flex items-center gap-0.5"
                           >
-                            <div className="flex items-center gap-2 min-w-0 pr-1">
-                              <div className="w-8 h-8 rounded-xl overflow-hidden bg-black shrink-0 relative">
-                                <img
-                                  src={t.artworkUrl}
-                                  alt={t.title}
-                                  referrerPolicy="no-referrer"
-                                  className="w-full h-full object-cover"
-                                />
-                                {isCurrent && (
-                                  <div className="absolute inset-0 bg-primary/30 flex items-center justify-center">
-                                    <span className="material-symbols-outlined text-[14px] text-primary">
-                                      equalizer
-                                    </span>
-                                  </div>
-                                )}
-                              </div>
-                              <div className="min-w-0">
-                                <p
-                                  className={`font-label-md text-[11px] font-bold truncate ${
-                                    isCurrent ? 'text-primary' : 'text-white'
-                                  }`}
-                                >
-                                  {t.title}
-                                </p>
-                                <p className="font-telemetry-sm text-[#9ca3af] text-[9px] truncate">
-                                  {t.artist} • {t.bpm} BPM • {t.camelotKey}
-                                </p>
-                              </div>
-                            </div>
-                            <span
-                              className={`font-telemetry-sm text-[9px] px-1.5 py-0.5 rounded font-bold shrink-0 ${
-                                t.shortFormat.includes('DSD')
-                                  ? 'bg-secondary/20 text-secondary'
-                                  : 'bg-primary/15 text-primary'
+                            Clear
+                          </button>
+                        )}
+                      </div>
+
+                      {filteredCollectionTracks.length === 0 ? (
+                        <div className="text-center py-6 text-xs text-[#9ca3af]">
+                          No tracks matching search
+                        </div>
+                      ) : (
+                        filteredCollectionTracks.map((t) => {
+                          const isCurrent = t.id === track.id;
+                          return (
+                            <div
+                              key={t.id}
+                              onClick={() => {
+                                triggerHaptic('cue');
+                                onSelectTrack(t);
+                                onShowToast(`Watch cued: ${t.title}`);
+                              }}
+                              className={`p-2 rounded-2xl flex items-center justify-between cursor-pointer active:scale-98 transition-all ${
+                                isCurrent
+                                  ? 'bg-primary/20 border border-primary/60 shadow-[0_0_12px_rgba(6,182,212,0.3)]'
+                                  : 'bg-[#181820] hover:bg-[#22222c] border border-[#2a2a35]'
                               }`}
                             >
-                              {t.shortFormat}
-                            </span>
-                          </div>
-                        );
-                      })}
+                              <div className="flex items-center gap-2 min-w-0 pr-1">
+                                <div className="w-8 h-8 rounded-xl overflow-hidden bg-black shrink-0 relative">
+                                  <img
+                                    src={t.artworkUrl}
+                                    alt={t.title}
+                                    referrerPolicy="no-referrer"
+                                    className="w-full h-full object-cover"
+                                  />
+                                  {isCurrent && (
+                                    <div className="absolute inset-0 bg-primary/30 flex items-center justify-center">
+                                      <span className="material-symbols-outlined text-[14px] text-primary">
+                                        equalizer
+                                      </span>
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="min-w-0">
+                                  <p
+                                    className={`font-label-md text-[11px] font-bold truncate ${
+                                      isCurrent ? 'text-primary' : 'text-white'
+                                    }`}
+                                  >
+                                    {t.title}
+                                  </p>
+                                  <p className="font-telemetry-sm text-[#9ca3af] text-[9px] truncate">
+                                    {t.artist} • {t.bpm} BPM • {t.camelotKey}
+                                  </p>
+                                </div>
+                              </div>
+                              <span
+                                className={`font-telemetry-sm text-[9px] px-1.5 py-0.5 rounded font-bold shrink-0 ${
+                                  t.shortFormat.includes('DSD')
+                                    ? 'bg-secondary/20 text-secondary'
+                                    : 'bg-primary/15 text-primary'
+                                }`}
+                              >
+                                {t.shortFormat}
+                              </span>
+                            </div>
+                          );
+                        })
+                      )}
                     </div>
                   )}
                 </div>
 
                 <div className="text-center pt-0.5 text-[9px] font-mono text-[#9ca3af]">
-                  Rotate Crown to fast-scroll collection
+                  Rotate Crown to scroll with tactile detents
                 </div>
               </div>
             )}
@@ -505,9 +708,10 @@ export const PixelWatchCompanion: React.FC<PixelWatchCompanionProps> = ({
                   </svg>
                 </div>
 
-                {/* Sync Action Button */}
+                {/* Sync Action Button with Tactile Feedback */}
                 <button
                   onClick={() => {
+                    triggerHaptic('cue');
                     onSyncBiometricBpm(simulatedHeartRate);
                     onShowToast(`Steered Crate to Heart Rate: ${simulatedHeartRate} BPM`);
                   }}
@@ -533,12 +737,14 @@ export const PixelWatchCompanion: React.FC<PixelWatchCompanionProps> = ({
                   </h4>
                 </div>
 
-                {/* Giant Voice Mic Button */}
+                {/* Giant Voice Mic Button with Haptic Response */}
                 <button
                   onClick={() => {
+                    triggerHaptic('tap');
                     setVoiceListening(true);
                     setTimeout(() => {
                       setVoiceListening(false);
+                      triggerHaptic('cue');
                       onTriggerVoicePrompt('Late night downtempo with warm analog tape hiss, under 95 BPM');
                       onShowToast('Wrist AI: Cooking Late Night Downtempo');
                     }, 1400);
@@ -568,6 +774,7 @@ export const PixelWatchCompanion: React.FC<PixelWatchCompanionProps> = ({
                     <button
                       key={capsule.label}
                       onClick={() => {
+                        triggerHaptic('tap');
                         onTriggerVoicePrompt(capsule.prompt);
                         onShowToast(`Cooked: ${capsule.label}`);
                       }}
@@ -606,10 +813,13 @@ export const PixelWatchCompanion: React.FC<PixelWatchCompanionProps> = ({
                   </p>
                 </div>
 
-                {/* Interactive Watch Toggles */}
+                {/* Interactive Watch Toggles with Haptics */}
                 <div className="space-y-1.5 w-full">
                   <button
-                    onClick={onToggleBitPerfect}
+                    onClick={() => {
+                      triggerHaptic('tap');
+                      onToggleBitPerfect();
+                    }}
                     className={`w-full py-2 px-3 rounded-xl font-mono text-xs flex items-center justify-between transition-colors ${
                       isBitPerfect
                         ? 'bg-tertiary/20 text-tertiary border border-tertiary/50 font-bold'
@@ -621,7 +831,10 @@ export const PixelWatchCompanion: React.FC<PixelWatchCompanionProps> = ({
                   </button>
 
                   <button
-                    onClick={onToggleDolbyAtmos}
+                    onClick={() => {
+                      triggerHaptic('tap');
+                      onToggleDolbyAtmos();
+                    }}
                     className={`w-full py-2 px-3 rounded-xl font-mono text-xs flex items-center justify-between transition-colors ${
                       dolbyAtmosEnabled
                         ? 'bg-secondary/20 text-secondary border border-secondary/50 font-bold'
@@ -653,6 +866,7 @@ export const PixelWatchCompanion: React.FC<PixelWatchCompanionProps> = ({
                 <button
                   key={screenKey}
                   onClick={() => {
+                    triggerHaptic('tap');
                     setActiveScreen(screenKey);
                     onShowToast(`Watch Screen: ${title}`);
                   }}
