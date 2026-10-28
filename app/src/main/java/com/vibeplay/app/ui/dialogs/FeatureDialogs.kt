@@ -1,4 +1,4 @@
-package com.vibeplay.app.ui
+package com.vibeplay.app.ui.dialogs
 
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
@@ -8,12 +8,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Notes
-import androidx.compose.material.icons.automirrored.filled.QueueMusic
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -24,470 +21,18 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.vibeplay.app.ui.VibePlayViewModel
 import com.vibeplay.app.ui.theme.*
-import com.vibeplay.core.model.EndpointType
-import com.vibeplay.core.model.Track
-import com.vibeplay.core.model.UsbDacEndpoint
 import com.vibeplay.core.model.VibeSeedData
-import kotlin.math.cos
-import kotlin.math.sin
 
 // ==========================================
-// 1. NOW PLAYING OVERLAY
-// ==========================================
-@Composable
-fun NowPlayingOverlay(
-    viewModel: VibePlayViewModel,
-    modifier: Modifier = Modifier
-) {
-    val state by viewModel.uiState.collectAsState()
-    val track = state.currentTrack ?: return
-
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .background(BackgroundDark)
-            .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceBetween
-    ) {
-        // Top Bar
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(onClick = { viewModel.setNowPlayingVisible(false) }) {
-                Icon(Icons.Default.KeyboardArrowDown, contentDescription = "Close", tint = TextPrimary)
-            }
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("PLAYING FROM CRATE", color = TextMuted, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                Text(track.album, color = TextPrimary, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
-            }
-            Row {
-                IconButton(onClick = { viewModel.setTrackActionsVisible(true, track) }) {
-                    Icon(Icons.Default.MoreVert, contentDescription = "Actions", tint = TextPrimary)
-                }
-                IconButton(onClick = { viewModel.setLyricsVisible(true) }) {
-                    Icon(Icons.AutoMirrored.Filled.Notes, contentDescription = "Lyrics", tint = TealPrimary)
-                }
-            }
-        }
-
-        // Cover Art & Ambient Halo
-        Box(
-            modifier = Modifier
-                .size(280.dp)
-                .clip(RoundedCornerShape(24.dp))
-                .background(ContainerSurface)
-                .border(2.dp, TealPrimary.copy(alpha = 0.4f), RoundedCornerShape(24.dp)),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(Icons.Default.MusicNote, contentDescription = null, tint = TealPrimary, modifier = Modifier.size(96.dp))
-        }
-
-        // Title & Track Info
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(track.title, fontWeight = FontWeight.Bold, color = TextPrimary, fontSize = 20.sp, textAlign = TextAlign.Center)
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(track.artist, color = TextMuted, fontSize = 15.sp)
-            Spacer(modifier = Modifier.height(8.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Badge(
-                    containerColor = ContainerSurface,
-                    modifier = Modifier.clickable { viewModel.setDacModalVisible(true) }
-                ) {
-                    Text("${track.format} ${track.sampleRate}", color = TealPrimary, fontSize = 11.sp, modifier = Modifier.padding(4.dp))
-                }
-                Badge(containerColor = ContainerSurface) {
-                    Text("${track.bpm} BPM / ${track.key}", color = AmberSecondary, fontSize = 11.sp, modifier = Modifier.padding(4.dp))
-                }
-            }
-        }
-
-        // Waveform Scrubber
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(40.dp)
-                .padding(horizontal = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(3.dp),
-            verticalAlignment = Alignment.Bottom
-        ) {
-            val bars = track.waveforms.ifEmpty { List(24) { 0.5f } }
-            bars.forEachIndexed { i, amp ->
-                val progress = (state.positionMs.toFloat() / state.durationMs.coerceAtLeast(1L)).coerceIn(0f, 1f)
-                val barProgress = i.toFloat() / bars.size
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight(amp.coerceIn(0.1f, 1.0f))
-                        .clip(RoundedCornerShape(2.dp))
-                        .background(if (barProgress <= progress) TealPrimary else ContainerBorder)
-                        .clickable {
-                            val targetMs = (barProgress * state.durationMs).toLong()
-                            viewModel.seekTo(targetMs)
-                        }
-                )
-            }
-        }
-
-        // Transport Controls
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(onClick = { viewModel.playPreviousTrack() }) {
-                Icon(Icons.Default.SkipPrevious, contentDescription = "Prev", tint = TextPrimary, modifier = Modifier.size(36.dp))
-            }
-            Box(
-                modifier = Modifier
-                    .size(68.dp)
-                    .clip(CircleShape)
-                    .background(TealPrimary)
-                    .clickable { viewModel.togglePlayPause() },
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    if (state.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                    contentDescription = "Play/Pause",
-                    tint = Color.Black,
-                    modifier = Modifier.size(36.dp)
-                )
-            }
-            IconButton(onClick = { viewModel.playNextTrack() }) {
-                Icon(Icons.Default.SkipNext, contentDescription = "Next", tint = TextPrimary, modifier = Modifier.size(36.dp))
-            }
-        }
-    }
-}
-
-// ==========================================
-// 2. SYNCHRONIZED LYRICS OVERLAY
-// ==========================================
-@Composable
-fun SynchronizedLyricsOverlay(
-    viewModel: VibePlayViewModel,
-    modifier: Modifier = Modifier
-) {
-    val state by viewModel.uiState.collectAsState()
-    val track = state.currentTrack ?: return
-    val currentSec = state.positionMs / 1000.0
-
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .background(BackgroundDark)
-            .padding(24.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(onClick = { viewModel.setLyricsVisible(false) }) {
-                Icon(Icons.Default.Close, contentDescription = "Close", tint = TextPrimary)
-            }
-            Text("SYNCHRONIZED LYRICS", color = TealPrimary, fontWeight = FontWeight.Bold, fontSize = 13.sp)
-            Spacer(modifier = Modifier.width(48.dp))
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(18.dp)
-        ) {
-            itemsIndexed(track.lyrics) { index, line ->
-                val isActive = currentSec >= line.time && (index == track.lyrics.lastIndex || currentSec < track.lyrics[index + 1].time)
-                Text(
-                    text = line.text,
-                    fontWeight = if (isActive) FontWeight.Bold else FontWeight.Normal,
-                    fontSize = if (isActive) 22.sp else 16.sp,
-                    color = if (isActive) TealPrimary else TextMuted,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { viewModel.seekTo((line.time * 1000).toLong()) }
-                )
-            }
-        }
-    }
-}
-
-// ==========================================
-// 3. EAR SAFETY GUARD MODAL
-// ==========================================
-@Composable
-fun DacDisconnectedModal(
-    onDismiss: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.Hearing, contentDescription = null, tint = AmberSecondary)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("EAR-SAFETY GUARD ENGAGED", color = AmberSecondary, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-            }
-        },
-        text = {
-            Text(
-                "An external USB DAC endpoint was unplugged during playback. Audio was muted instantly to prevent sudden loud speaker blast.",
-                color = TextPrimary,
-                fontSize = 14.sp
-            )
-        },
-        confirmButton = {
-            Button(
-                onClick = onDismiss,
-                colors = ButtonDefaults.buttonColors(containerColor = AmberSecondary)
-            ) {
-                Text("Acknowledge & Resume", color = Color.Black, fontWeight = FontWeight.Bold)
-            }
-        },
-        containerColor = ContainerSurface,
-        modifier = modifier
-    )
-}
-
-// ==========================================
-// 4. DAC OUTPUT ROUTING MODAL (Stitch Ref: 769150ee)
-// ==========================================
-@Composable
-fun DacOutputModal(
-    viewModel: VibePlayViewModel,
-    modifier: Modifier = Modifier
-) {
-    val state by viewModel.uiState.collectAsState()
-
-    AlertDialog(
-        onDismissRequest = { viewModel.setDacModalVisible(false) },
-        title = {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.Usb, contentDescription = null, tint = TealPrimary)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("AUDIO ENDPOINT ROUTING", color = TealPrimary, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-            }
-        },
-        text = {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                Text(
-                    "Direct hardware routing bypasses Android AudioFlinger 48kHz SRC mixer for bit-perfect output.",
-                    color = TextMuted,
-                    fontSize = 12.sp
-                )
-
-                // Endpoints List
-                state.availableEndpoints.forEach { endpoint ->
-                    val isSelected = state.activeEndpoint.id == endpoint.id
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(if (isSelected) ContainerBorder else BackgroundDark)
-                            .border(1.dp, if (isSelected) TealPrimary else ContainerBorder, RoundedCornerShape(8.dp))
-                            .clickable { viewModel.selectEndpoint(endpoint) }
-                            .padding(10.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        RadioButton(
-                            selected = isSelected,
-                            onClick = { viewModel.selectEndpoint(endpoint) },
-                            colors = RadioButtonDefaults.colors(selectedColor = TealPrimary)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(endpoint.name, fontWeight = FontWeight.Bold, color = TextPrimary, fontSize = 13.sp)
-                            Text(endpoint.maxSampleRate, color = if (endpoint.dsdSupport) AmberSecondary else TextMuted, fontSize = 11.sp)
-                        }
-                        if (endpoint.type == EndpointType.USB_DAC) {
-                            Badge(containerColor = TealPrimary.copy(alpha = 0.2f)) {
-                                Text("DIRECT", color = TealPrimary, fontSize = 9.sp, fontWeight = FontWeight.Bold)
-                            }
-                        }
-                    }
-                }
-
-                HorizontalDivider(color = ContainerBorder)
-
-                // Bit-Perfect switch
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column {
-                        Text("Bit-Perfect Direct USB", fontWeight = FontWeight.SemiBold, color = TextPrimary, fontSize = 13.sp)
-                        Text("Zero SRC resampling", color = TextMuted, fontSize = 11.sp)
-                    }
-                    Switch(
-                        checked = state.bitPerfectDirect,
-                        onCheckedChange = { viewModel.setBitPerfect(it) },
-                        colors = SwitchDefaults.colors(checkedThumbColor = Color.Black, checkedTrackColor = TealPrimary)
-                    )
-                }
-
-                // Dolby Atmos spatializer switch (mutually exclusive)
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column {
-                        Text("Dolby Atmos Spatializer", fontWeight = FontWeight.SemiBold, color = TextPrimary, fontSize = 13.sp)
-                        Text("Disables bit-perfect mode", color = TextMuted, fontSize = 11.sp)
-                    }
-                    Switch(
-                        checked = state.dolbyAtmosEnabled,
-                        onCheckedChange = { viewModel.setDolbyAtmos(it) },
-                        colors = SwitchDefaults.colors(checkedThumbColor = Color.Black, checkedTrackColor = AmberSecondary)
-                    )
-                }
-            }
-        },
-        confirmButton = {
-            Button(
-                onClick = { viewModel.setDacModalVisible(false) },
-                colors = ButtonDefaults.buttonColors(containerColor = TealPrimary)
-            ) {
-                Text("Done", color = Color.Black, fontWeight = FontWeight.Bold)
-            }
-        },
-        containerColor = ContainerSurface,
-        modifier = modifier
-    )
-}
-
-// ==========================================
-// 5. TRACK ACTIONS & ACOUSTIC DETAILS (Stitch Ref: c2f0f68f)
-// ==========================================
-@Composable
-fun TrackActionsSheet(
-    viewModel: VibePlayViewModel,
-    modifier: Modifier = Modifier
-) {
-    val state by viewModel.uiState.collectAsState()
-    val track = state.selectedTrackForActions ?: state.currentTrack ?: return
-
-    AlertDialog(
-        onDismissRequest = { viewModel.setTrackActionsVisible(false) },
-        title = {
-            Column {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        modifier = Modifier
-                            .size(44.dp)
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(ContainerSurface)
-                            .border(1.dp, TealPrimary.copy(alpha = 0.5f), RoundedCornerShape(8.dp)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(Icons.Default.MusicNote, contentDescription = null, tint = TealPrimary)
-                    }
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(track.title, fontWeight = FontWeight.Bold, color = TextPrimary, fontSize = 15.sp, maxLines = 1)
-                        Text(track.artist, color = TextMuted, fontSize = 12.sp)
-                    }
-                }
-                Spacer(modifier = Modifier.height(10.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Badge(containerColor = BackgroundDark) {
-                        Text("${track.format} ${track.sampleRate} (${track.bitDepth})", color = TealPrimary, fontSize = 10.sp)
-                    }
-                    Badge(containerColor = BackgroundDark) {
-                        Text("${track.bpm} BPM • Key ${track.key}", color = AmberSecondary, fontSize = 10.sp)
-                    }
-                }
-            }
-        },
-        text = {
-            val context = androidx.compose.ui.platform.LocalContext.current
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                TrackActionRow(
-                    icon = Icons.AutoMirrored.Filled.QueueMusic,
-                    title = "Play Now in Lossless Direct",
-                    onClick = {
-                        viewModel.playTrack(track)
-                        viewModel.setTrackActionsVisible(false)
-                    }
-                )
-                TrackActionRow(
-                    icon = Icons.Default.AutoAwesome,
-                    title = "Cook Vibe from this Track",
-                    onClick = {
-                        viewModel.setTrackActionsVisible(false)
-                        viewModel.cookMixtape("Similar to ${track.title} at ${track.bpm} BPM in ${track.key}")
-                    }
-                )
-                TrackActionRow(
-                    icon = Icons.Default.CleaningServices,
-                    title = "Scan for Better Quality Master Rip",
-                    onClick = {
-                        viewModel.setTrackActionsVisible(false)
-                        viewModel.setDeduplicatorVisible(true)
-                    }
-                )
-                TrackActionRow(
-                    icon = Icons.Default.Share,
-                    title = "Share Lossless Audio Meta",
-                    onClick = {
-                        viewModel.setTrackActionsVisible(false)
-                        val shareIntent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
-                            type = "text/plain"
-                            putExtra(android.content.Intent.EXTRA_TEXT, "Now spinning ${track.title} by ${track.artist} (${track.sampleRate} ${track.bitDepth}) on VibePlay Lossless Studio")
-                        }
-                        context.startActivity(android.content.Intent.createChooser(shareIntent, "Share Track"))
-                    }
-                )
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = { viewModel.setTrackActionsVisible(false) }) {
-                Text("Close", color = TextMuted)
-            }
-        },
-        containerColor = ContainerSurface,
-        modifier = modifier
-    )
-}
-
-@Composable
-fun TrackActionRow(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    title: String,
-    onClick: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(8.dp))
-            .clickable { onClick() }
-            .padding(vertical = 10.dp, horizontal = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(icon, contentDescription = null, tint = TealPrimary, modifier = Modifier.size(20.dp))
-        Spacer(modifier = Modifier.width(12.dp))
-        Text(title, color = TextPrimary, fontSize = 13.sp, fontWeight = FontWeight.Medium)
-    }
-}
-
-// ==========================================
-// 6. ANDROID MATERIAL YOU WIDGETS (Stitch Ref: 25911bf2)
+// 1. ANDROID MATERIAL YOU WIDGETS (Stitch Ref: 25911bf2)
 // ==========================================
 @Composable
 fun WidgetsShowcaseModal(
@@ -588,7 +133,7 @@ fun WidgetPreviewCard(title: String, desc: String, onAdd: () -> Unit) {
 }
 
 // ==========================================
-// 7. FIRST-LAUNCH ONBOARDING (Stitch Ref: 5c1c2e9e)
+// 2. FIRST-LAUNCH ONBOARDING (Stitch Ref: 5c1c2e9e)
 // ==========================================
 @Composable
 fun WelcomeOnboardingModal(
@@ -656,7 +201,7 @@ fun WelcomeOnboardingModal(
 }
 
 @Composable
-fun OnboardingFeatureRow(icon: androidx.compose.ui.graphics.vector.ImageVector, title: String, desc: String) {
+fun OnboardingFeatureRow(icon: ImageVector, title: String, desc: String) {
     Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
         Box(
             modifier = Modifier
@@ -676,14 +221,13 @@ fun OnboardingFeatureRow(icon: androidx.compose.ui.graphics.vector.ImageVector, 
 }
 
 // ==========================================
-// 8. PIXEL ASSISTANT / VOICE VIBE SYNTHESIZER (Custom Crafted)
+// 3. PIXEL ASSISTANT / VOICE VIBE SYNTHESIZER
 // ==========================================
 @Composable
 fun PixelAssistantVoiceModal(
     viewModel: VibePlayViewModel,
     modifier: Modifier = Modifier
 ) {
-    val state by viewModel.uiState.collectAsState()
     var transcript by remember { mutableStateOf("“Play high-energy cardio tracks above 135 BPM with heavy bass”") }
 
     // Pulsing audio animation
@@ -815,7 +359,7 @@ fun PixelAssistantVoiceModal(
 }
 
 // ==========================================
-// 9. LOSSLESS DEDUPLICATOR (Stitch Ref)
+// 4. LOSSLESS DEDUPLICATOR (Stitch Ref)
 // ==========================================
 @Composable
 fun MusicDeduplicatorSheet(
@@ -899,7 +443,7 @@ fun MusicDeduplicatorSheet(
 }
 
 // ==========================================
-// 10. DRIVE MODE OVERLAY (Stitch Ref: d8447670)
+// 5. DRIVE MODE OVERLAY (Stitch Ref: d8447670)
 // ==========================================
 @Composable
 fun DriveModeOverlay(
