@@ -27,12 +27,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vibeplay.app.hardware.UsbDacHardwareManager
-import com.vibeplay.app.audio.UsbDacReceiver
 import com.vibeplay.app.audio.VibePlaybackService
 import com.vibeplay.app.ui.*
 import com.vibeplay.app.ui.theme.*
 import com.vibeplay.core.model.EndpointType
-import com.vibeplay.core.model.UsbDacEndpoint
 
 class MainActivity : ComponentActivity() {
 
@@ -62,8 +60,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private val usbDacReceiver = UsbDacReceiver()
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -80,27 +76,6 @@ class MainActivity : ComponentActivity() {
         // Start Foreground MediaSessionService
         val serviceIntent = Intent(this, VibePlaybackService::class.java)
         startService(serviceIntent)
-
-        // Setup USB DAC dynamic receivers
-        usbDacReceiver.onDacAttached = { device ->
-            handleDacAttached(device)
-        }
-        usbDacReceiver.onDacDetached = { device ->
-            viewModel.onUsbDacDetached()
-        }
-
-        val filter = IntentFilter().apply {
-            addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED)
-            addAction(UsbManager.ACTION_USB_DEVICE_DETACHED)
-            addAction(AudioManager.ACTION_AUDIO_BECOMING_NOISY)
-        }
-        registerReceiver(usbDacReceiver, filter)
-
-        // Check already connected USB devices on launch
-        val usbManager = getSystemService(Context.USB_SERVICE) as? UsbManager
-        usbManager?.deviceList?.values?.firstOrNull { UsbDacReceiver.isUsbAudioDevice(it) }?.let { device ->
-            handleDacAttached(device)
-        }
 
         setContent {
             val state by viewModel.uiState.collectAsState()
@@ -252,26 +227,10 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun handleDacAttached(device: UsbDevice) {
-        val dacName = device.productName ?: "USB Audiophile DAC"
-        val endpoint = UsbDacEndpoint(
-            id = "usb-${device.vendorId}-${device.productId}",
-            name = dacName,
-            type = EndpointType.USB_DAC,
-            maxSampleRate = "PCM 768kHz / 32-bit Direct",
-            dsdSupport = true,
-            vendorId = device.vendorId,
-            productId = device.productId,
-            isConnected = true
-        )
-        viewModel.onUsbDacAttached(endpoint)
-    }
-
     override fun onDestroy() {
         super.onDestroy()
         if (::hardwareManager.isInitialized) {
             hardwareManager.stopMonitoring()
         }
-        unregisterReceiver(usbDacReceiver)
     }
 }

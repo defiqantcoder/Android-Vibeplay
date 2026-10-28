@@ -33,7 +33,7 @@ import androidx.compose.ui.unit.sp
 import com.vibeplay.app.ui.theme.*
 import com.vibeplay.core.model.EndpointType
 import com.vibeplay.core.model.Track
-import com.vibeplay.core.model.UsbDacEndpoint
+import com.vibeplay.core.hardware.UniversalDacEndpoint
 import com.vibeplay.core.model.VibeSeedData
 import kotlin.math.cos
 import kotlin.math.sin
@@ -289,8 +289,8 @@ fun DacOutputModal(
                 )
 
                 // Endpoints List
-                state.availableEndpoints.forEach { endpoint ->
-                    val isSelected = state.activeEndpoint.id == endpoint.id
+                state.universalDacs.forEach { endpoint ->
+                    val isSelected = state.activeUniversalDac?.id == endpoint.id
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -308,10 +308,10 @@ fun DacOutputModal(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Column(modifier = Modifier.weight(1f)) {
-                            Text(endpoint.name, fontWeight = FontWeight.Bold, color = TextPrimary, fontSize = 13.sp)
-                            Text(endpoint.maxSampleRate, color = if (endpoint.dsdSupport) AmberSecondary else TextMuted, fontSize = 11.sp)
+                            Text(endpoint.modelName, fontWeight = FontWeight.Bold, color = TextPrimary, fontSize = 13.sp)
+                            Text(endpoint.maxSampleRate, color = if (endpoint.dsdCapability?.isNotEmpty() == true) AmberSecondary else TextMuted, fontSize = 11.sp)
                         }
-                        if (endpoint.type == EndpointType.USB_DAC) {
+                        if (true) {
                             Badge(containerColor = TealPrimary.copy(alpha = 0.2f)) {
                                 Text("DIRECT", color = TealPrimary, fontSize = 9.sp, fontWeight = FontWeight.Bold)
                             }
@@ -933,7 +933,7 @@ fun DriveModeOverlay(
             Spacer(modifier = Modifier.height(8.dp))
             Text(track.artist, color = TealPrimary, fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
             Spacer(modifier = Modifier.height(12.dp))
-            Text("${track.bpm} BPM • ${state.activeEndpoint.name}", color = TextMuted, fontSize = 14.sp)
+            Text("${track.bpm} BPM • ${state.activeUniversalDac?.modelName}", color = TextMuted, fontSize = 14.sp)
         }
 
         // Oversized Transport Buttons for driving safety
