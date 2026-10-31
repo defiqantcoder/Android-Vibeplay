@@ -64,15 +64,23 @@ class WearSyncManagerTest {
         val mockContext = mock(Context::class.java)
         val syncManager = WearSyncManager(mockContext)
 
-        // Initial state is the default one
+        val parseDataMapMethod: Method = WearSyncManager::class.java.getDeclaredMethod("parseDataMap", DataMap::class.java)
+        parseDataMapMethod.isAccessible = true
+
+        val initialDataMap = DataMap().apply {
+            putString(WearSyncProtocol.KEY_TRACK_ID, "initial-track")
+            putString(WearSyncProtocol.KEY_ARTIST, "Initial Artist")
+            putString(WearSyncProtocol.KEY_ALBUM, "Initial Album")
+            putLong(WearSyncProtocol.KEY_DURATION_MS, 180000L)
+        }
+        parseDataMapMethod.invoke(syncManager, initialDataMap)
+        val initialState = syncManager.playbackState.value
 
         val dataMap = DataMap().apply {
             putString(WearSyncProtocol.KEY_TITLE, "New Title Only")
             // Not setting anything else
         }
 
-        val parseDataMapMethod: Method = WearSyncManager::class.java.getDeclaredMethod("parseDataMap", DataMap::class.java)
-        parseDataMapMethod.isAccessible = true
         parseDataMapMethod.invoke(syncManager, dataMap)
 
         val state = syncManager.playbackState.value
@@ -81,10 +89,9 @@ class WearSyncManagerTest {
         assertEquals("New Title Only", state.title)
 
         // Kept existing values
-        val defaultState = WearPlaybackState()
-        assertEquals(defaultState.trackId, state.trackId)
-        assertEquals(defaultState.artist, state.artist)
-        assertEquals(defaultState.album, state.album)
-        assertEquals(defaultState.durationMs, state.durationMs)
+        assertEquals(initialState.trackId, state.trackId)
+        assertEquals(initialState.artist, state.artist)
+        assertEquals(initialState.album, state.album)
+        assertEquals(initialState.durationMs, state.durationMs)
     }
 }
