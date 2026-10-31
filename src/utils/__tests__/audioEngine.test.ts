@@ -141,6 +141,57 @@ describe('probeConnectedAudioHardware', () => {
     expect(result[1].id).toBe('ex-2');
   });
 
+  it('should keep MediaDevices results when WebUSB enumeration fails', async () => {
+    const mockGetDevices = vi.fn().mockRejectedValue(new Error('Permission denied'));
+    const mockEnumerateDevices = vi.fn().mockResolvedValue([
+      {
+        kind: 'audiooutput',
+        label: 'Speakers (Realtek Audio)',
+        deviceId: 'realtek-123'
+      }
+    ]);
+
+    Object.defineProperty(global, 'navigator', {
+      value: {
+        ...originalNavigator,
+        usb: { getDevices: mockGetDevices },
+        mediaDevices: { enumerateDevices: mockEnumerateDevices }
+      },
+      writable: true,
+      configurable: true
+    });
+
+    const result = await probeConnectedAudioHardware([]);
+
+    expect(result.some((model) => model.modelName === 'Speakers (Realtek Audio)')).toBe(true);
+  });
+
+  it('should keep WebUSB results when MediaDevices enumeration fails', async () => {
+    const mockGetDevices = vi.fn().mockResolvedValue([
+      {
+        vendorId: 0x2fc6,
+        productId: 0xf702,
+        productName: 'Hugo 2',
+        manufacturerName: 'Chord'
+      }
+    ]);
+    const mockEnumerateDevices = vi.fn().mockRejectedValue(new Error('Permission denied'));
+
+    Object.defineProperty(global, 'navigator', {
+      value: {
+        ...originalNavigator,
+        usb: { getDevices: mockGetDevices },
+        mediaDevices: { enumerateDevices: mockEnumerateDevices }
+      },
+      writable: true,
+      configurable: true
+    });
+
+    const result = await probeConnectedAudioHardware([]);
+
+    expect(result.some((model) => model.modelName === 'Hugo 2')).toBe(true);
+  });
+
   it('should gracefully handle errors when enumerating devices', async () => {
     const existingModels: UsbDacEndpoint[] = [{ id: '1', modelName: 'Test DAC' } as UsbDacEndpoint];
 
