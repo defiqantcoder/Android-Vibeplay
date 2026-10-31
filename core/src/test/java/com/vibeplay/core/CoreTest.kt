@@ -1,6 +1,6 @@
 package com.vibeplay.core
 
-import org.junit.Assert.assertEquals
+import org.junit.Assert
 import org.junit.Test
 
 class CoreTest {
@@ -48,11 +48,11 @@ class CoreTest {
         manager.addTrack("Track 2")
         manager.addTrack("Track 3")
 
-        assertEquals(0, manager.currentIndex)
+        Assert.assertEquals(0, manager.currentIndex)
         manager.nextTrack()
-        assertEquals(1, manager.currentIndex)
+        Assert.assertEquals(1, manager.currentIndex)
         manager.nextTrack()
-        assertEquals(2, manager.currentIndex)
+        Assert.assertEquals(2, manager.currentIndex)
     }
 
     @Test
@@ -62,11 +62,11 @@ class CoreTest {
         manager.addTrack("Track 1")
         manager.addTrack("Track 2")
 
-        assertEquals(0, manager.currentIndex)
+        Assert.assertEquals(0, manager.currentIndex)
         manager.nextTrack()
-        assertEquals(1, manager.currentIndex)
+        Assert.assertEquals(1, manager.currentIndex)
         manager.nextTrack()
-        assertEquals(0, manager.currentIndex) // should loop back to 0
+        Assert.assertEquals(0, manager.currentIndex) // should loop back to 0
     }
 
     @Test
@@ -76,8 +76,8 @@ class CoreTest {
         manager.addTrack("Track 1")
         manager.addTrack("Track 2")
 
-        assertEquals(0, manager.currentIndex)
+        Assert.assertEquals(0, manager.currentIndex)
         manager.nextTrack()
-        assertEquals(0, manager.currentIndex) // should stay on same track
+        Assert.assertEquals(0, manager.currentIndex) // should stay on same track
     }
 }
