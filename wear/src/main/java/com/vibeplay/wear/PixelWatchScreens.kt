@@ -32,7 +32,6 @@ import androidx.wear.compose.material.*
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import com.vibeplay.core.model.Track
-import com.vibeplay.core.model.VibeSeedData
 import kotlinx.coroutines.launch
 import kotlin.math.sin
 

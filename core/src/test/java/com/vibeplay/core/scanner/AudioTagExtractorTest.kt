@@ -59,13 +59,13 @@ class AudioTagExtractorTest {
             val streamInfo = ByteArray(34)
 
             // sampleRate=48000(0xBB80) 20 bits
-            // channels=2 (0x01) 3 bits
-            // bitDepth=16 (0x0F) 5 bits
+            // channels=1 (0x00) 3 bits
+            // bitDepth=24 (0x17) 5 bits
             // totalSamples = 0 (36 bits)
             streamInfo[10] = 0x0B
             streamInfo[11] = 0xB8.toByte()
-            streamInfo[12] = 0x02
-            streamInfo[13] = 0xF0.toByte()
+            streamInfo[12] = 0x01
+            streamInfo[13] = 0x70.toByte()
 
             raf.write(streamInfo)
 
@@ -119,8 +119,8 @@ class AudioTagExtractorTest {
         assertEquals("Electronic", result.genre)
         assertEquals(120, result.bpm)
         assertEquals(48000, result.sampleRateHz)
-        assertEquals(16, result.bitDepth)
-        assertEquals(2, result.channelCount)
+        assertEquals(24, result.bitDepth)
+        assertEquals(1, result.channelCount)
         assertEquals(-5.5, result.trackGainDb!!, 0.001)
         assertEquals(-4.0, result.albumGainDb!!, 0.001)
     }
