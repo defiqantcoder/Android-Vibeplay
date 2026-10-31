@@ -63,6 +63,22 @@ class VibeCookerEngineTest {
 
         assertTrue(scored[0].score > scored[1].score)
         assertTrue(scored[1].score > scored[2].score)
+
+        // Equal-BPM pair with different energy (loser first)
+        val lowEnergy = createTrack("e_low", bpm = 125, energy = 0.2, danceability = 0.8)
+        val targetEnergy = createTrack("e_target", bpm = 125, energy = 0.7, danceability = 0.8)
+        val scoredByEnergy = VibeCookerEngine.scoreAndRankTracks(listOf(lowEnergy, targetEnergy), rules)
+        assertEquals("e_target", scoredByEnergy[0].track.id)
+        assertEquals("e_low", scoredByEnergy[1].track.id)
+        assertTrue(scoredByEnergy[0].score > scoredByEnergy[1].score)
+
+        // Equal-energy pair with different BPM (loser first)
+        val farBpm = createTrack("bpm_far", bpm = 100, energy = 0.7, danceability = 0.8)
+        val targetBpm = createTrack("bpm_target", bpm = 125, energy = 0.7, danceability = 0.8)
+        val scoredByBpm = VibeCookerEngine.scoreAndRankTracks(listOf(farBpm, targetBpm), rules)
+        assertEquals("bpm_target", scoredByBpm[0].track.id)
+        assertEquals("bpm_far", scoredByBpm[1].track.id)
+        assertTrue(scoredByBpm[0].score > scoredByBpm[1].score)
     }
 
     @Test
@@ -122,7 +138,7 @@ class VibeCookerEngineTest {
 
         // The extremely fast track should have a BPM delta of 75, which means BPM score is 0
         assertEquals(75.0, scoredExtremelyFast.bpmDelta, 0.01)
+        assertEquals(0.64, scoredExtremelyFast.score, 0.0001)
         assertTrue(scoredPerfect.score > scoredExtremelyFast.score)
     }
-
 }
