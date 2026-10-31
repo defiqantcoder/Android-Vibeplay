@@ -476,8 +476,9 @@ fun DriveModeOverlay(
             Text(track.title, fontWeight = FontWeight.ExtraBold, color = TextPrimary, fontSize = 28.sp, textAlign = TextAlign.Center)
             Spacer(modifier = Modifier.height(8.dp))
             Text(track.artist, color = TealPrimary, fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
-            Spacer(modifier = Modifier.height(12.dp))
-            Text("${track.bpm} BPM • ${state.activeEndpoint.name}", color = TextMuted, fontSize = 14.sp)
+            val dacName = state.activeUniversalDac?.modelName
+            val outputInfo = if (dacName != null) "${track.bpm} BPM • $dacName" else "${track.bpm} BPM"
+            Text(outputInfo, color = TextMuted, fontSize = 14.sp)
         }
 
         // Oversized Transport Buttons for driving safety

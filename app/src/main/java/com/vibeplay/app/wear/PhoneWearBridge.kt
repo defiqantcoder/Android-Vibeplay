@@ -51,8 +51,8 @@ class PhoneWearBridge(private val context: Context) {
                     dataMap.putBoolean(WearSyncProtocol.KEY_IS_BIT_PERFECT, state.bitPerfectDirect)
                     dataMap.putDouble(WearSyncProtocol.KEY_BPM, (track?.bpm ?: 120).toDouble())
                     dataMap.putDouble(WearSyncProtocol.KEY_ENERGY, track?.energy ?: 0.7)
-                    dataMap.putBoolean(WearSyncProtocol.KEY_DAC_CONNECTED, state.activeEndpoint.isConnected)
-                    dataMap.putString(WearSyncProtocol.KEY_DAC_NAME, state.activeEndpoint.name)
+                    dataMap.putBoolean(WearSyncProtocol.KEY_DAC_CONNECTED, state.activeUniversalDac != null)
+                    dataMap.putString(WearSyncProtocol.KEY_DAC_NAME, state.activeUniversalDac?.modelName ?: "")
                     dataMap.putLong(WearSyncProtocol.KEY_TIMESTAMP, System.currentTimeMillis())
                 }
                 val putDataReq = putDataMapReq.asPutDataRequest().setUrgent()

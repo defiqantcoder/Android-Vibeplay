@@ -28,8 +28,8 @@ data class VibePlayUiState(
     val tracks: List<Track> = emptyList(),
     val crates: List<CrateFolder> = VibeSeedData.INITIAL_CRATES,
     val activeCrateId: String? = null,
-    val activeEndpoint: UsbDacEndpoint = VibeSeedData.INITIAL_USB_DAC_MODELS.first(),
-    val availableEndpoints: List<UsbDacEndpoint> = VibeSeedData.INITIAL_USB_DAC_MODELS,
+
+
     val universalDacs: List<UniversalDacEndpoint> = emptyList(),
     val activeUniversalDac: UniversalDacEndpoint? = null,
     val eqBands: List<EqBand> = VibeSeedData.INITIAL_EQ_BANDS,
@@ -278,11 +278,11 @@ class VibePlayViewModel(
         _uiState.value = _uiState.value.copy(forceDspOnDac = force)
     }
 
-    fun onUsbDacAttached(endpoint: UsbDacEndpoint) {
-        val updatedEndpoints = (_uiState.value.availableEndpoints.filter { it.id != endpoint.id } + endpoint)
+    fun onUsbDacAttached(endpoint: UniversalDacEndpoint) {
+        val updatedEndpoints = (_uiState.value.universalDacs.filter { it.id != endpoint.id } + endpoint)
         _uiState.value = _uiState.value.copy(
-            activeEndpoint = endpoint,
-            availableEndpoints = updatedEndpoints,
+            activeUniversalDac = endpoint,
+            universalDacs = updatedEndpoints,
             bitPerfectDirect = true,
             dolbyAtmosEnabled = false
         )
@@ -346,12 +346,12 @@ class VibePlayViewModel(
         _uiState.value = _uiState.value.copy(showOnboarding = visible)
     }
 
-    fun selectEndpoint(endpoint: UsbDacEndpoint) {
+    fun selectEndpoint(endpoint: UniversalDacEndpoint) {
         _uiState.value = _uiState.value.copy(
-            activeEndpoint = endpoint,
-            bitPerfectDirect = endpoint.type == EndpointType.USB_DAC
+            activeUniversalDac = endpoint,
+            bitPerfectDirect = true
         )
-        audioEngine?.setBitPerfectMode(endpoint.type == EndpointType.USB_DAC, _uiState.value.exclusiveUsbAccess)
+        audioEngine?.setBitPerfectMode(true, _uiState.value.exclusiveUsbAccess)
     }
 
     fun selectCrate(crateId: String?) {

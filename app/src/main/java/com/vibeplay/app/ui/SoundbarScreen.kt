@@ -109,7 +109,7 @@ private fun BitPerfectBanner(
             Spacer(modifier = Modifier.height(6.dp))
             Text(
                 if (isBypassed)
-                    "Audio is streaming directly to ${state.activeEndpoint.name} without SRC or software EQ coloration."
+                    "Audio is streaming directly to ${state.activeUniversalDac?.modelName ?: "Unknown DAC"} without SRC or software EQ coloration."
                 else
                     "Software RBJ Biquad filters are active while streaming to USB DAC.",
                 color = TextMuted,
