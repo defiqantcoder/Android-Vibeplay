@@ -1,0 +1,5 @@
+🧪 Add tests for WearSyncManager.parseDataMap
+
+* 🎯 **What:** The untested `WearSyncManager.parseDataMap` method in `wear/src/main/java/com/vibeplay/wear/WearSyncManager.kt` was missing test coverage because it required mocking Google Play Services' DataMap and DataClient classes.
+* 📊 **Coverage:** Added test coverage for `WearSyncManager.parseDataMap` that verifies the playback state is correctly updated. Added `testParseDataMap` to cover all fields updated in `parseDataMap`, and `testParseDataMap_partialUpdate_keepsExistingValues` to verify that existing fields are preserved if not provided in the `DataMap`.
+* ✨ **Result:** Increased test coverage for `WearSyncManager.parseDataMap` to ensure that it behaves as expected when parsing `DataMap` data and when partial data is provided. This prevents regressions and helps future refactoring.
