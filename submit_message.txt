@@ -1,0 +1,10 @@
+🧪 [testing improvement] Unit tests for LocalMusicScanner
+
+🎯 **What:** The `LocalMusicScanner.parseFlacFile` method previously lacked tests. It's a custom pure Kotlin binary parser that extracts metadata and tags without native ExoPlayer or libFLAC dependencies.
+
+📊 **Coverage:** The added tests cover:
+- Invalid scenarios (missing file, too small, invalid magic header).
+- Valid scenarios with a dynamically constructed mock FLAC byte array (testing STREAMINFO parsing logic, tags, duration MS calculations, sample rates, etc).
+- As a side-effect, unrelated Lint errors in the app were resolved by adding the `MODIFY_AUDIO_SETTINGS` permission in the Manifest.
+
+✨ **Result:** Test coverage for `LocalMusicScanner` provides a reliable safety net for future regressions and refactors involving custom metadata parsing.
