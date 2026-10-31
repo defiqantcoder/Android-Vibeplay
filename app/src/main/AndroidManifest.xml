@@ -14,7 +14,8 @@
 
     <application
         android:name=".VibePlayApplication"
-        android:allowBackup="true"
+        android:allowBackup="false"
+        android:dataExtractionRules="@xml/data_extraction_rules"
         android:label="VibePlay"
         android:supportsRtl="true"
         android:theme="@android:style/Theme.Material.NoActionBar">
