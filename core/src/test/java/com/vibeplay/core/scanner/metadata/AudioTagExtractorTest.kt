@@ -76,7 +76,7 @@ class AudioTagExtractorTest {
         createFlacFile(
             file = flacFile,
             sampleRate = 48000,
-            channels = 2,
+            channels = 1,
             bitDepth = 24,
             tags = mapOf(
                 "TITLE" to "Test Title",
@@ -104,7 +104,7 @@ class AudioTagExtractorTest {
         assertEquals(-4.5, metadata.albumGainDb)
         assertEquals(48000, metadata.sampleRateHz)
         assertEquals(24, metadata.bitDepth)
-        assertEquals(2, metadata.channelCount)
+        assertEquals(1, metadata.channelCount)
     }
 
     @Test
@@ -201,9 +201,14 @@ class AudioTagExtractorTest {
         out.write("fLaC".toByteArray(StandardCharsets.ISO_8859_1))
 
         out.write(0)
-        val streamInfoLen = 18
+        val streamInfoLen = 34
         out.write(byteArrayOf(0, 0, streamInfoLen.toByte()))
         val streamInfo = ByteArray(streamInfoLen)
+        val blockSize = 4096
+        streamInfo[0] = (blockSize ushr 8).toByte()
+        streamInfo[1] = blockSize.toByte()
+        streamInfo[2] = (blockSize ushr 8).toByte()
+        streamInfo[3] = blockSize.toByte()
 
         val sr20 = sampleRate and 0xFFFFF
         val ch3 = (channels - 1) and 0x07
