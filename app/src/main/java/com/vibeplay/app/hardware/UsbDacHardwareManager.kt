@@ -70,6 +70,7 @@ class UsbDacHardwareManager(
             } == true
 
             if (wasActiveUnplugged && currentActive != null) {
+                _activeDac.value = null
                 // Trigger Ear-Safety Auto-Pause Guard immediately upon physical USB unplug
                 onDacUnpluggedSafetyPause(currentActive)
             }
@@ -84,8 +85,15 @@ class UsbDacHardwareManager(
     private val usbReceiver = object : BroadcastReceiver() {
         override fun onReceive(ctx: Context?, intent: Intent?) {
             when (intent?.action) {
-                UsbManager.ACTION_USB_DEVICE_ATTACHED,
-                UsbManager.ACTION_USB_DEVICE_DETACHED -> scanAllConnectedAudioHardware()
+                UsbManager.ACTION_USB_DEVICE_ATTACHED -> scanAllConnectedAudioHardware()
+                UsbManager.ACTION_USB_DEVICE_DETACHED -> {
+                    val currentActive = _activeDac.value
+                    if (currentActive != null) {
+                        _activeDac.value = null
+                        onDacUnpluggedSafetyPause(currentActive)
+                    }
+                    scanAllConnectedAudioHardware()
+                }
             }
         }
     }
