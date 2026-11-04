@@ -1,0 +1,3 @@
+- VibePlayViewModel is structured with a testDaoProvider which allows tests to inject custom persistence behavior avoiding full Room database initialization issues on test platforms.
+- `advanceUntilIdle()` must be properly orchestrated around suspend calls in Android UI tests using coroutines test dispatchers.
+- Use atomic `replaceTracks()` pattern using Transactions in Room DAO to properly clear absent items safely.

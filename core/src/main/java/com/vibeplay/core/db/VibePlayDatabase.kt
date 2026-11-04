@@ -70,6 +70,15 @@ interface VibePlayDao {
         danceMax: Double
     ): List<TrackEntity>
 
+    @Query("DELETE FROM tracks")
+    suspend fun clearTracks()
+
+    @Transaction
+    suspend fun replaceTracks(tracks: List<TrackEntity>) {
+        clearTracks()
+        insertTracks(tracks)
+    }
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTracks(tracks: List<TrackEntity>)
 
