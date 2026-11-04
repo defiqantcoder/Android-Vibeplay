@@ -3,7 +3,7 @@ package com.vibeplay.wear
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.focusable
+import androidx.compose.foundation.gestures.rememberScrollableState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -13,27 +13,37 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.input.rotary.onRotaryScrollEvent
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.wear.compose.foundation.ExperimentalWearFoundationApi
 import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
 import androidx.wear.compose.foundation.lazy.items
 import androidx.wear.compose.foundation.lazy.rememberScalingLazyListState
+import androidx.wear.compose.foundation.rotary.RotaryScrollableDefaults
+import androidx.wear.compose.foundation.rotary.rotaryScrollable
 import androidx.wear.compose.material.*
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
 import com.vibeplay.core.model.Track
 import kotlinx.coroutines.launch
 import kotlin.math.sin
+
+private tailrec fun Context.findActivity(): Activity? = when (this) {
+    is Activity -> this
+    is ContextWrapper -> baseContext.findActivity()
+    else -> null
+}
 
 val WearBackground = Color(0xFF121214)
 val WearPrimary = Color(0xFF06B6D4)
@@ -50,92 +60,105 @@ fun PixelWatchApp(
     val haptics = remember { WatchHapticsController(context) }
     val pagerState = rememberPagerState(pageCount = { 5 })
     val coroutineScope = rememberCoroutineScope()
+    val swipeToDismissState = rememberSwipeToDismissBoxState()
 
-    Scaffold(
-        timeText = { TimeText() },
-        pageIndicator = {
-            HorizontalPageIndicator(
-                pageIndicatorState = object : PageIndicatorState {
-                    override val pageCount: Int = 5
-                    override val pageOffset: Float = pagerState.currentPageOffsetFraction
-                    override val selectedPage: Int = pagerState.currentPage
+    // Standard Wear OS "swipe right to go back / exit" gesture.
+    SwipeToDismissBox(
+        state = swipeToDismissState,
+        onDismissed = { context.findActivity()?.finish() },
+        backgroundScrimColor = WearBackground
+    ) { isBackground ->
+        if (isBackground) {
+            Box(modifier = Modifier.fillMaxSize().background(WearBackground))
+        } else {
+            Scaffold(
+                timeText = { TimeText() },
+                pageIndicator = {
+                    HorizontalPageIndicator(
+                        pageIndicatorState = object : PageIndicatorState {
+                            override val pageCount: Int = 5
+                            override val pageOffset: Float = pagerState.currentPageOffsetFraction
+                            override val selectedPage: Int = pagerState.currentPage
+                        }
+                    )
                 }
-            )
-        }
-    ) {
-        HorizontalPager(
-            state = pagerState,
-            modifier = Modifier
-                .fillMaxSize()
-                .background(WearBackground)
-        ) { page ->
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
             ) {
-                when (page) {
-                    0 -> NowPlayingWatchScreen(
-                        state = playbackState,
-                        haptics = haptics,
-                        onVolumeChange = { syncManager.setVolume(it) },
-                        onTogglePlay = {
-                            syncManager.togglePlayPause()
-                            haptics.performClick()
-                        },
-                        onNextTrack = {
-                            syncManager.nextTrack()
-                            haptics.performClick()
-                        },
-                        onPrevTrack = {
-                            syncManager.prevTrack()
-                            haptics.performClick()
-                        },
-                        onNextScreen = {
-                            coroutineScope.launch {
-                                pagerState.animateScrollToPage((pagerState.currentPage + 1) % 5)
-                            }
-                            haptics.performClick()
+                HorizontalPager(
+                    state = pagerState,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(WearBackground)
+                ) { page ->
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        when (page) {
+                            0 -> NowPlayingWatchScreen(
+                                state = playbackState,
+                                haptics = haptics,
+                                onVolumeChange = { syncManager.setVolume(it) },
+                                onTogglePlay = {
+                                    syncManager.togglePlayPause()
+                                    haptics.performClick()
+                                },
+                                onNextTrack = {
+                                    syncManager.nextTrack()
+                                    haptics.performClick()
+                                },
+                                onPrevTrack = {
+                                    syncManager.prevTrack()
+                                    haptics.performClick()
+                                },
+                                onNextScreen = {
+                                    coroutineScope.launch {
+                                        pagerState.animateScrollToPage((pagerState.currentPage + 1) % 5)
+                                    }
+                                    haptics.performClick()
+                                }
+                            )
+                            1 -> WristCrateExplorerScreen(
+                                haptics = haptics,
+                                tracks = tracks,
+                                onSelectTrack = { trackId ->
+                                    syncManager.selectTrack(trackId)
+                                    coroutineScope.launch {
+                                        pagerState.animateScrollToPage(0)
+                                    }
+                                    haptics.performClick()
+                                }
+                            )
+                            2 -> BiometricBpmSyncScreen(
+                                haptics = haptics,
+                                onSyncBpm = { bpm ->
+                                    syncManager.syncBpm(bpm)
+                                }
+                            )
+                            3 -> QuickVibeVoiceScreen(
+                                haptics = haptics,
+                                onPromptSelected = { prompt ->
+                                    syncManager.triggerVibePrompt(prompt)
+                                    coroutineScope.launch {
+                                        pagerState.animateScrollToPage(0)
+                                    }
+                                }
+                            )
+                            4 -> DacRemoteWatchScreen(
+                                state = playbackState,
+                                haptics = haptics,
+                                onToggleBitPerfect = {
+                                    syncManager.toggleBitPerfect()
+                                }
+                            )
                         }
-                    )
-                    1 -> WristCrateExplorerScreen(
-                        haptics = haptics,
-                        tracks = tracks,
-                        onSelectTrack = { trackId ->
-                            syncManager.selectTrack(trackId)
-                            coroutineScope.launch {
-                                pagerState.animateScrollToPage(0)
-                            }
-                            haptics.performClick()
-                        }
-                    )
-                    2 -> BiometricBpmSyncScreen(
-                        haptics = haptics,
-                        onSyncBpm = { bpm ->
-                            syncManager.syncBpm(bpm)
-                        }
-                    )
-                    3 -> QuickVibeVoiceScreen(
-                        haptics = haptics,
-                        onPromptSelected = { prompt ->
-                            syncManager.triggerVibePrompt(prompt)
-                            coroutineScope.launch {
-                                pagerState.animateScrollToPage(0)
-                            }
-                        }
-                    )
-                    4 -> DacRemoteWatchScreen(
-                        state = playbackState,
-                        haptics = haptics,
-                        onToggleBitPerfect = {
-                            syncManager.toggleBitPerfect()
-                        }
-                    )
+                    }
                 }
             }
         }
     }
 }
 
+@OptIn(ExperimentalWearFoundationApi::class)
 @Composable
 fun NowPlayingWatchScreen(
     state: WearPlaybackState,
@@ -152,118 +175,139 @@ fun NowPlayingWatchScreen(
         focusRequester.requestFocus()
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(12.dp)
-            .focusRequester(focusRequester)
-            .focusable()
-            .onRotaryScrollEvent { event ->
-                // Rotate crown adjusts volume attenuation with haptic ticks
-                val delta = event.verticalScrollPixels / 1000f
-                val newVol = (state.volume + delta).coerceIn(0f, 1f)
-                if (newVol != state.volume) {
-                    onVolumeChange(newVol)
-                    haptics.performCrownTick()
-                }
-                true
-            },
-        contentAlignment = Alignment.Center
-    ) {
-        // Circular Radial Scrubber Arc showing Volume & Playback state
-        Canvas(modifier = Modifier.fillMaxSize()) {
-            val strokeWidth = 5.dp.toPx()
-            val radius = (size.minDimension - strokeWidth) / 2f
-            val center = Offset(size.width / 2f, size.height / 2f)
+    // Crown rotation is routed through a ScrollableState so the native Wear rotary
+    // behavior (fling, velocity, input-device handling) drives volume attenuation.
+    val currentVolume by rememberUpdatedState(state.volume)
+    val volumeScrollState = rememberScrollableState { delta ->
+        val newVol = (currentVolume + delta / 1000f).coerceIn(0f, 1f)
+        if (newVol != currentVolume) {
+            onVolumeChange(newVol)
+            haptics.performCrownTick()
+        }
+        delta
+    }
 
-            // Background arc (270 degrees)
-            drawArc(
-                color = WearSurface,
-                startAngle = 135f,
-                sweepAngle = 270f,
-                useCenter = false,
-                topLeft = Offset(center.x - radius, center.y - radius),
-                size = Size(radius * 2, radius * 2),
-                style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
-            )
+    val progress = if (state.durationMs > 0L) {
+        (state.positionMs.toFloat() / state.durationMs.toFloat()).coerceIn(0f, 1f)
+    } else 0f
 
-            // Active progress arc reflecting volume level
-            drawArc(
-                color = WearPrimary,
-                startAngle = 135f,
-                sweepAngle = 270f * state.volume,
-                useCenter = false,
-                topLeft = Offset(center.x - radius, center.y - radius),
-                size = Size(radius * 2, radius * 2),
-                style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        // Curved indicator hugging the display edge, tied to playback progress.
+        positionIndicator = {
+            PositionIndicator(
+                value = { progress },
+                color = WearSecondary,
+                modifier = Modifier
             )
         }
-
-        // Center Content & Transport Controls
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-            modifier = Modifier.padding(horizontal = 20.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(12.dp)
+                .rotaryScrollable(
+                    behavior = RotaryScrollableDefaults.behavior(scrollableState = volumeScrollState),
+                    focusRequester = focusRequester
+                ),
+            contentAlignment = Alignment.Center
         ) {
-            Text(state.title, fontWeight = FontWeight.Bold, fontSize = 11.sp, maxLines = 1, textAlign = TextAlign.Center)
-            Text(state.artist, color = WearSecondary, fontSize = 9.sp, maxLines = 1)
-            Spacer(modifier = Modifier.height(2.dp))
-            Text("Vol ${(state.volume * 100).toInt()}% • ${(state.sampleRate / 1000)}k", color = Color.Gray, fontSize = 8.sp)
-            Spacer(modifier = Modifier.height(4.dp))
+            // Circular Radial Scrubber Arc showing Volume & Playback state
+            Canvas(modifier = Modifier.fillMaxSize()) {
+                val strokeWidth = 5.dp.toPx()
+                val radius = (size.minDimension - strokeWidth) / 2f
+                val center = Offset(size.width / 2f, size.height / 2f)
 
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Button(
-                    onClick = onPrevTrack,
-                    colors = ButtonDefaults.buttonColors(backgroundColor = WearSurface),
-                    modifier = Modifier.size(30.dp)
-                ) {
-                    Icon(
-                        Icons.Default.SkipPrevious,
-                        contentDescription = "Previous",
-                        tint = Color.White,
-                        modifier = Modifier.size(16.dp)
-                    )
-                }
+                // Background arc (270 degrees)
+                drawArc(
+                    color = WearSurface,
+                    startAngle = 135f,
+                    sweepAngle = 270f,
+                    useCenter = false,
+                    topLeft = Offset(center.x - radius, center.y - radius),
+                    size = Size(radius * 2, radius * 2),
+                    style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
+                )
 
-                Button(
-                    onClick = onTogglePlay,
-                    colors = ButtonDefaults.buttonColors(backgroundColor = WearPrimary),
-                    modifier = Modifier.size(38.dp)
-                ) {
-                    Icon(
-                        if (state.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                        contentDescription = "Play/Pause",
-                        tint = Color.Black,
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-
-                Button(
-                    onClick = onNextTrack,
-                    colors = ButtonDefaults.buttonColors(backgroundColor = WearSurface),
-                    modifier = Modifier.size(30.dp)
-                ) {
-                    Icon(
-                        Icons.Default.SkipNext,
-                        contentDescription = "Next",
-                        tint = Color.White,
-                        modifier = Modifier.size(16.dp)
-                    )
-                }
+                // Active progress arc reflecting volume level
+                drawArc(
+                    color = WearPrimary,
+                    startAngle = 135f,
+                    sweepAngle = 270f * state.volume,
+                    useCenter = false,
+                    topLeft = Offset(center.x - radius, center.y - radius),
+                    size = Size(radius * 2, radius * 2),
+                    style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
+                )
             }
 
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                "${state.dacName.take(12)} • ${if (state.isBitPerfect) "Bit-Perfect" else "DSP Active"}",
-                color = WearPrimary,
-                fontSize = 8.sp,
-                fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.clickable { onNextScreen() }
-            )
+            // Center Content & Transport Controls
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+                modifier = Modifier.padding(horizontal = 20.dp)
+            ) {
+                Text(state.title, fontWeight = FontWeight.Bold, fontSize = 11.sp, maxLines = 1, textAlign = TextAlign.Center)
+                Text(state.artist, color = WearSecondary, fontSize = 9.sp, maxLines = 1)
+                Spacer(modifier = Modifier.height(2.dp))
+                Text("Vol ${(state.volume * 100).toInt()}% • ${(state.sampleRate / 1000)}k", color = Color.Gray, fontSize = 8.sp)
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Button(
+                        onClick = onPrevTrack,
+                        colors = ButtonDefaults.buttonColors(backgroundColor = WearSurface),
+                        modifier = Modifier.size(30.dp)
+                    ) {
+                        Icon(
+                            Icons.Default.SkipPrevious,
+                            contentDescription = "Previous",
+                            tint = Color.White,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+
+                    Button(
+                        onClick = onTogglePlay,
+                        colors = ButtonDefaults.buttonColors(backgroundColor = WearPrimary),
+                        modifier = Modifier.size(38.dp)
+                    ) {
+                        Icon(
+                            if (state.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                            contentDescription = "Play/Pause",
+                            tint = Color.Black,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+
+                    Button(
+                        onClick = onNextTrack,
+                        colors = ButtonDefaults.buttonColors(backgroundColor = WearSurface),
+                        modifier = Modifier.size(30.dp)
+                    ) {
+                        Icon(
+                            Icons.Default.SkipNext,
+                            contentDescription = "Next",
+                            tint = Color.White,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    "${state.dacName.take(12)} • ${if (state.isBitPerfect) "Bit-Perfect" else "DSP Active"}",
+                    color = WearPrimary,
+                    fontSize = 8.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.clickable { onNextScreen() }
+                )
+            }
         }
     }
 }
 
+@OptIn(ExperimentalWearFoundationApi::class)
 @Composable
 fun WristCrateExplorerScreen(
     haptics: WatchHapticsController,
@@ -281,13 +325,10 @@ fun WristCrateExplorerScreen(
         state = listState,
         modifier = Modifier
             .fillMaxSize()
-            .focusRequester(focusRequester)
-            .focusable()
-            .onRotaryScrollEvent { event ->
-                listState.dispatchRawDelta(event.verticalScrollPixels)
-                haptics.performCrownTick()
-                true
-            },
+            .rotaryScrollable(
+                behavior = RotaryScrollableDefaults.behavior(scrollableState = listState),
+                focusRequester = focusRequester
+            ),
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         item {
