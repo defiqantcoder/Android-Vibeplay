@@ -2,7 +2,9 @@ package com.vibeplay.app.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import android.net.Uri
 import com.vibeplay.app.audio.VibeAudioEngine
+import com.vibeplay.app.scanner.SafMusicScanner
 import com.vibeplay.core.db.VibePlayDatabase
 import com.vibeplay.core.engine.VibeCookerEngine
 import com.vibeplay.core.model.*
@@ -12,7 +14,9 @@ import com.vibeplay.app.wear.PhoneWearBridge
 import com.vibeplay.app.wear.PhoneWearBridgeEvents
 import com.vibeplay.core.hardware.UniversalDacEndpoint
 import com.vibeplay.core.wear.WearSyncProtocol
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -69,6 +73,7 @@ class VibePlayViewModel(
 
     private val _uiState = MutableStateFlow(VibePlayUiState())
     val uiState: StateFlow<VibePlayUiState> = _uiState.asStateFlow()
+    private var scanJob: Job? = null
 
     init {
         // Observe audioEngine playback state
@@ -121,29 +126,44 @@ class VibePlayViewModel(
             }
         }
 
-        // Trigger initial local lossless scan
+        // Restore the selected tree; retain the legacy path when no tree was chosen.
         context?.let { ctx ->
             val sharedPrefs = ctx.getSharedPreferences("vibeplay_prefs", android.content.Context.MODE_PRIVATE)
-            val libraryPath = sharedPrefs.getString("library_path", "/home/sinnoh/music-test") ?: "/home/sinnoh/music-test"
-            scanLocalMusicFolder(File(libraryPath))
+            val treeUri = sharedPrefs.getString("library_tree_uri", null)
+            if (treeUri != null) {
+                scanSelectedMusicFolder(treeUri)
+            } else {
+                val libraryPath = sharedPrefs.getString("library_path", "/home/sinnoh/music-test") ?: "/home/sinnoh/music-test"
+                scanLocalMusicFolder(File(libraryPath))
+            }
         } ?: run {
             scanLocalMusicFolder(File("/home/sinnoh/music-test"))
         }
     }
 
-    fun scanLocalMusicFolder(directory: File) {
-        viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isScanning = true)
-            val scannedTracks = withContext(Dispatchers.IO) {
-                if (directory.exists() && directory.isDirectory) {
-                    LocalMusicScanner.scanDirectory(directory)
-                } else {
-                    emptyList()
-                }
-            }
+    fun scanSelectedMusicFolder(treeUri: String) {
+        val resolver = context?.contentResolver ?: return
+        scanLibrary("selected folder", clearOnEmpty = true) { SafMusicScanner.scanTree(resolver, Uri.parse(treeUri)) }
+    }
 
-            if (scannedTracks.isNotEmpty()) {
-                val combinedTracks = scannedTracks
+    fun scanLocalMusicFolder(directory: File) {
+        scanLibrary(directory.name) {
+            if (directory.exists() && directory.isDirectory) LocalMusicScanner.scanDirectory(directory)
+            else emptyList()
+        }
+    }
+
+    private fun scanLibrary(source: String, clearOnEmpty: Boolean = false, scan: suspend () -> List<Track>) {
+        scanJob?.cancel()
+        scanJob = viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isScanning = true, scanSummary = "")
+            try {
+                val scannedTracks = withContext(Dispatchers.IO) { scan() }
+                if (scannedTracks.isEmpty() && !clearOnEmpty) {
+                    _uiState.value = _uiState.value.copy(isScanning = false)
+                    cookMixtape(_uiState.value.activeCookPrompt)
+                    return@launch
+                }
                 val losslessCrate = CrateFolder(
                     id = "crate-lossless-local",
                     name = "Local Lossless Master Vault",
@@ -151,20 +171,22 @@ class VibePlayViewModel(
                     energyArc = "Dynamic High-Res",
                     lastCooked = "Live Indexed"
                 )
-                val updatedCrates = listOf(losslessCrate) + VibeSeedData.INITIAL_CRATES
-
                 _uiState.value = _uiState.value.copy(
-                    tracks = combinedTracks,
-                    crates = updatedCrates,
+                    tracks = scannedTracks,
+                    crates = if (scannedTracks.isEmpty()) VibeSeedData.INITIAL_CRATES
+                        else listOf(losslessCrate) + VibeSeedData.INITIAL_CRATES,
                     isScanning = false,
-                    scanSummary = "Indexed ${scannedTracks.size} lossless FLAC tracks from ${directory.name}"
+                    scanSummary = "Indexed ${scannedTracks.size} lossless FLAC tracks from $source"
                 )
-            } else {
-                _uiState.value = _uiState.value.copy(isScanning = false)
+                cookMixtape(_uiState.value.activeCookPrompt)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: Exception) {
+                _uiState.value = _uiState.value.copy(
+                    isScanning = false,
+                    scanSummary = "Could not scan $source. Check folder access and try again."
+                )
             }
-
-            // Re-cook initial queue with updated library
-            cookMixtape(_uiState.value.activeCookPrompt)
         }
     }
 

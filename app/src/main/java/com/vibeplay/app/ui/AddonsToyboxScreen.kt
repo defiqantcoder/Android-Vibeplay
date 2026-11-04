@@ -135,7 +135,7 @@ fun SettingsScreen(
                     .padding(16.dp)
             ) {
                 Text(
-                    text = selectedLibraryUri ?: "MediaStore Fallback Active",
+                    text = selectedLibraryUri ?: "Using the configured library path",
                     color = TextPrimary,
                     fontSize = 14.sp
                 )
@@ -146,6 +146,17 @@ fun SettingsScreen(
                     modifier = Modifier.align(Alignment.End)
                 ) {
                     Text("Select Music Folder", color = Color.Black, fontWeight = FontWeight.Bold)
+                }
+                Button(
+                    onClick = { selectedLibraryUri?.let(viewModel::scanSelectedMusicFolder) },
+                    enabled = selectedLibraryUri != null && !state.isScanning,
+                    colors = ButtonDefaults.buttonColors(containerColor = TealPrimary),
+                    modifier = Modifier.align(Alignment.End)
+                ) {
+                    Text("Scan Music Folder", color = Color.Black, fontWeight = FontWeight.Bold)
+                }
+                if (state.isScanning || state.scanSummary.isNotEmpty()) {
+                    Text(if (state.isScanning) "Scanning..." else state.scanSummary, color = TextMuted, fontSize = 12.sp)
                 }
             }
         }
