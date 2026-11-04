@@ -218,3 +218,312 @@ describe('probeConnectedAudioHardware', () => {
     expect(result).toEqual(existingModels);
   });
 });
+
+describe('requestWebUsbDacHardware', () => {
+  let originalNavigator: any;
+
+  beforeEach(() => {
+    originalNavigator = global.navigator;
+  });
+
+  afterEach(() => {
+    Object.defineProperty(global, 'navigator', {
+      value: originalNavigator,
+      writable: true,
+      configurable: true
+    });
+    vi.restoreAllMocks();
+  });
+
+  it('should return null if navigator is undefined', async () => {
+    Object.defineProperty(global, 'navigator', {
+      value: undefined,
+      writable: true,
+      configurable: true
+    });
+
+    const { requestWebUsbDacHardware } = await import('../audioEngine');
+    const result = await requestWebUsbDacHardware();
+
+    expect(result).toBeNull();
+  });
+
+  it('should return null if navigator.usb is undefined', async () => {
+    Object.defineProperty(global, 'navigator', {
+      value: { ...originalNavigator, usb: undefined },
+      writable: true,
+      configurable: true
+    });
+
+    const { requestWebUsbDacHardware } = await import('../audioEngine');
+    const result = await requestWebUsbDacHardware();
+
+    expect(result).toBeNull();
+  });
+
+  it('should request a device with classCode 1 first, and return a parsed profile', async () => {
+    const mockRequestDevice = vi.fn().mockResolvedValue({
+      vendorId: 0x2fc6,
+      productId: 0xf702,
+      productName: 'Hugo 2',
+      manufacturerName: 'Chord'
+    });
+
+    Object.defineProperty(global, 'navigator', {
+      value: {
+        ...originalNavigator,
+        usb: { requestDevice: mockRequestDevice }
+      },
+      writable: true,
+      configurable: true
+    });
+
+    const { requestWebUsbDacHardware } = await import('../audioEngine');
+    const result = await requestWebUsbDacHardware();
+
+    expect(mockRequestDevice).toHaveBeenCalledWith({ filters: [{ classCode: 1 }] });
+    expect(result).toBeDefined();
+    expect(result!.modelName).toBe('Hugo 2');
+    expect(result!.vendor).toBe('Chord Electronics');
+    expect(result!.detectionSource).toBe('WebUSB Direct Pairing');
+    expect(result!.usbVidPid).toBe('2FC6:F702');
+  });
+
+  it('should fallback to empty filters if classCode 1 request fails', async () => {
+    const mockRequestDevice = vi.fn()
+      .mockRejectedValueOnce(new Error('No device found'))
+      .mockResolvedValueOnce({
+        vendorId: 0x2fc6,
+        productId: 0xf702,
+        productName: 'Hugo 2',
+        manufacturerName: 'Chord'
+      });
+
+    Object.defineProperty(global, 'navigator', {
+      value: {
+        ...originalNavigator,
+        usb: { requestDevice: mockRequestDevice }
+      },
+      writable: true,
+      configurable: true
+    });
+
+    const { requestWebUsbDacHardware } = await import('../audioEngine');
+    const result = await requestWebUsbDacHardware();
+
+    expect(mockRequestDevice).toHaveBeenCalledTimes(2);
+    expect(mockRequestDevice).toHaveBeenNthCalledWith(1, { filters: [{ classCode: 1 }] });
+    expect(mockRequestDevice).toHaveBeenNthCalledWith(2, { filters: [] });
+
+    expect(result).toBeDefined();
+    expect(result!.modelName).toBe('Hugo 2');
+  });
+
+  it('should return null if both requests fail', async () => {
+    const mockRequestDevice = vi.fn().mockRejectedValue(new Error('Cancelled'));
+
+    Object.defineProperty(global, 'navigator', {
+      value: {
+        ...originalNavigator,
+        usb: { requestDevice: mockRequestDevice }
+      },
+      writable: true,
+      configurable: true
+    });
+
+    const { requestWebUsbDacHardware } = await import('../audioEngine');
+    const result = await requestWebUsbDacHardware();
+
+    expect(mockRequestDevice).toHaveBeenCalledTimes(2);
+    expect(result).toBeNull();
+  });
+});
+
+describe('subscribeToHardwareHotplug', () => {
+  let originalNavigator: any;
+
+  beforeEach(() => {
+    originalNavigator = global.navigator;
+  });
+
+  afterEach(() => {
+    Object.defineProperty(global, 'navigator', {
+      value: originalNavigator,
+      writable: true,
+      configurable: true
+    });
+    vi.restoreAllMocks();
+  });
+
+  it('should return a no-op function if navigator is undefined', async () => {
+    Object.defineProperty(global, 'navigator', {
+      value: undefined,
+      writable: true,
+      configurable: true
+    });
+
+    const { subscribeToHardwareHotplug } = await import('../audioEngine');
+    const unsubscribe = subscribeToHardwareHotplug(() => {});
+
+    expect(typeof unsubscribe).toBe('function');
+    // Calling it should not throw
+    unsubscribe();
+  });
+
+  it('should add event listeners and return a function to remove them', async () => {
+    const mockMediaDevicesAdd = vi.fn();
+    const mockMediaDevicesRemove = vi.fn();
+    const mockUsbAdd = vi.fn();
+    const mockUsbRemove = vi.fn();
+
+    Object.defineProperty(global, 'navigator', {
+      value: {
+        ...originalNavigator,
+        mediaDevices: {
+          addEventListener: mockMediaDevicesAdd,
+          removeEventListener: mockMediaDevicesRemove
+        },
+        usb: {
+          addEventListener: mockUsbAdd,
+          removeEventListener: mockUsbRemove
+        }
+      },
+      writable: true,
+      configurable: true
+    });
+
+    const mockCallback = vi.fn();
+    const { subscribeToHardwareHotplug } = await import('../audioEngine');
+    const unsubscribe = subscribeToHardwareHotplug(mockCallback);
+
+    expect(mockMediaDevicesAdd).toHaveBeenCalledWith('devicechange', expect.any(Function));
+    expect(mockUsbAdd).toHaveBeenCalledWith('connect', expect.any(Function));
+    expect(mockUsbAdd).toHaveBeenCalledWith('disconnect', expect.any(Function));
+
+    // Simulate devicechange event
+    const handleDeviceChange = mockMediaDevicesAdd.mock.calls[0][1];
+    handleDeviceChange();
+    expect(mockCallback).toHaveBeenCalledTimes(1);
+
+    unsubscribe();
+
+    expect(mockMediaDevicesRemove).toHaveBeenCalledWith('devicechange', expect.any(Function));
+    expect(mockUsbRemove).toHaveBeenCalledWith('connect', expect.any(Function));
+    expect(mockUsbRemove).toHaveBeenCalledWith('disconnect', expect.any(Function));
+  });
+
+  it('should handle undefined event listeners safely', async () => {
+    Object.defineProperty(global, 'navigator', {
+      value: {
+        ...originalNavigator,
+        mediaDevices: {},
+        usb: {}
+      },
+      writable: true,
+      configurable: true
+    });
+
+    const mockCallback = vi.fn();
+    const { subscribeToHardwareHotplug } = await import('../audioEngine');
+    const unsubscribe = subscribeToHardwareHotplug(mockCallback);
+
+    expect(typeof unsubscribe).toBe('function');
+    unsubscribe(); // Should not throw
+  });
+});
+
+describe('probeConnectedAudioHardware (Extended Coverage)', () => {
+  let originalNavigator: any;
+
+  beforeEach(() => {
+    originalNavigator = global.navigator;
+  });
+
+  afterEach(() => {
+    Object.defineProperty(global, 'navigator', {
+      value: originalNavigator,
+      writable: true,
+      configurable: true
+    });
+    vi.restoreAllMocks();
+  });
+
+  it('should ignore default and communications devices in MediaDevices', async () => {
+    const mockGetDevices = vi.fn().mockResolvedValue([]);
+    const mockEnumerateDevices = vi.fn().mockResolvedValue([
+      { kind: 'audiooutput', label: 'Default', deviceId: 'default' },
+      { kind: 'audiooutput', label: 'Communications', deviceId: 'communications' },
+      { kind: 'audiooutput', label: 'Real Speakers', deviceId: 'real-123' },
+      { kind: 'audioinput', label: 'Mic', deviceId: 'mic-123' }, // Should ignore audioinput
+      { kind: 'audiooutput', label: '', deviceId: 'empty-label' } // Should ignore empty label
+    ]);
+
+    Object.defineProperty(global, 'navigator', {
+      value: {
+        ...originalNavigator,
+        usb: { getDevices: mockGetDevices },
+        mediaDevices: { enumerateDevices: mockEnumerateDevices }
+      },
+      writable: true,
+      configurable: true
+    });
+
+    const { probeConnectedAudioHardware } = await import('../audioEngine');
+    const result = await probeConnectedAudioHardware([]);
+
+    expect(result.length).toBe(1);
+    expect(result[0].modelName).toBe('Real Speakers');
+    expect(result[0].sinkId).toBe('real-123');
+  });
+
+  it('should correctly format default product names for WebUSB devices without product name', async () => {
+    const mockGetDevices = vi.fn().mockResolvedValue([
+      {
+        vendorId: 0x1234,
+        productId: 0x5678,
+        manufacturerName: 'Generic Audio'
+        // productName is missing
+      }
+    ]);
+    const mockEnumerateDevices = vi.fn().mockResolvedValue([]);
+
+    Object.defineProperty(global, 'navigator', {
+      value: {
+        ...originalNavigator,
+        usb: { getDevices: mockGetDevices },
+        mediaDevices: { enumerateDevices: mockEnumerateDevices }
+      },
+      writable: true,
+      configurable: true
+    });
+
+    const { probeConnectedAudioHardware } = await import('../audioEngine');
+    const result = await probeConnectedAudioHardware([]);
+
+    expect(result.length).toBe(1);
+    expect(result[0].modelName).toBe('USB Audio DAC (1234:5678)');
+    expect(result[0].usbVidPid).toBe('1234:5678');
+  });
+
+  it('should handle undefined usb in navigator gracefully', async () => {
+    const mockEnumerateDevices = vi.fn().mockResolvedValue([
+      { kind: 'audiooutput', label: 'Speakers', deviceId: 'real-123' }
+    ]);
+
+    Object.defineProperty(global, 'navigator', {
+      value: {
+        ...originalNavigator,
+        usb: undefined, // USB API not supported
+        mediaDevices: { enumerateDevices: mockEnumerateDevices }
+      },
+      writable: true,
+      configurable: true
+    });
+
+    const { probeConnectedAudioHardware } = await import('../audioEngine');
+    const result = await probeConnectedAudioHardware([]);
+
+    expect(result.length).toBe(1);
+    expect(result[0].modelName).toBe('Speakers');
+  });
+});
