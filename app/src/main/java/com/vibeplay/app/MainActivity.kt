@@ -32,11 +32,35 @@ import com.vibeplay.app.ui.*
 import com.vibeplay.app.ui.dialogs.*
 import com.vibeplay.app.ui.overlays.*
 import com.vibeplay.app.ui.theme.*
+import android.net.Uri
+import androidx.activity.result.contract.ActivityResultContracts
 import com.vibeplay.core.model.EndpointType
 
 class MainActivity : ComponentActivity() {
 
     private lateinit var hardwareManager: UsbDacHardwareManager
+
+    private val openDocumentTreeLauncher = registerForActivityResult(
+        ActivityResultContracts.OpenDocumentTree()
+    ) { uri: Uri? ->
+        if (uri != null) {
+            try {
+                contentResolver.takePersistableUriPermission(
+                    uri,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION
+                )
+            } catch (_: Exception) {}
+
+            val sharedPrefs = getSharedPreferences("vibeplay_prefs", Context.MODE_PRIVATE)
+            sharedPrefs.edit()
+                .putString("saf_tree_uri", uri.toString())
+                .apply()
+
+            uri.path?.let { path ->
+                viewModel.scanLocalMusicFolder(java.io.File(path))
+            }
+        }
+    }
 
     private val viewModel: VibePlayViewModel by viewModels {
         object : androidx.lifecycle.ViewModelProvider.Factory {
@@ -166,7 +190,10 @@ class MainActivity : ComponentActivity() {
                             1 -> VibeCookerScreen(viewModel = viewModel)
                             2 -> SoundbarScreen(viewModel = viewModel)
                             3 -> AddonsToyboxScreen(viewModel = viewModel)
-                            4 -> SettingsScreen(viewModel = viewModel)
+                            4 -> SettingsScreen(
+                                viewModel = viewModel,
+                                onLaunchSafPicker = { openDocumentTreeLauncher.launch(null) }
+                            )
                         }
 
                         // Full Screen Overlays & Modals
