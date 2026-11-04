@@ -112,6 +112,117 @@ class VibeCookerEngineTest {
     }
 
     @Test
+    fun `scoreAndRankTracks applies harmonic bonus for target key when anchor key is null`() {
+        // Arrange
+        val rules = VibeSqlBounds(
+            bpmMin = 120,
+            bpmMax = 130,
+            energyMin = 0.6,
+            energyMax = 0.8,
+            danceMin = 0.5,
+            danceMax = 1.0,
+            targetKey = "8A"
+        )
+
+        val harmonicMatchTrack = createTrack("t1", bpm = 125, energy = 0.7, danceability = 0.8, key = "8A")
+        val harmonicClashTrack = createTrack("t2", bpm = 125, energy = 0.7, danceability = 0.8, key = "3B")
+
+        val tracks = listOf(harmonicClashTrack, harmonicMatchTrack)
+
+        // Act
+        val scored = VibeCookerEngine.scoreAndRankTracks(tracks, rules, anchorKey = null)
+
+        // Assert
+        assertEquals(2, scored.size)
+        assertEquals("t1", scored[0].track.id)
+        assertEquals("t2", scored[1].track.id)
+        assertTrue(scored[0].score > scored[1].score)
+    }
+
+    @Test
+    fun `scoreAndRankTracks uses default harmonic score when neither anchor nor target key provided`() {
+        // Arrange
+        val rules = VibeSqlBounds(
+            bpmMin = 120,
+            bpmMax = 130,
+            energyMin = 0.6,
+            energyMax = 0.8,
+            danceMin = 0.5,
+            danceMax = 1.0,
+            targetKey = null
+        )
+
+        val track = createTrack("t1", bpm = 125, energy = 0.7, danceability = 0.8, key = "8A")
+        val tracks = listOf(track)
+
+        // Act
+        val scored = VibeCookerEngine.scoreAndRankTracks(tracks, rules, anchorKey = null)
+
+        // Assert
+        assertEquals(1, scored.size)
+        assertEquals("General Transition", scored[0].harmonicCompatibility)
+        // totalScore = (energyScore * 0.35) + (bpmScore * 0.30) + (danceScore * 0.15) + (harmonicScore * 0.20)
+        // energyDelta = 0, energyScore = 1.0 -> 0.35
+        // bpmDelta = 0, bpmScore = 1.0 -> 0.30
+        // danceScore = 1.0 -> 0.15
+        // harmonicScore = 0.7 -> 0.14
+        // totalScore = 0.35 + 0.30 + 0.15 + 0.14 = 0.94
+        assertEquals(0.94, scored[0].score, 0.001)
+    }
+
+    @Test
+    fun `scoreAndRankTracks calculates dance score correctly based on danceMin`() {
+        // Arrange
+        val rules = VibeSqlBounds(
+            bpmMin = 120,
+            bpmMax = 130, // Target BPM will be 125
+            energyMin = 0.6,
+            energyMax = 0.8, // Target Energy will be 0.7
+            danceMin = 0.7,
+            danceMax = 1.0,
+            targetKey = null
+        )
+
+        val highDanceTrack = createTrack("t1", bpm = 125, energy = 0.7, danceability = 0.8) // >= 0.7 -> score 1.0
+        val lowDanceTrack = createTrack("t2", bpm = 125, energy = 0.7, danceability = 0.6)  // < 0.7 -> score 0.5
+
+        val tracks = listOf(lowDanceTrack, highDanceTrack)
+
+        // Act
+        val scored = VibeCookerEngine.scoreAndRankTracks(tracks, rules)
+
+        // Assert
+        assertEquals(2, scored.size)
+        val scoredHigh = scored.find { it.track.id == "t1" }!!
+        val scoredLow = scored.find { it.track.id == "t2" }!!
+
+        assertTrue(scoredHigh.score > scoredLow.score)
+
+        // expected score difference is just the dance component difference (1.0 vs 0.5) * 0.15 weight = 0.075
+        assertEquals(0.075, scoredHigh.score - scoredLow.score, 0.001)
+    }
+
+    @Test
+    fun `scoreAndRankTracks returns empty list for empty track list`() {
+        // Arrange
+        val rules = VibeSqlBounds(
+            bpmMin = 120,
+            bpmMax = 130,
+            energyMin = 0.6,
+            energyMax = 0.8,
+            danceMin = 0.5,
+            danceMax = 1.0,
+            targetKey = null
+        )
+
+        // Act
+        val scored = VibeCookerEngine.scoreAndRankTracks(emptyList(), rules)
+
+        // Assert
+        assertEquals(0, scored.size)
+    }
+
+    @Test
     fun `scoreAndRankTracks handles BPM penalty and normalizes`() {
         // Arrange
         val rules = VibeSqlBounds(
