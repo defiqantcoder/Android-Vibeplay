@@ -2,13 +2,11 @@ package com.vibeplay.app
 
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
-import android.hardware.usb.UsbDevice
-import android.hardware.usb.UsbManager
-import android.media.AudioManager
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -32,8 +30,6 @@ import com.vibeplay.app.ui.*
 import com.vibeplay.app.ui.dialogs.*
 import com.vibeplay.app.ui.overlays.*
 import com.vibeplay.app.ui.theme.*
-import android.net.Uri
-import androidx.activity.result.contract.ActivityResultContracts
 import com.vibeplay.core.model.EndpointType
 
 class MainActivity : ComponentActivity() {
@@ -56,9 +52,7 @@ class MainActivity : ComponentActivity() {
                 .putString("saf_tree_uri", uri.toString())
                 .apply()
 
-            uri.path?.let { path ->
-                viewModel.scanLocalMusicFolder(java.io.File(path))
-            }
+            viewModel.scanSafDirectory(uri, this)
         }
     }
 

@@ -18,7 +18,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.File
+import android.content.ContentUris
+import android.content.Context
+import android.media.MediaMetadataRetriever
+import android.net.Uri
+import android.provider.MediaStore
+import androidx.documentfile.provider.DocumentFile
 
 data class VibePlayUiState(
     val currentTrack: Track? = null,
@@ -121,32 +126,103 @@ class VibePlayViewModel(
             }
         }
 
-        // Trigger initial local lossless scan
+        // Trigger initial audio library scan via SAF or MediaStore fallback
         context?.let { ctx ->
-            val sharedPrefs = ctx.getSharedPreferences("vibeplay_prefs", android.content.Context.MODE_PRIVATE)
-            val libraryPath = sharedPrefs.getString("library_path", "/home/sinnoh/music-test") ?: "/home/sinnoh/music-test"
-            scanLocalMusicFolder(File(libraryPath))
-        } ?: run {
-            scanLocalMusicFolder(File("/home/sinnoh/music-test"))
+            val sharedPrefs = ctx.getSharedPreferences("vibeplay_prefs", Context.MODE_PRIVATE)
+            val safUriString = sharedPrefs.getString("saf_tree_uri", null)
+            if (!safUriString.isNullOrEmpty()) {
+                scanSafDirectory(Uri.parse(safUriString), ctx)
+            } else {
+                scanMediaStoreAudio(ctx)
+            }
         }
     }
 
-    fun scanLocalMusicFolder(directory: File) {
+    fun scanSafDirectory(uri: Uri, context: Context) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isScanning = true)
             val scannedTracks = withContext(Dispatchers.IO) {
-                if (directory.exists() && directory.isDirectory) {
-                    LocalMusicScanner.scanDirectory(directory)
-                } else {
-                    emptyList()
+                val rootDoc = DocumentFile.fromTreeUri(context, uri) ?: return@withContext emptyList<Track>()
+                val audioFiles = mutableListOf<DocumentFile>()
+                collectAudioFiles(rootDoc, audioFiles)
+
+                val results = mutableListOf<Track>()
+                for ((index, docFile) in audioFiles.withIndex()) {
+                    try {
+                        val retriever = MediaMetadataRetriever()
+                        var title: String? = null
+                        var artist: String? = null
+                        var album: String? = null
+                        var durationMs: Long = 0L
+                        var sampleRateStr = "44.1 kHz"
+
+                        try {
+                            retriever.setDataSource(context, docFile.uri)
+                            title = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE)
+                            artist = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST)
+                            album = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM)
+                            durationMs = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLongOrNull() ?: 0L
+                            val sr = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_SAMPLERATE)?.toIntOrNull()
+                            if (sr != null && sr > 0) {
+                                sampleRateStr = String.format("%.1f kHz", sr / 1000.0)
+                            }
+                        } catch (_: Exception) {
+                        } finally {
+                            try { retriever.release() } catch (_: Exception) {}
+                        }
+
+                        val fileName = docFile.name ?: "Track"
+                        val finalTitle = if (!title.isNullOrBlank()) title else fileName.substringBeforeLast(".")
+                        val finalArtist = if (!artist.isNullOrBlank()) artist else "Unknown Artist"
+                        val finalAlbum = if (!album.isNullOrBlank()) album else "Unknown Album"
+                        val ext = fileName.substringAfterLast(".", "FLAC").uppercase()
+
+                        val minutes = (durationMs / 1000) / 60
+                        val seconds = (durationMs / 1000) % 60
+                        val durationStr = String.format("%d:%02d", minutes, seconds)
+
+                        val hash = kotlin.math.abs(fileName.hashCode())
+                        val bpm = 80 + (hash % 65)
+                        val keys = listOf("1A", "1B", "2A", "2B", "3A", "3B", "4A", "4B", "5A", "5B", "6A", "6B",
+                            "7A", "7B", "8A", "8B", "9A", "9B", "10A", "10B", "11A", "11B", "12A", "12B")
+                        val key = keys[hash % keys.size]
+                        val energy = ((bpm - 60).toDouble() / 100.0).coerceIn(0.2, 0.98)
+                        val danceability = (1.0 - kotlin.math.abs(bpm - 124) / 80.0).coerceIn(0.3, 0.95)
+                        val waveforms = (0 until 24).map { i ->
+                            val v = (kotlin.math.sin((hash + i * 17).toDouble()) + 1.0) / 2.0
+                            (0.15 + v * 0.85).toFloat().coerceIn(0.1f, 1.0f)
+                        }
+
+                        results.add(
+                            Track(
+                                id = "saf-track-$index",
+                                title = finalTitle,
+                                artist = finalArtist,
+                                album = finalAlbum,
+                                duration = durationStr,
+                                durationMs = durationMs,
+                                bpm = bpm,
+                                key = key,
+                                energy = energy,
+                                danceability = danceability,
+                                crateId = "crate-saf",
+                                format = ext,
+                                sampleRate = sampleRateStr,
+                                bitDepth = "24-bit",
+                                localUri = docFile.uri.toString(),
+                                waveforms = waveforms
+                            )
+                        )
+                    } catch (_: Exception) {}
                 }
+                results
             }
 
             if (scannedTracks.isNotEmpty()) {
-                val combinedTracks = scannedTracks
+                val folderName = DocumentFile.fromTreeUri(context, uri)?.name ?: "SAF Vault"
                 val losslessCrate = CrateFolder(
-                    id = "crate-lossless-local",
-                    name = "Local Lossless Master Vault",
+                    id = "crate-saf-local",
+                    name = "$folderName Vault",
                     trackCount = scannedTracks.size,
                     energyArc = "Dynamic High-Res",
                     lastCooked = "Live Indexed"
@@ -154,16 +230,147 @@ class VibePlayViewModel(
                 val updatedCrates = listOf(losslessCrate) + VibeSeedData.INITIAL_CRATES
 
                 _uiState.value = _uiState.value.copy(
-                    tracks = combinedTracks,
+                    tracks = scannedTracks,
                     crates = updatedCrates,
                     isScanning = false,
-                    scanSummary = "Indexed ${scannedTracks.size} lossless FLAC tracks from ${directory.name}"
+                    scanSummary = "Indexed ${scannedTracks.size} lossless audio tracks from $folderName"
                 )
+                cookMixtape(_uiState.value.activeCookPrompt)
             } else {
-                _uiState.value = _uiState.value.copy(isScanning = false)
+                scanMediaStoreAudio(context)
+            }
+        }
+    }
+
+    private fun collectAudioFiles(dir: DocumentFile, list: MutableList<DocumentFile>) {
+        val files = dir.listFiles()
+        for (file in files) {
+            if (file.isDirectory) {
+                collectAudioFiles(file, list)
+            } else if (file.isFile) {
+                val name = file.name ?: ""
+                val type = file.type
+                if (type?.startsWith("audio/") == true ||
+                    name.endsWith(".flac", ignoreCase = true) ||
+                    name.endsWith(".mp3", ignoreCase = true) ||
+                    name.endsWith(".wav", ignoreCase = true) ||
+                    name.endsWith(".m4a", ignoreCase = true) ||
+                    name.endsWith(".ogg", ignoreCase = true) ||
+                    name.endsWith(".aac", ignoreCase = true)
+                ) {
+                    list.add(file)
+                }
+            }
+        }
+    }
+
+    fun scanMediaStoreAudio(context: Context) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isScanning = true)
+            val scannedTracks = withContext(Dispatchers.IO) {
+                val results = mutableListOf<Track>()
+                val projection = arrayOf(
+                    MediaStore.Audio.Media._ID,
+                    MediaStore.Audio.Media.TITLE,
+                    MediaStore.Audio.Media.ARTIST,
+                    MediaStore.Audio.Media.ALBUM,
+                    MediaStore.Audio.Media.DURATION
+                )
+                val selection = "${MediaStore.Audio.Media.IS_MUSIC} != 0"
+                val sortOrder = "${MediaStore.Audio.Media.TITLE} ASC"
+
+                try {
+                    context.contentResolver.query(
+                        MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                        projection,
+                        selection,
+                        null,
+                        sortOrder
+                    )?.use { cursor ->
+                        val idCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID)
+                        val titleCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE)
+                        val artistCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST)
+                        val albumCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM)
+                        val durationCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION)
+
+                        var index = 0
+                        while (cursor.moveToNext()) {
+                            val id = cursor.getLong(idCol)
+                            val title = cursor.getString(titleCol) ?: "Unknown Track"
+                            val artist = cursor.getString(artistCol) ?: "Unknown Artist"
+                            val album = cursor.getString(albumCol) ?: "Unknown Album"
+                            val durationMs = cursor.getLong(durationCol)
+                            val contentUri = ContentUris.withAppendedId(
+                                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                                id
+                            )
+
+                            val minutes = (durationMs / 1000) / 60
+                            val seconds = (durationMs / 1000) % 60
+                            val durationStr = String.format("%d:%02d", minutes, seconds)
+
+                            val hash = kotlin.math.abs(title.hashCode())
+                            val bpm = 80 + (hash % 65)
+                            val keys = listOf("1A", "1B", "2A", "2B", "3A", "3B", "4A", "4B", "5A", "5B", "6A", "6B",
+                                "7A", "7B", "8A", "8B", "9A", "9B", "10A", "10B", "11A", "11B", "12A", "12B")
+                            val key = keys[hash % keys.size]
+                            val energy = ((bpm - 60).toDouble() / 100.0).coerceIn(0.2, 0.98)
+                            val danceability = (1.0 - kotlin.math.abs(bpm - 124) / 80.0).coerceIn(0.3, 0.95)
+                            val waveforms = (0 until 24).map { i ->
+                                val v = (kotlin.math.sin((hash + i * 17).toDouble()) + 1.0) / 2.0
+                                (0.15 + v * 0.85).toFloat().coerceIn(0.1f, 1.0f)
+                            }
+
+                            results.add(
+                                Track(
+                                    id = "mediastore-audio-$index",
+                                    title = title,
+                                    artist = artist,
+                                    album = album,
+                                    duration = durationStr,
+                                    durationMs = durationMs,
+                                    bpm = bpm,
+                                    key = key,
+                                    energy = energy,
+                                    danceability = danceability,
+                                    crateId = "crate-mediastore",
+                                    format = "AUDIO",
+                                    sampleRate = "48.0 kHz",
+                                    bitDepth = "24-bit",
+                                    localUri = contentUri.toString(),
+                                    waveforms = waveforms
+                                )
+                            )
+                            index++
+                        }
+                    }
+                } catch (_: Exception) {}
+                results
             }
 
-            // Re-cook initial queue with updated library
+            if (scannedTracks.isNotEmpty()) {
+                val mediaStoreCrate = CrateFolder(
+                    id = "crate-mediastore-local",
+                    name = "MediaStore Vault",
+                    trackCount = scannedTracks.size,
+                    energyArc = "Dynamic High-Res",
+                    lastCooked = "Live Indexed"
+                )
+                val updatedCrates = listOf(mediaStoreCrate) + VibeSeedData.INITIAL_CRATES
+
+                _uiState.value = _uiState.value.copy(
+                    tracks = scannedTracks,
+                    crates = updatedCrates,
+                    isScanning = false,
+                    scanSummary = "Indexed ${scannedTracks.size} audio tracks from MediaStore"
+                )
+            } else {
+                _uiState.value = _uiState.value.copy(
+                    isScanning = false,
+                    scanSummary = "MediaStore scan complete (0 tracks found, default crates active)"
+                )
+            }
+
             cookMixtape(_uiState.value.activeCookPrompt)
         }
     }
