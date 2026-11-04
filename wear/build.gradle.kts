@@ -9,7 +9,7 @@ android {
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.vibeplay.wear"
+        applicationId = "com.vibeplay.app"
         minSdk = 30
         targetSdk = 34
         versionCode = 1
