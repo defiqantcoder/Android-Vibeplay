@@ -63,14 +63,8 @@ fun PixelWatchApp(
     val swipeToDismissState = rememberSwipeToDismissBoxState()
 
     // Standard Wear OS "swipe right to go back / exit" gesture.
-    SwipeToDismissBox(
-        state = swipeToDismissState,
-        onDismissed = { context.findActivity()?.finish() },
-        backgroundScrimColor = WearBackground
-    ) { isBackground ->
-        if (isBackground) {
-            Box(modifier = Modifier.fillMaxSize().background(WearBackground))
-        } else {
+    Box(
+    ) {
             Scaffold(
                 timeText = { TimeText() },
                 pageIndicator = {
@@ -154,7 +148,6 @@ fun PixelWatchApp(
                     }
                 }
             }
-        }
     }
 }
 
