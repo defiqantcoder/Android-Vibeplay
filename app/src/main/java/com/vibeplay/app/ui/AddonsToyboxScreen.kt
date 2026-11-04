@@ -154,7 +154,7 @@ fun SettingsScreen(
                     .padding(16.dp)
             ) {
                 Text(
-                    text = safUri ?: "MediaStore Fallback Active",
+                    text = safUri ?: "No Folder Selected - Using MediaStore Fallback",
                     color = if (safUri != null) TextPrimary else TextMuted,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Medium,
