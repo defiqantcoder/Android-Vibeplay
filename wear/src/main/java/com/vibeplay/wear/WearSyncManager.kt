@@ -90,7 +90,7 @@ class WearSyncManager(private val context: Context) : DataClient.OnDataChangedLi
         }
     }
 
-    private fun parseCrateItems(dataMap: DataMap) {
+    internal fun parseCrateItems(dataMap: DataMap) {
         val tracksList = dataMap.getDataMapArrayList("tracks") ?: return
         val newTracks = tracksList.map { trackData ->
             com.vibeplay.core.model.Track(
@@ -114,7 +114,7 @@ class WearSyncManager(private val context: Context) : DataClient.OnDataChangedLi
         _tracks.value = newTracks
     }
 
-    private fun parseDataMap(dataMap: DataMap) {
+    internal fun parseDataMap(dataMap: DataMap) {
         _playbackState.value = _playbackState.value.copy(
             trackId = dataMap.getString(WearSyncProtocol.KEY_TRACK_ID, _playbackState.value.trackId),
             title = dataMap.getString(WearSyncProtocol.KEY_TITLE, _playbackState.value.title),
@@ -129,7 +129,8 @@ class WearSyncManager(private val context: Context) : DataClient.OnDataChangedLi
             bpm = dataMap.getDouble(WearSyncProtocol.KEY_BPM, _playbackState.value.bpm),
             energy = dataMap.getDouble(WearSyncProtocol.KEY_ENERGY, _playbackState.value.energy),
             dacConnected = dataMap.getBoolean(WearSyncProtocol.KEY_DAC_CONNECTED, _playbackState.value.dacConnected),
-            dacName = dataMap.getString(WearSyncProtocol.KEY_DAC_NAME, _playbackState.value.dacName)
+            dacName = dataMap.getString(WearSyncProtocol.KEY_DAC_NAME, _playbackState.value.dacName),
+            volume = dataMap.getFloat(WearSyncProtocol.KEY_VOLUME, _playbackState.value.volume)
         )
     }
 
