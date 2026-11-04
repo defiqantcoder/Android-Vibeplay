@@ -141,4 +141,58 @@ class VibeCookerEngineTest {
         assertEquals(0.64, scoredExtremelyFast.score, 0.0001)
         assertTrue(scoredPerfect.score > scoredExtremelyFast.score)
     }
+
+    @Test
+    fun `scoreAndRankTracks uses rules targetKey when anchorKey is null`() {
+        val rules = VibeSqlBounds(
+            bpmMin = 120, bpmMax = 130,
+            energyMin = 0.6, energyMax = 0.8,
+            danceMin = 0.5, danceMax = 1.0,
+            targetKey = "8A"
+        )
+        val harmonicMatchTrack = createTrack("t1", bpm = 125, energy = 0.7, danceability = 0.8, key = "8A") // Perfect match
+        val harmonicClashTrack = createTrack("t2", bpm = 125, energy = 0.7, danceability = 0.8, key = "3B") // Clash
+
+        val tracks = listOf(harmonicClashTrack, harmonicMatchTrack)
+
+        val scored = VibeCookerEngine.scoreAndRankTracks(tracks, rules, anchorKey = null)
+
+        assertEquals(2, scored.size)
+        assertEquals("t1", scored[0].track.id)
+        assertEquals("t2", scored[1].track.id)
+        assertTrue(scored[0].score > scored[1].score)
+    }
+
+    @Test
+    fun `scoreAndRankTracks penalizes low danceability`() {
+        val rules = VibeSqlBounds(
+            bpmMin = 120, bpmMax = 130,
+            energyMin = 0.6, energyMax = 0.8,
+            danceMin = 0.8, danceMax = 1.0,
+            targetKey = null
+        )
+
+        val highDanceTrack = createTrack("t1", bpm = 125, energy = 0.7, danceability = 0.9)
+        val lowDanceTrack = createTrack("t2", bpm = 125, energy = 0.7, danceability = 0.5) // Below 0.8
+
+        val tracks = listOf(lowDanceTrack, highDanceTrack)
+        val scored = VibeCookerEngine.scoreAndRankTracks(tracks, rules)
+
+        assertEquals(2, scored.size)
+        assertEquals("t1", scored[0].track.id)
+        assertEquals("t2", scored[1].track.id)
+        assertTrue(scored[0].score > scored[1].score)
+    }
+
+    @Test
+    fun `scoreAndRankTracks handles empty track list`() {
+        val rules = VibeSqlBounds(
+            bpmMin = 120, bpmMax = 130,
+            energyMin = 0.6, energyMax = 0.8,
+            danceMin = 0.5, danceMax = 1.0,
+            targetKey = null
+        )
+        val scored = VibeCookerEngine.scoreAndRankTracks(emptyList(), rules)
+        assertTrue(scored.isEmpty())
+    }
 }
