@@ -44,6 +44,7 @@ android {
 }
 
 dependencies {
+implementation(libs.androidx.fragment.ktx)
     implementation(project(":core"))
 
     implementation(libs.androidx.core.ktx)
