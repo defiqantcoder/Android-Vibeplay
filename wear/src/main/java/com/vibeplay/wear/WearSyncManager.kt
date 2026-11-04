@@ -31,6 +31,14 @@ data class WearPlaybackState(
 
 class WearSyncManager(private val context: Context) : DataClient.OnDataChangedListener {
 
+    companion object {
+        @Volatile private var instance: WearSyncManager? = null
+
+        fun getInstance(context: Context): WearSyncManager = instance ?: synchronized(this) {
+            instance ?: WearSyncManager(context.applicationContext).also { instance = it }
+        }
+    }
+
     private val dataClient by lazy { Wearable.getDataClient(context) }
     private val messageClient by lazy { Wearable.getMessageClient(context) }
     private val nodeClient by lazy { Wearable.getNodeClient(context) }
@@ -55,14 +63,17 @@ class WearSyncManager(private val context: Context) : DataClient.OnDataChangedLi
         scope.launch {
             try {
                 val dataItemBuffer = dataClient.dataItems.await()
-                for (item in dataItemBuffer) {
-                    if (item.uri.path == WearSyncProtocol.DATA_PATH_PLAYBACK) {
-                        parseDataMap(DataMapItem.fromDataItem(item).dataMap)
-                    } else if (item.uri.path == WearSyncProtocol.DATA_PATH_CRATE_ITEMS) {
-                        parseCrateItems(DataMapItem.fromDataItem(item).dataMap)
+                try {
+                    for (item in dataItemBuffer) {
+                        if (item.uri.path == WearSyncProtocol.DATA_PATH_PLAYBACK) {
+                            parseDataMap(DataMapItem.fromDataItem(item).dataMap)
+                        } else if (item.uri.path == WearSyncProtocol.DATA_PATH_CRATE_ITEMS) {
+                            parseCrateItems(DataMapItem.fromDataItem(item).dataMap)
+                        }
                     }
+                } finally {
+                    dataItemBuffer.release()
                 }
-                dataItemBuffer.release()
             } catch (_: Exception) {}
         }
     }

@@ -41,20 +41,13 @@ val WearSecondary = Color(0xFFF59E0B)
 val WearSurface = Color(0xFF1E1E24)
 
 @Composable
-fun PixelWatchApp() {
+fun PixelWatchApp(
+    playbackState: WearPlaybackState,
+    tracks: List<Track>,
+    syncManager: WearSyncManager
+) {
     val context = LocalContext.current
     val haptics = remember { WatchHapticsController(context) }
-    val syncManager = remember { WearSyncManager(context) }
-
-    DisposableEffect(Unit) {
-        syncManager.register()
-        onDispose {
-            syncManager.unregister()
-        }
-    }
-
-    val playbackState by syncManager.playbackState.collectAsState()
-    val tracks by syncManager.tracks.collectAsState()
     val pagerState = rememberPagerState(pageCount = { 5 })
     val coroutineScope = rememberCoroutineScope()
 
