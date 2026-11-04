@@ -8,7 +8,6 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.mockito.Mockito.mock
-import java.lang.reflect.Method
 
 class WearSyncManagerTest {
 
@@ -33,12 +32,12 @@ class WearSyncManagerTest {
             putDouble(WearSyncProtocol.KEY_ENERGY, 0.9)
             putBoolean(WearSyncProtocol.KEY_DAC_CONNECTED, false)
             putString(WearSyncProtocol.KEY_DAC_NAME, "None")
+            putFloat(WearSyncProtocol.KEY_VOLUME, 0.5f)
         }
 
-        // Use reflection to access the private parseDataMap method
-        val parseDataMapMethod: Method = WearSyncManager::class.java.getDeclaredMethod("parseDataMap", DataMap::class.java)
-        parseDataMapMethod.isAccessible = true
-        parseDataMapMethod.invoke(syncManager, dataMap)
+
+
+        syncManager.parseDataMap(dataMap)
 
         // Verify the internal playbackState was updated correctly
         val state = syncManager.playbackState.value
@@ -57,6 +56,7 @@ class WearSyncManagerTest {
         assertEquals(0.9, state.energy, 0.01)
         assertFalse(state.dacConnected)
         assertEquals("None", state.dacName)
+        assertEquals(0.5f, state.volume, 0.01f)
     }
 
     @Test
@@ -64,8 +64,8 @@ class WearSyncManagerTest {
         val mockContext = mock(Context::class.java)
         val syncManager = WearSyncManager(mockContext)
 
-        val parseDataMapMethod: Method = WearSyncManager::class.java.getDeclaredMethod("parseDataMap", DataMap::class.java)
-        parseDataMapMethod.isAccessible = true
+
+
 
         val initialDataMap = DataMap().apply {
             putString(WearSyncProtocol.KEY_TRACK_ID, "initial-track")
@@ -73,7 +73,7 @@ class WearSyncManagerTest {
             putString(WearSyncProtocol.KEY_ALBUM, "Initial Album")
             putLong(WearSyncProtocol.KEY_DURATION_MS, 180000L)
         }
-        parseDataMapMethod.invoke(syncManager, initialDataMap)
+        syncManager.parseDataMap(initialDataMap)
         val initialState = syncManager.playbackState.value
 
         val dataMap = DataMap().apply {
@@ -81,7 +81,7 @@ class WearSyncManagerTest {
             // Not setting anything else
         }
 
-        parseDataMapMethod.invoke(syncManager, dataMap)
+        syncManager.parseDataMap(dataMap)
 
         val state = syncManager.playbackState.value
 
@@ -93,5 +93,48 @@ class WearSyncManagerTest {
         assertEquals(initialState.artist, state.artist)
         assertEquals(initialState.album, state.album)
         assertEquals(initialState.durationMs, state.durationMs)
+    }
+
+
+    @Test
+    fun testParseCrateItems() {
+        val mockContext = mock(Context::class.java)
+        val syncManager = WearSyncManager(mockContext)
+
+        val trackDataMap = DataMap().apply {
+            putString(WearSyncProtocol.KEY_TRACK_ID, "track-123")
+            putString(WearSyncProtocol.KEY_TITLE, "Crate Track")
+            putString(WearSyncProtocol.KEY_ARTIST, "Crate Artist")
+            putString(WearSyncProtocol.KEY_ALBUM, "Crate Album")
+            putDouble(WearSyncProtocol.KEY_BPM, 130.0)
+            putString("format", "WAV")
+        }
+
+        val dataMap = DataMap().apply {
+            putDataMapArrayList("tracks", arrayListOf(trackDataMap))
+        }
+
+        syncManager.parseCrateItems(dataMap)
+
+        val tracks = syncManager.tracks.value
+        assertEquals(1, tracks.size)
+
+        val track = tracks[0]
+        assertEquals("track-123", track.id)
+        assertEquals("Crate Track", track.title)
+        assertEquals("Crate Artist", track.artist)
+        assertEquals("Crate Album", track.album)
+        assertEquals(130, track.bpm)
+        assertEquals("WAV", track.format)
+
+        // Assert defaults
+        assertEquals("0:00", track.duration)
+        assertEquals(0L, track.durationMs)
+        assertEquals("1A", track.key)
+        assertEquals(0.5, track.energy, 0.01)
+        assertEquals(0.5, track.danceability, 0.01)
+        assertEquals("crate", track.crateId)
+        assertEquals("44.1 kHz", track.sampleRate)
+        assertEquals("16-bit", track.bitDepth)
     }
 }
