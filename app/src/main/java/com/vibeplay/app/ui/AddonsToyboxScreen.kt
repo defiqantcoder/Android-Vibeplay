@@ -102,8 +102,9 @@ fun AddonCard(addon: AddonPackage, onToggle: () -> Unit) {
 @Composable
 fun SettingsScreen(
     viewModel: VibePlayViewModel,
-    modifier: Modifier = Modifier,
-    onLaunchSafPicker: () -> Unit = {}
+    selectedLibraryUri: String?,
+    onLaunchSafPicker: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val state by viewModel.uiState.collectAsState()
 
@@ -125,26 +126,6 @@ fun SettingsScreen(
             Text("LIBRARY DIRECTORY", fontWeight = FontWeight.Bold, color = TextMuted, fontSize = 12.sp)
             Spacer(modifier = Modifier.height(8.dp))
 
-            val context = androidx.compose.ui.platform.LocalContext.current
-            val sharedPrefs = remember(context) {
-                context.getSharedPreferences("vibeplay_prefs", android.content.Context.MODE_PRIVATE)
-            }
-            var safUri by remember {
-                mutableStateOf(sharedPrefs.getString("saf_tree_uri", null))
-            }
-
-            DisposableEffect(sharedPrefs) {
-                val listener = android.content.SharedPreferences.OnSharedPreferenceChangeListener { prefs, key ->
-                    if (key == "saf_tree_uri") {
-                        safUri = prefs.getString("saf_tree_uri", null)
-                    }
-                }
-                sharedPrefs.registerOnSharedPreferenceChangeListener(listener)
-                onDispose {
-                    sharedPrefs.unregisterOnSharedPreferenceChangeListener(listener)
-                }
-            }
-
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -154,13 +135,11 @@ fun SettingsScreen(
                     .padding(16.dp)
             ) {
                 Text(
-                    text = safUri ?: "MediaStore Fallback Active",
-                    color = if (safUri != null) TextPrimary else TextMuted,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Medium,
-                    modifier = Modifier.fillMaxWidth()
+                    text = selectedLibraryUri ?: "Using the configured library path or MediaStore fallback",
+                    color = TextPrimary,
+                    fontSize = 14.sp
                 )
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(8.dp))
                 Button(
                     onClick = onLaunchSafPicker,
                     colors = ButtonDefaults.buttonColors(containerColor = TealPrimary),
@@ -168,6 +147,17 @@ fun SettingsScreen(
                     modifier = Modifier.align(Alignment.End)
                 ) {
                     Text("Select Music Folder", color = Color.Black, fontWeight = FontWeight.Bold)
+                }
+                Button(
+                    onClick = { selectedLibraryUri?.let(viewModel::scanSelectedMusicFolder) },
+                    enabled = selectedLibraryUri != null && !state.isScanning,
+                    colors = ButtonDefaults.buttonColors(containerColor = TealPrimary),
+                    modifier = Modifier.align(Alignment.End)
+                ) {
+                    Text("Scan Music Folder", color = Color.Black, fontWeight = FontWeight.Bold)
+                }
+                if (state.isScanning || state.scanSummary.isNotEmpty()) {
+                    Text(if (state.isScanning) "Scanning..." else state.scanSummary, color = TextMuted, fontSize = 12.sp)
                 }
             }
         }

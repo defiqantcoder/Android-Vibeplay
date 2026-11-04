@@ -2,7 +2,9 @@ package com.vibeplay.core.scanner
 
 import com.vibeplay.core.model.Track
 import java.io.File
-import java.io.RandomAccessFile
+import java.io.DataInputStream
+import java.io.EOFException
+import java.io.InputStream
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.charset.StandardCharsets
@@ -28,9 +30,15 @@ object LocalMusicScanner {
     fun parseFlacFile(file: File): FlacInfo? {
         if (!file.exists() || file.length() < 42) return null
 
-        RandomAccessFile(file, "r").use { raf ->
+        return file.inputStream().use { parseFlacStream(it) }
+    }
+
+    /** Parse FLAC metadata from a stream without closing it. */
+    fun parseFlacStream(input: InputStream): FlacInfo? {
+        val stream = DataInputStream(input)
+        try {
             val magic = ByteArray(4)
-            raf.readFully(magic)
+            stream.readFully(magic)
             if (String(magic, StandardCharsets.ISO_8859_1) != "fLaC") {
                 return null
             }
@@ -43,25 +51,25 @@ object LocalMusicScanner {
             val tags = mutableMapOf<String, String>()
 
             var isLast = false
-            while (!isLast && raf.filePointer < raf.length()) {
-                val headerByte = raf.read()
-                if (headerByte == -1) break
+            var hasStreamInfo = false
+            while (!isLast) {
+                val headerByte = stream.read()
+                if (headerByte == -1) throw EOFException()
                 isLast = (headerByte and 0x80) != 0
                 val blockType = headerByte and 0x7F
 
                 val lengthBytes = ByteArray(3)
-                raf.readFully(lengthBytes)
+                stream.readFully(lengthBytes)
                 val blockLength = ((lengthBytes[0].toInt() and 0xFF) shl 16) or
                         ((lengthBytes[1].toInt() and 0xFF) shl 8) or
                         (lengthBytes[2].toInt() and 0xFF)
 
-                val blockStart = raf.filePointer
-
                 when (blockType) {
                     0 -> { // STREAMINFO
                         val streamInfo = ByteArray(blockLength)
-                        raf.readFully(streamInfo)
-                        if (streamInfo.size >= 18) {
+                        stream.readFully(streamInfo)
+                        if (streamInfo.size == 34) {
+                            hasStreamInfo = true
                             // Bytes 10-17 contain sample rate (20 bits), channels (3 bits), bits per sample (5 bits), total samples (36 bits)
                             val b10 = streamInfo[10].toInt() and 0xFF
                             val b11 = streamInfo[11].toInt() and 0xFF
@@ -90,7 +98,7 @@ object LocalMusicScanner {
                     }
                     4 -> { // VORBIS_COMMENT
                         val commentData = ByteArray(blockLength)
-                        raf.readFully(commentData)
+                        stream.readFully(commentData)
                         val buffer = ByteBuffer.wrap(commentData).order(ByteOrder.LITTLE_ENDIAN)
 
                         if (buffer.remaining() >= 4) {
@@ -119,11 +127,18 @@ object LocalMusicScanner {
                     }
                     else -> {
                         // Skip other metadata blocks (PICTURE, PADDING, CUESHEET, etc.)
-                        raf.seek(blockStart + blockLength)
+                        var remaining = blockLength
+                        val buffer = ByteArray(8192)
+                        while (remaining > 0) {
+                            val count = stream.read(buffer, 0, minOf(remaining, buffer.size))
+                            if (count < 0) throw EOFException()
+                            remaining -= count
+                        }
                     }
                 }
             }
 
+            if (!hasStreamInfo) return null
             return FlacInfo(
                 sampleRate = sampleRate,
                 bitDepth = bitDepth,
@@ -132,6 +147,8 @@ object LocalMusicScanner {
                 durationMs = durationMs,
                 tags = tags
             )
+        } catch (_: EOFException) {
+            return null
         }
     }
 
@@ -150,40 +167,7 @@ object LocalMusicScanner {
             try {
                 val info = parseFlacFile(file)
                 if (info != null) {
-                    val title = info.tags["TITLE"] ?: file.nameWithoutExtension
-                    val artist = info.tags["ARTIST"] ?: file.parentFile?.name ?: "Unknown Artist"
-                    val album = info.tags["ALBUM"] ?: file.parentFile?.name ?: "Unknown Album"
-                    val bpm = info.tags["BPM"]?.toIntOrNull() ?: estimateBpmFromHash(file.name)
-                    val key = info.tags["INITIALKEY"] ?: estimateKeyFromHash(file.name)
-                    val energy = estimateEnergy(bpm)
-                    val danceability = estimateDanceability(bpm)
-
-                    val minutes = (info.durationMs / 1000) / 60
-                    val seconds = (info.durationMs / 1000) % 60
-                    val durationStr = String.format("%d:%02d", minutes, seconds)
-
-                    val sampleRateKhz = String.format("%.1f kHz", info.sampleRate / 1000.0)
-                    val bitDepthStr = "${info.bitDepth}-bit"
-
-                    val track = Track(
-                        id = "local-flac-$index",
-                        title = title,
-                        artist = artist,
-                        album = album,
-                        duration = durationStr,
-                        durationMs = info.durationMs,
-                        bpm = bpm,
-                        key = key,
-                        energy = energy,
-                        danceability = danceability,
-                        crateId = "crate-local",
-                        format = "FLAC",
-                        sampleRate = sampleRateKhz,
-                        bitDepth = bitDepthStr,
-                        localUri = file.absolutePath,
-                        waveforms = generateDeterministicWaveform(file.name, 24)
-                    )
-                    results.add(track)
+                    results.add(trackFromFlac(info, file.name, file.parentFile?.name, file.absolutePath, "local-flac-$index"))
                 }
             } catch (e: Exception) {
                 // Ignore corrupt individual file
@@ -191,6 +175,35 @@ object LocalMusicScanner {
         }
 
         return results
+    }
+
+    /** Build the same library model for filesystem and document-provider FLAC files. */
+    fun trackFromFlac(info: FlacInfo, name: String, parentName: String?, uri: String, id: String): Track {
+        val title = info.tags["TITLE"] ?: name.substringBeforeLast('.', name)
+        val artist = info.tags["ARTIST"] ?: parentName ?: "Unknown Artist"
+        val album = info.tags["ALBUM"] ?: parentName ?: "Unknown Album"
+        val bpm = info.tags["BPM"]?.toIntOrNull() ?: estimateBpmFromHash(name)
+        val key = info.tags["INITIALKEY"] ?: estimateKeyFromHash(name)
+        val minutes = (info.durationMs / 1000) / 60
+        val seconds = (info.durationMs / 1000) % 60
+        return Track(
+            id = id,
+            title = title,
+            artist = artist,
+            album = album,
+            duration = String.format("%d:%02d", minutes, seconds),
+            durationMs = info.durationMs,
+            bpm = bpm,
+            key = key,
+            energy = estimateEnergy(bpm),
+            danceability = estimateDanceability(bpm),
+            crateId = "crate-local",
+            format = "FLAC",
+            sampleRate = String.format("%.1f kHz", info.sampleRate / 1000.0),
+            bitDepth = "${info.bitDepth}-bit",
+            localUri = uri,
+            waveforms = generateDeterministicWaveform(name, 24)
+        )
     }
 
     private fun estimateBpmFromHash(name: String): Int {

@@ -132,5 +132,22 @@ class LocalMusicScannerTest {
         assertEquals(10000L, result.durationMs)
         assertEquals("Test Track", result.tags["TITLE"])
         assertEquals("Test Artist", result.tags["ARTIST"])
+
+        val fromStream = validFlacFile.inputStream().use { LocalMusicScanner.parseFlacStream(it) }
+        assertEquals(result, fromStream)
+        val uri = "content://example/tree/music/document/song"
+        val track = LocalMusicScanner.trackFromFlac(fromStream!!, "song.flac", "Album folder", uri, uri)
+        assertEquals("Test Track", track.title)
+        assertEquals("Test Artist", track.artist)
+        assertEquals("Album folder", track.album)
+        assertEquals(uri, track.localUri)
+        assertEquals(10000L, track.durationMs)
+    }
+
+    @Test
+    fun parseFlacStream_withTruncatedMetadata_returnsNull() {
+        val truncated = byteArrayOf('f'.code.toByte(), 'L'.code.toByte(), 'a'.code.toByte(), 'C'.code.toByte(), 0x80.toByte(), 0, 0, 34, 1)
+        assertNull(LocalMusicScanner.parseFlacStream(truncated.inputStream()))
+        assertNull(LocalMusicScanner.parseFlacStream("fLaC".byteInputStream()))
     }
 }

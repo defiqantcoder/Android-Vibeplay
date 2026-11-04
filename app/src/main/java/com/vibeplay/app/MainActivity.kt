@@ -2,12 +2,15 @@ package com.vibeplay.app
 
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
+import android.content.IntentFilter
+import android.hardware.usb.UsbDevice
+import android.hardware.usb.UsbManager
+import android.media.AudioManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -35,24 +38,15 @@ import com.vibeplay.core.model.EndpointType
 class MainActivity : ComponentActivity() {
 
     private lateinit var hardwareManager: UsbDacHardwareManager
+    private var selectedLibraryUri by mutableStateOf<String?>(null)
 
-    private val openDocumentTreeLauncher = registerForActivityResult(
-        ActivityResultContracts.OpenDocumentTree()
-    ) { uri: Uri? ->
+    private val safPicker = registerForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
         if (uri != null) {
-            try {
-                contentResolver.takePersistableUriPermission(
-                    uri,
-                    Intent.FLAG_GRANT_READ_URI_PERMISSION
-                )
-            } catch (_: Exception) {}
-
-            val sharedPrefs = getSharedPreferences("vibeplay_prefs", Context.MODE_PRIVATE)
-            sharedPrefs.edit()
-                .putString("saf_tree_uri", uri.toString())
-                .apply()
-
-            viewModel.scanSafDirectory(uri, this)
+            contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            selectedLibraryUri = uri.toString()
+            getSharedPreferences("vibeplay_prefs", Context.MODE_PRIVATE)
+                .edit().putString("library_tree_uri", selectedLibraryUri)
+                .putString("saf_tree_uri", selectedLibraryUri).apply()
         }
     }
 
@@ -82,6 +76,9 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val preferences = getSharedPreferences("vibeplay_prefs", Context.MODE_PRIVATE)
+        selectedLibraryUri = preferences.getString("library_tree_uri", null)
+            ?: preferences.getString("saf_tree_uri", null)
 
         if (!::hardwareManager.isInitialized) {
             hardwareManager = UsbDacHardwareManager(
@@ -186,7 +183,8 @@ class MainActivity : ComponentActivity() {
                             3 -> AddonsToyboxScreen(viewModel = viewModel)
                             4 -> SettingsScreen(
                                 viewModel = viewModel,
-                                onLaunchSafPicker = { openDocumentTreeLauncher.launch(null) }
+                                selectedLibraryUri = selectedLibraryUri,
+                                onLaunchSafPicker = { safPicker.launch(null) }
                             )
                         }
 
