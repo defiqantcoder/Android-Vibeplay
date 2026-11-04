@@ -2,13 +2,11 @@ package com.vibeplay.app
 
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
-import android.hardware.usb.UsbDevice
-import android.hardware.usb.UsbManager
-import android.media.AudioManager
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -37,6 +35,26 @@ import com.vibeplay.core.model.EndpointType
 class MainActivity : ComponentActivity() {
 
     private lateinit var hardwareManager: UsbDacHardwareManager
+
+    private val openDocumentTreeLauncher = registerForActivityResult(
+        ActivityResultContracts.OpenDocumentTree()
+    ) { uri: Uri? ->
+        if (uri != null) {
+            try {
+                contentResolver.takePersistableUriPermission(
+                    uri,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION
+                )
+            } catch (_: Exception) {}
+
+            val sharedPrefs = getSharedPreferences("vibeplay_prefs", Context.MODE_PRIVATE)
+            sharedPrefs.edit()
+                .putString("saf_tree_uri", uri.toString())
+                .apply()
+
+            viewModel.scanSafDirectory(uri, this)
+        }
+    }
 
     private val viewModel: VibePlayViewModel by viewModels {
         object : androidx.lifecycle.ViewModelProvider.Factory {
@@ -166,7 +184,10 @@ class MainActivity : ComponentActivity() {
                             1 -> VibeCookerScreen(viewModel = viewModel)
                             2 -> SoundbarScreen(viewModel = viewModel)
                             3 -> AddonsToyboxScreen(viewModel = viewModel)
-                            4 -> SettingsScreen(viewModel = viewModel)
+                            4 -> SettingsScreen(
+                                viewModel = viewModel,
+                                onLaunchSafPicker = { openDocumentTreeLauncher.launch(null) }
+                            )
                         }
 
                         // Full Screen Overlays & Modals
