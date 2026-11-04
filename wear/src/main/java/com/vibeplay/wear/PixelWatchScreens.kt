@@ -60,11 +60,9 @@ fun PixelWatchApp(
     val haptics = remember { WatchHapticsController(context) }
     val pagerState = rememberPagerState(pageCount = { 5 })
     val coroutineScope = rememberCoroutineScope()
-    val swipeToDismissState = rememberSwipeToDismissBoxState()
 
     // Standard Wear OS "swipe right to go back / exit" gesture.
     SwipeToDismissBox(
-        state = swipeToDismissState,
         onDismissed = { context.findActivity()?.finish() },
         backgroundScrimColor = WearBackground
     ) { isBackground ->
