@@ -5,20 +5,22 @@ import com.vibeplay.core.db.EqBandEntity
 import com.vibeplay.core.db.TrackEntity
 import com.vibeplay.core.db.VibePlayDao
 import com.vibeplay.core.db.VibePlayDatabase
-import com.vibeplay.core.model.Track
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import kotlinx.coroutines.withTimeout
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.mock
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class VibePlayViewModelPersistenceTest {
@@ -38,7 +40,7 @@ class VibePlayViewModelPersistenceTest {
     class FakeDao(initialTracks: List<TrackEntity> = emptyList()) : VibePlayDao {
         val tracks = initialTracks.toMutableList()
         val insertedTracks = mutableListOf<List<TrackEntity>>()
-        var getAllTracksCallCount = 0
+        @Volatile var getAllTracksCallCount = 0
 
         override suspend fun getAllTracks(): List<TrackEntity> {
             getAllTracksCallCount++
@@ -68,19 +70,8 @@ class VibePlayViewModelPersistenceTest {
         override suspend fun updateBandGain(id: String, gain: Double) {}
     }
 
-    class FakeDatabase(val fakeDao: FakeDao) : VibePlayDatabase() {
-        override fun dao(): VibePlayDao = fakeDao
-        override fun clearAllTables() {}
-        override fun createInvalidationTracker(): androidx.room.InvalidationTracker {
-            throw UnsupportedOperationException()
-        }
-        override fun createOpenHelper(config: androidx.room.DatabaseConfiguration): androidx.sqlite.db.SupportOpenHelper {
-            throw UnsupportedOperationException()
-        }
-    }
-
     @Test
-    fun loadCachedTracksOnLaunch_whenDatabaseHasTracks_populatesUiStateInstantlyWithoutScanning() = runTest(testDispatcher) {
+    fun loadCachedTracksOnLaunch_whenDatabaseHasTracks_populatesUiStateInstantlyWithoutScanning() = runTest {
         val cachedTrackEntity = TrackEntity(
             id = "cached-01",
             title = "Cached Track",
@@ -100,10 +91,17 @@ class VibePlayViewModelPersistenceTest {
             lyricsJson = ""
         )
         val fakeDao = FakeDao(listOf(cachedTrackEntity))
-        val fakeDb = FakeDatabase(fakeDao)
+        val fakeDb = mock<VibePlayDatabase> {
+            on { dao() } doReturn fakeDao
+        }
 
         val viewModel = VibePlayViewModel(database = fakeDb)
-        advanceUntilIdle()
+
+        withTimeout(3000) {
+            while (viewModel.uiState.value.tracks.isEmpty()) {
+                delay(20)
+            }
+        }
 
         assertEquals(1, fakeDao.getAllTracksCallCount)
         val uiState = viewModel.uiState.value
@@ -115,12 +113,19 @@ class VibePlayViewModelPersistenceTest {
     }
 
     @Test
-    fun loadCachedTracksOnLaunch_whenDatabaseIsEmpty_leavesTracksEmpty() = runTest(testDispatcher) {
+    fun loadCachedTracksOnLaunch_whenDatabaseIsEmpty_leavesTracksEmpty() = runTest {
         val fakeDao = FakeDao(emptyList())
-        val fakeDb = FakeDatabase(fakeDao)
+        val fakeDb = mock<VibePlayDatabase> {
+            on { dao() } doReturn fakeDao
+        }
 
         val viewModel = VibePlayViewModel(database = fakeDb)
-        advanceUntilIdle()
+
+        withTimeout(3000) {
+            while (fakeDao.getAllTracksCallCount == 0) {
+                delay(20)
+            }
+        }
 
         assertEquals(1, fakeDao.getAllTracksCallCount)
         val uiState = viewModel.uiState.value
