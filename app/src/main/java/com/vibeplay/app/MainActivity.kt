@@ -10,6 +10,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -37,6 +38,16 @@ import com.vibeplay.core.model.EndpointType
 class MainActivity : ComponentActivity() {
 
     private lateinit var hardwareManager: UsbDacHardwareManager
+    private var selectedLibraryUri by mutableStateOf<String?>(null)
+
+    private val safPicker = registerForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
+        if (uri != null) {
+            contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            selectedLibraryUri = uri.toString()
+            getSharedPreferences("vibeplay_prefs", Context.MODE_PRIVATE)
+                .edit().putString("library_tree_uri", selectedLibraryUri).apply()
+        }
+    }
 
     private val viewModel: VibePlayViewModel by viewModels {
         object : androidx.lifecycle.ViewModelProvider.Factory {
@@ -64,6 +75,8 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        selectedLibraryUri = getSharedPreferences("vibeplay_prefs", Context.MODE_PRIVATE)
+            .getString("library_tree_uri", null)
 
         if (!::hardwareManager.isInitialized) {
             hardwareManager = UsbDacHardwareManager(
@@ -166,7 +179,11 @@ class MainActivity : ComponentActivity() {
                             1 -> VibeCookerScreen(viewModel = viewModel)
                             2 -> SoundbarScreen(viewModel = viewModel)
                             3 -> AddonsToyboxScreen(viewModel = viewModel)
-                            4 -> SettingsScreen(viewModel = viewModel)
+                            4 -> SettingsScreen(
+                                viewModel = viewModel,
+                                selectedLibraryUri = selectedLibraryUri,
+                                onLaunchSafPicker = { safPicker.launch(null) }
+                            )
                         }
 
                         // Full Screen Overlays & Modals
