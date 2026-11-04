@@ -135,7 +135,7 @@ fun SettingsScreen(
                     .padding(16.dp)
             ) {
                 Text(
-                    text = selectedLibraryUri ?: "Using the configured library path",
+                    text = selectedLibraryUri ?: "Using the configured library path or MediaStore fallback",
                     color = TextPrimary,
                     fontSize = 14.sp
                 )
@@ -143,6 +143,7 @@ fun SettingsScreen(
                 Button(
                     onClick = onLaunchSafPicker,
                     colors = ButtonDefaults.buttonColors(containerColor = TealPrimary),
+                    shape = RoundedCornerShape(8.dp),
                     modifier = Modifier.align(Alignment.End)
                 ) {
                     Text("Select Music Folder", color = Color.Black, fontWeight = FontWeight.Bold)

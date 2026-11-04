@@ -45,7 +45,8 @@ class MainActivity : ComponentActivity() {
             contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
             selectedLibraryUri = uri.toString()
             getSharedPreferences("vibeplay_prefs", Context.MODE_PRIVATE)
-                .edit().putString("library_tree_uri", selectedLibraryUri).apply()
+                .edit().putString("library_tree_uri", selectedLibraryUri)
+                .putString("saf_tree_uri", selectedLibraryUri).apply()
         }
     }
 
@@ -75,8 +76,9 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        selectedLibraryUri = getSharedPreferences("vibeplay_prefs", Context.MODE_PRIVATE)
-            .getString("library_tree_uri", null)
+        val preferences = getSharedPreferences("vibeplay_prefs", Context.MODE_PRIVATE)
+        selectedLibraryUri = preferences.getString("library_tree_uri", null)
+            ?: preferences.getString("saf_tree_uri", null)
 
         if (!::hardwareManager.isInitialized) {
             hardwareManager = UsbDacHardwareManager(

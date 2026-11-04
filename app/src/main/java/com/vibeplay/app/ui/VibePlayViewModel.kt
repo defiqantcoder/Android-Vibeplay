@@ -3,6 +3,10 @@ package com.vibeplay.app.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import android.net.Uri
+import android.content.ContentUris
+import android.content.Context
+import android.os.Environment
+import android.provider.MediaStore
 import com.vibeplay.app.audio.VibeAudioEngine
 import com.vibeplay.app.scanner.SafMusicScanner
 import com.vibeplay.core.db.VibePlayDatabase
@@ -23,6 +27,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
+
+internal fun resolveLibraryDirectory(configuredPath: String?, defaultDirectory: () -> File?): File? =
+    configuredPath?.let(::File) ?: defaultDirectory()
 
 data class VibePlayUiState(
     val currentTrack: Track? = null,
@@ -126,47 +133,60 @@ class VibePlayViewModel(
             }
         }
 
-        // Restore the selected tree; retain the legacy path when no tree was chosen.
+        // Prefer either saved tree key, then a configured path, then the app music directory.
         context?.let { ctx ->
-            val sharedPrefs = ctx.getSharedPreferences("vibeplay_prefs", android.content.Context.MODE_PRIVATE)
-            val treeUri = sharedPrefs.getString("library_tree_uri", null)
+            val prefs = ctx.getSharedPreferences("vibeplay_prefs", Context.MODE_PRIVATE)
+            val treeUri = prefs.getString("library_tree_uri", null) ?: prefs.getString("saf_tree_uri", null)
             if (treeUri != null) {
                 scanSelectedMusicFolder(treeUri)
             } else {
-                val libraryPath = sharedPrefs.getString("library_path", "/home/sinnoh/music-test") ?: "/home/sinnoh/music-test"
-                scanLocalMusicFolder(File(libraryPath))
+                val configuredPath = prefs.getString("library_path", null)
+                val directory = resolveLibraryDirectory(configuredPath) { ctx.getExternalFilesDir(Environment.DIRECTORY_MUSIC) }
+                if (directory != null) scanLocalMusicFolder(directory) else scanMediaStoreAudio(ctx)
             }
-        } ?: run {
-            scanLocalMusicFolder(File("/home/sinnoh/music-test"))
         }
     }
 
     fun scanSelectedMusicFolder(treeUri: String) {
-        val resolver = context?.contentResolver ?: return
-        scanLibrary("selected folder", clearOnEmpty = true) { SafMusicScanner.scanTree(resolver, Uri.parse(treeUri)) }
+        val ctx = context ?: return
+        scanLibrary("selected folder", fallbackToMediaStore = true) { SafMusicScanner.scanTree(ctx, Uri.parse(treeUri)) }
     }
 
     fun scanLocalMusicFolder(directory: File) {
-        scanLibrary(directory.name) {
+        scanLibrary(directory.name, fallbackToMediaStore = context != null) {
             if (directory.exists() && directory.isDirectory) LocalMusicScanner.scanDirectory(directory)
             else emptyList()
         }
     }
 
-    private fun scanLibrary(source: String, clearOnEmpty: Boolean = false, scan: suspend () -> List<Track>) {
+    fun scanMediaStoreAudio(context: Context) {
+        scanLibrary("MediaStore", clearOnEmpty = true) { mediaStoreTracks(context) }
+    }
+
+    private fun scanLibrary(
+        source: String,
+        clearOnEmpty: Boolean = false,
+        fallbackToMediaStore: Boolean = false,
+        scan: suspend () -> List<Track>
+    ) {
         scanJob?.cancel()
         scanJob = viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isScanning = true, scanSummary = "")
             try {
-                val scannedTracks = withContext(Dispatchers.IO) { scan() }
-                if (scannedTracks.isEmpty() && !clearOnEmpty) {
+                val (scannedTracks, actualSource) = withContext(Dispatchers.IO) {
+                    val found = scan()
+                    if (found.isEmpty() && fallbackToMediaStore && context != null) {
+                        mediaStoreTracks(context) to "MediaStore"
+                    } else found to source
+                }
+                if (scannedTracks.isEmpty() && !clearOnEmpty && !fallbackToMediaStore) {
                     _uiState.value = _uiState.value.copy(isScanning = false)
                     cookMixtape(_uiState.value.activeCookPrompt)
                     return@launch
                 }
                 val losslessCrate = CrateFolder(
                     id = "crate-lossless-local",
-                    name = "Local Lossless Master Vault",
+                    name = "Local Music Vault",
                     trackCount = scannedTracks.size,
                     energyArc = "Dynamic High-Res",
                     lastCooked = "Live Indexed"
@@ -176,7 +196,7 @@ class VibePlayViewModel(
                     crates = if (scannedTracks.isEmpty()) VibeSeedData.INITIAL_CRATES
                         else listOf(losslessCrate) + VibeSeedData.INITIAL_CRATES,
                     isScanning = false,
-                    scanSummary = "Indexed ${scannedTracks.size} lossless FLAC tracks from $source"
+                    scanSummary = "Indexed ${scannedTracks.size} audio tracks from $actualSource"
                 )
                 cookMixtape(_uiState.value.activeCookPrompt)
             } catch (e: CancellationException) {
@@ -188,6 +208,85 @@ class VibePlayViewModel(
                 )
             }
         }
+    }
+
+    private fun mediaStoreTracks(context: Context): List<Track> {
+        val results = mutableListOf<Track>()
+        val projection = arrayOf(
+            MediaStore.Audio.Media._ID,
+            MediaStore.Audio.Media.TITLE,
+            MediaStore.Audio.Media.ARTIST,
+            MediaStore.Audio.Media.ALBUM,
+            MediaStore.Audio.Media.DURATION
+        )
+        val selection = "${MediaStore.Audio.Media.IS_MUSIC} != 0"
+        val sortOrder = "${MediaStore.Audio.Media.TITLE} ASC"
+
+        context.contentResolver.query(
+                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                projection,
+                selection,
+                null,
+                sortOrder
+            )?.use { cursor ->
+                val idCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID)
+                val titleCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE)
+                val artistCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST)
+                val albumCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM)
+                val durationCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION)
+
+                var index = 0
+                while (cursor.moveToNext()) {
+                    val id = cursor.getLong(idCol)
+                    val title = cursor.getString(titleCol) ?: "Unknown Track"
+                    val artist = cursor.getString(artistCol) ?: "Unknown Artist"
+                    val album = cursor.getString(albumCol) ?: "Unknown Album"
+                    val durationMs = cursor.getLong(durationCol)
+                    val contentUri = ContentUris.withAppendedId(
+                        MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                        id
+                    )
+
+                    val minutes = (durationMs / 1000) / 60
+                    val seconds = (durationMs / 1000) % 60
+                    val durationStr = String.format("%d:%02d", minutes, seconds)
+
+                    val hash = kotlin.math.abs(title.hashCode())
+                    val bpm = 80 + (hash % 65)
+                    val keys = listOf("1A", "1B", "2A", "2B", "3A", "3B", "4A", "4B", "5A", "5B", "6A", "6B",
+                        "7A", "7B", "8A", "8B", "9A", "9B", "10A", "10B", "11A", "11B", "12A", "12B")
+                    val key = keys[hash % keys.size]
+                    val energy = ((bpm - 60).toDouble() / 100.0).coerceIn(0.2, 0.98)
+                    val danceability = (1.0 - kotlin.math.abs(bpm - 124) / 80.0).coerceIn(0.3, 0.95)
+                    val waveforms = (0 until 24).map { i ->
+                        val v = (kotlin.math.sin((hash + i * 17).toDouble()) + 1.0) / 2.0
+                        (0.15 + v * 0.85).toFloat().coerceIn(0.1f, 1.0f)
+                    }
+
+                    results.add(
+                        Track(
+                            id = "mediastore-audio-$index",
+                            title = title,
+                            artist = artist,
+                            album = album,
+                            duration = durationStr,
+                            durationMs = durationMs,
+                            bpm = bpm,
+                            key = key,
+                            energy = energy,
+                            danceability = danceability,
+                            crateId = "crate-mediastore",
+                            format = "AUDIO",
+                            sampleRate = "48.0 kHz",
+                            bitDepth = "24-bit",
+                            localUri = contentUri.toString(),
+                            waveforms = waveforms
+                        )
+                    )
+                    index++
+                }
+            } ?: throw java.io.IOException("Could not read MediaStore")
+        return results
     }
 
     fun playTrack(track: Track) {
