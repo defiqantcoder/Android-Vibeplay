@@ -112,6 +112,35 @@ class VibeCookerEngineTest {
     }
 
     @Test
+    fun `scoreAndRankTracks applies harmonic bonus for target key in rules`() {
+        // Arrange
+        val rules = VibeSqlBounds(
+            bpmMin = 120,
+            bpmMax = 130,
+            energyMin = 0.6,
+            energyMax = 0.8,
+            danceMin = 0.5,
+            danceMax = 1.0,
+            targetKey = "8A"
+        )
+
+        // Both tracks have the exact same stats, so harmonic score will break the tie
+        val harmonicMatchTrack = createTrack("t1", bpm = 125, energy = 0.7, danceability = 0.8, key = "8A") // Perfect match
+        val harmonicClashTrack = createTrack("t2", bpm = 125, energy = 0.7, danceability = 0.8, key = "3B") // Clash
+
+        val tracks = listOf(harmonicClashTrack, harmonicMatchTrack)
+
+        // Act - anchorKey is null, but targetKey is in rules
+        val scored = VibeCookerEngine.scoreAndRankTracks(tracks, rules, anchorKey = null)
+
+        // Assert
+        assertEquals(2, scored.size)
+        assertEquals("t1", scored[0].track.id)
+        assertEquals("t2", scored[1].track.id)
+        assertTrue(scored[0].score > scored[1].score)
+    }
+
+    @Test
     fun `scoreAndRankTracks handles BPM penalty and normalizes`() {
         // Arrange
         val rules = VibeSqlBounds(
@@ -143,7 +172,9 @@ class VibeCookerEngineTest {
     }
 
     @Test
-    fun `scoreAndRankTracks applies harmonic bonus from rules targetKey when anchorKey is null`() {
+
+    fun `scoreAndRankTracks handles empty track list`() {
+
         // Arrange
         val rules = VibeSqlBounds(
             bpmMin = 120,
@@ -152,41 +183,38 @@ class VibeCookerEngineTest {
             energyMax = 0.8,
             danceMin = 0.5,
             danceMax = 1.0,
-            targetKey = "8A"
+
+            targetKey = null
         )
 
-        // Both tracks have the exact same stats, so harmonic score will break the tie
-        val harmonicMatchTrack = createTrack("t1", bpm = 125, energy = 0.7, danceability = 0.8, key = "8A") // Perfect match
-        val harmonicClashTrack = createTrack("t2", bpm = 125, energy = 0.7, danceability = 0.8, key = "3B") // Clash
-
-        val tracks = listOf(harmonicClashTrack, harmonicMatchTrack)
+        val tracks = emptyList<Track>()
 
         // Act
-        val scored = VibeCookerEngine.scoreAndRankTracks(tracks, rules, anchorKey = null)
+        val scored = VibeCookerEngine.scoreAndRankTracks(tracks, rules)
 
         // Assert
-        assertEquals(2, scored.size)
-        assertEquals("t1", scored[0].track.id)
-        assertEquals("t2", scored[1].track.id)
-        assertTrue(scored[0].score > scored[1].score)
+        assertTrue(scored.isEmpty())
     }
 
     @Test
-    fun `scoreAndRankTracks correctly applies danceability score`() {
+    fun `scoreAndRankTracks penalizes low danceability`() {
         // Arrange
         val rules = VibeSqlBounds(
             bpmMin = 120,
-            bpmMax = 130,
+            bpmMax = 130, // Target BPM 125
             energyMin = 0.6,
-            energyMax = 0.8,
-            danceMin = 0.7, // Target danceability minimum
+            energyMax = 0.8, // Target Energy 0.7
+            danceMin = 0.8, // High danceability required
+
             danceMax = 1.0,
             targetKey = null
         )
 
-        // Both tracks have the exact same stats, except for danceability
-        val highDanceTrack = createTrack("t1", bpm = 125, energy = 0.7, danceability = 0.8, key = "8A") // Meets rules.danceMin
-        val lowDanceTrack = createTrack("t2", bpm = 125, energy = 0.7, danceability = 0.4, key = "8A") // Fails rules.danceMin
+
+        // Same everything, but t1 meets danceMin and t2 does not
+        val highDanceTrack = createTrack("t1", bpm = 125, energy = 0.7, danceability = 0.9)
+        val lowDanceTrack = createTrack("t2", bpm = 125, energy = 0.7, danceability = 0.5)
+
 
         val tracks = listOf(lowDanceTrack, highDanceTrack)
 
@@ -198,26 +226,10 @@ class VibeCookerEngineTest {
         assertEquals("t1", scored[0].track.id)
         assertEquals("t2", scored[1].track.id)
         assertTrue(scored[0].score > scored[1].score)
-    }
 
-    @Test
-    fun `scoreAndRankTracks handles empty track list gracefully`() {
-        // Arrange
-        val rules = VibeSqlBounds(
-            bpmMin = 120,
-            bpmMax = 130,
-            energyMin = 0.6,
-            energyMax = 0.8,
-            danceMin = 0.5,
-            danceMax = 1.0,
-            targetKey = null
-        )
 
-        // Act
-        val scored = VibeCookerEngine.scoreAndRankTracks(emptyList(), rules)
-
-        // Assert
-        assertTrue(scored.isEmpty())
+        // High dance gives 1.0 (weighted 0.15), low gives 0.5 (weighted 0.075)
+        assertEquals(0.075, scored[0].score - scored[1].score, 0.0001)
     }
 
 }

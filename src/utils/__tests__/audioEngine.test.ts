@@ -217,4 +217,50 @@ describe('probeConnectedAudioHardware', () => {
     // The errors should be caught and ignored, returning the original models
     expect(result).toEqual(existingModels);
   });
+
+  it('should ignore MediaDevices that are not audiooutput or have invalid deviceIds or short labels', async () => {
+    const mockEnumerateDevices = vi.fn().mockResolvedValue([
+      { kind: 'videoinput', label: 'Camera', deviceId: 'cam-1' },
+      { kind: 'audiooutput', label: 'Default', deviceId: 'default' },
+      { kind: 'audiooutput', label: 'Communications', deviceId: 'communications' },
+      { kind: 'audiooutput', label: 'a ', deviceId: 'short-1' },
+      { kind: 'audiooutput', label: 'Good Speaker', deviceId: 'speaker-1' },
+    ]);
+
+    Object.defineProperty(global, 'navigator', {
+      value: {
+        ...originalNavigator,
+        mediaDevices: { enumerateDevices: mockEnumerateDevices }
+      },
+      writable: true,
+      configurable: true
+    });
+
+    const result = await probeConnectedAudioHardware([]);
+    expect(result.length).toBe(1);
+    expect(result[0].modelName).toBe('Good Speaker');
+    expect(result[0].sinkId).toBe('speaker-1');
+  });
+
+  it('should provide fallback productName for WebUSB devices if productName is empty', async () => {
+    const mockGetDevices = vi.fn().mockResolvedValue([
+      { vendorId: 0x1234, productId: 0x5678, productName: '   ', manufacturerName: 'TestCo' },
+      { vendorId: 0xabcd, productId: 0xef01 }
+    ]);
+
+    Object.defineProperty(global, 'navigator', {
+      value: {
+        ...originalNavigator,
+        usb: { getDevices: mockGetDevices }
+      },
+      writable: true,
+      configurable: true
+    });
+
+    const result = await probeConnectedAudioHardware([]);
+    expect(result.length).toBe(2);
+    // Unshifted, so index 0 is the second device (abcd:ef01)
+    expect(result[0].modelName).toBe('USB Audio DAC (ABCD:EF01)');
+    expect(result[1].modelName).toBe('USB Audio DAC (1234:5678)');
+  });
 });

@@ -24,9 +24,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.wear.compose.foundation.ExperimentalWearFoundationApi
+import androidx.wear.compose.foundation.SwipeToDismissBoxState
 import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
 import androidx.wear.compose.foundation.lazy.items
 import androidx.wear.compose.foundation.lazy.rememberScalingLazyListState
+import androidx.wear.compose.foundation.rememberSwipeToDismissBoxState
 import androidx.wear.compose.foundation.rotary.RotaryScrollableDefaults
 import androidx.wear.compose.foundation.rotary.rotaryScrollable
 import androidx.wear.compose.material.*
@@ -60,7 +62,7 @@ fun PixelWatchApp(
     val haptics = remember { WatchHapticsController(context) }
     val pagerState = rememberPagerState(pageCount = { 5 })
     val coroutineScope = rememberCoroutineScope()
-    val swipeToDismissState = rememberSwipeToDismissBoxState()
+    val swipeToDismissState = androidx.wear.compose.foundation.rememberSwipeToDismissBoxState()
 
     // Standard Wear OS "swipe right to go back / exit" gesture.
     SwipeToDismissBox(
