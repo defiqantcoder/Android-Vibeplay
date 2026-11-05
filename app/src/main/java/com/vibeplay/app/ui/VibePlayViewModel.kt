@@ -9,6 +9,8 @@ import android.os.Environment
 import android.provider.MediaStore
 import com.vibeplay.app.audio.VibeAudioEngine
 import com.vibeplay.app.scanner.SafMusicScanner
+import androidx.room.Room
+import com.vibeplay.core.db.TrackEntity
 import com.vibeplay.core.db.VibePlayDatabase
 import com.vibeplay.core.engine.VibeCookerEngine
 import com.vibeplay.core.model.*
@@ -133,16 +135,21 @@ class VibePlayViewModel(
             }
         }
 
-        // Prefer either saved tree key, then a configured path, then the app music directory.
-        context?.let { ctx ->
-            val prefs = ctx.getSharedPreferences("vibeplay_prefs", Context.MODE_PRIVATE)
-            val treeUri = prefs.getString("library_tree_uri", null) ?: prefs.getString("saf_tree_uri", null)
-            if (treeUri != null) {
-                scanSelectedMusicFolder(treeUri)
-            } else {
-                val configuredPath = prefs.getString("library_path", null)
-                val directory = resolveLibraryDirectory(configuredPath) { ctx.getExternalFilesDir(Environment.DIRECTORY_MUSIC) }
-                if (directory != null) scanLocalMusicFolder(directory) else scanMediaStoreAudio(ctx)
+        // Populate instantly from the Room cache. Only when nothing is cached yet (first run)
+        // do we fall back to scanning: saved tree key, then a configured path, then the app
+        // music directory. Afterwards, rescans happen only on demand (Scan Music Folder).
+        viewModelScope.launch {
+            if (loadCachedTracks()) return@launch
+            context?.let { ctx ->
+                val prefs = ctx.getSharedPreferences("vibeplay_prefs", Context.MODE_PRIVATE)
+                val treeUri = prefs.getString("library_tree_uri", null) ?: prefs.getString("saf_tree_uri", null)
+                if (treeUri != null) {
+                    scanSelectedMusicFolder(treeUri)
+                } else {
+                    val configuredPath = prefs.getString("library_path", null)
+                    val directory = resolveLibraryDirectory(configuredPath) { ctx.getExternalFilesDir(Environment.DIRECTORY_MUSIC) }
+                    if (directory != null) scanLocalMusicFolder(directory) else scanMediaStoreAudio(ctx)
+                }
             }
         }
     }
@@ -198,6 +205,7 @@ class VibePlayViewModel(
                     isScanning = false,
                     scanSummary = "Indexed ${scannedTracks.size} audio tracks from $actualSource"
                 )
+                persistTracks(scannedTracks)
                 cookMixtape(_uiState.value.activeCookPrompt)
             } catch (e: CancellationException) {
                 throw e
@@ -208,6 +216,111 @@ class VibePlayViewModel(
                 )
             }
         }
+    }
+
+    /** Uses the injected database, or lazily opens the on-device library cache. */
+    private fun libraryDao() = (database ?: context?.let { cacheDatabase(it) })?.dao()
+
+    /** Emits cached tracks straight into [_uiState]. Returns true when the cache had tracks. */
+    private suspend fun loadCachedTracks(): Boolean {
+        val cached = try {
+            withContext(Dispatchers.IO) { libraryDao()?.getAllTracks().orEmpty().map { it.toTrack() } }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (_: Exception) {
+            emptyList()
+        }
+        if (cached.isEmpty()) return false
+        // A scan the user started in the meantime always wins over the cache.
+        if (_uiState.value.isScanning || _uiState.value.tracks.isNotEmpty()) return true
+        val losslessCrate = CrateFolder(
+            id = "crate-lossless-local",
+            name = "Local Music Vault",
+            trackCount = cached.size,
+            energyArc = "Dynamic High-Res",
+            lastCooked = "Cached"
+        )
+        _uiState.value = _uiState.value.copy(
+            tracks = cached,
+            crates = listOf(losslessCrate) + VibeSeedData.INITIAL_CRATES,
+            scanSummary = "Loaded ${cached.size} cached tracks"
+        )
+        cookMixtape(_uiState.value.activeCookPrompt)
+        return true
+    }
+
+    private suspend fun persistTracks(tracks: List<Track>) {
+        if (tracks.isEmpty()) return
+        try {
+            withContext(Dispatchers.IO) {
+                libraryDao()?.insertTracks(tracks.map { it.toEntity() })
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (_: Exception) {
+            // Persistence is best-effort; the in-memory library is already populated.
+        }
+    }
+
+    private fun Track.toEntity() = TrackEntity(
+        id = id,
+        title = title,
+        artist = artist,
+        album = album,
+        duration = duration,
+        durationMs = durationMs,
+        bpm = bpm,
+        key = key,
+        energy = energy,
+        danceability = danceability,
+        crateId = crateId,
+        format = format,
+        sampleRate = sampleRate,
+        bitDepth = bitDepth,
+        coverArt = coverArt,
+        localUri = localUri,
+        waveformsJson = waveforms.joinToString(","),
+        lyricsJson = lyrics.joinToString("|||") { "${it.time}:::${it.text}" }
+    )
+
+    private fun TrackEntity.toTrack() = Track(
+        id = id,
+        title = title,
+        artist = artist,
+        album = album,
+        duration = duration,
+        durationMs = durationMs,
+        bpm = bpm,
+        key = key,
+        energy = energy,
+        danceability = danceability,
+        crateId = crateId,
+        format = format,
+        sampleRate = sampleRate,
+        bitDepth = bitDepth,
+        coverArt = coverArt,
+        localUri = localUri,
+        waveforms = if (waveformsJson.isBlank()) emptyList() else waveformsJson.split(",").mapNotNull { it.toFloatOrNull() },
+        lyrics = if (lyricsJson.isBlank()) emptyList() else lyricsJson.split("|||").mapNotNull {
+            val parts = it.split(":::", limit = 2)
+            if (parts.size == 2) {
+                val time = parts[0].toDoubleOrNull() ?: return@mapNotNull null
+                LyricLine(time, parts[1])
+            } else null
+        }
+    )
+
+    private companion object {
+        @Volatile private var cacheDb: VibePlayDatabase? = null
+
+        fun cacheDatabase(context: Context): VibePlayDatabase =
+            cacheDb ?: synchronized(this) {
+                cacheDb ?: Room.databaseBuilder(
+                    context.applicationContext,
+                    VibePlayDatabase::class.java,
+                    "vibeplay_library.db"
+                ).build().also { cacheDb = it }
+            }
     }
 
     private fun mediaStoreTracks(context: Context): List<Track> {
