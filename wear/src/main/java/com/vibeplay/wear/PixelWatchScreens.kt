@@ -38,6 +38,8 @@ import android.content.ContextWrapper
 import com.vibeplay.core.model.Track
 import kotlinx.coroutines.launch
 import kotlin.math.sin
+import androidx.wear.compose.material.SwipeToDismissBox
+import androidx.wear.compose.foundation.rememberSwipeToDismissBoxState
 
 private tailrec fun Context.findActivity(): Activity? = when (this) {
     is Activity -> this
