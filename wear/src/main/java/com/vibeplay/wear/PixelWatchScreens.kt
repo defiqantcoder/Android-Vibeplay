@@ -30,6 +30,7 @@ import androidx.wear.compose.foundation.lazy.rememberScalingLazyListState
 import androidx.wear.compose.foundation.rotary.RotaryScrollableDefaults
 import androidx.wear.compose.foundation.rotary.rotaryScrollable
 import androidx.wear.compose.material.SwipeToDismissBox
+import androidx.wear.compose.material.SwipeToDismissBox
 import androidx.wear.compose.material.rememberSwipeToDismissBoxState
 
 import androidx.wear.compose.material.*
@@ -69,7 +70,7 @@ fun PixelWatchApp(
     val swipeToDismissState = androidx.wear.compose.foundation.rememberSwipeToDismissBoxState()
 
     // Standard Wear OS "swipe right to go back / exit" gesture.
-    androidx.wear.compose.material.SwipeToDismissBox(
+    SwipeToDismissBox(
         state = swipeToDismissState,
         onDismissed = { context.findActivity()?.finish() },
         backgroundScrimColor = WearBackground

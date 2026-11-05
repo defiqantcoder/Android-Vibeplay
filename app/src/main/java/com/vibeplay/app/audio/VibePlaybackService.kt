@@ -2,9 +2,6 @@ package com.vibeplay.app.audio
 
 import android.app.PendingIntent
 import android.content.Intent
-import android.os.Process
-import androidx.annotation.OptIn
-import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
 import com.vibeplay.app.MainActivity
@@ -29,7 +26,6 @@ class VibePlaybackService : MediaSessionService() {
 
             mediaSession = MediaSession.Builder(this, player)
                 .setSessionActivity(sessionActivityPendingIntent)
-                .setCallback(PlaybackSessionCallback())
                 .build()
         }
     }
@@ -45,22 +41,5 @@ class VibePlaybackService : MediaSessionService() {
             mediaSession = null
         }
         super.onDestroy()
-    }
-}
-
-internal fun isPlaybackControllerAllowed(controllerUid: Int, appUid: Int, isTrusted: Boolean): Boolean =
-    (controllerUid >= 0 && controllerUid == appUid) || isTrusted
-
-@OptIn(UnstableApi::class)
-internal class PlaybackSessionCallback : MediaSession.Callback {
-    override fun onConnect(
-        session: MediaSession,
-        controller: MediaSession.ControllerInfo
-    ): MediaSession.ConnectionResult {
-        return if (isPlaybackControllerAllowed(controller.uid, Process.myUid(), controller.isTrusted)) {
-            super.onConnect(session, controller)
-        } else {
-            MediaSession.ConnectionResult.reject()
-        }
     }
 }
