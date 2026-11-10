@@ -42,27 +42,35 @@ fun SoundbarScreen(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        item { SoundbarHeader() }
+        SoundbarContent(state, isBypassed, viewModel)
+    }
+}
 
-        // Bit-Perfect Hardware Intercept Banner
-        if (state.bitPerfectDirect) {
-            item { BitPerfectBanner(state, isBypassed, viewModel) }
-        }
+private fun androidx.compose.foundation.lazy.LazyListScope.SoundbarContent(
+    state: VibePlayUiState,
+    isBypassed: Boolean,
+    viewModel: VibePlayViewModel
+) {
+    item { SoundbarHeader() }
 
-        // Live Frequency Response Canvas
-        item { FrequencyResponseCanvas(state, isBypassed) }
+    // Bit-Perfect Hardware Intercept Banner
+    if (state.bitPerfectDirect) {
+        item { BitPerfectBanner(state, isBypassed, viewModel) }
+    }
 
-        // Preset Chips
-        item { PresetChips(state, viewModel) }
+    // Live Frequency Response Canvas
+    item { FrequencyResponseCanvas(state, isBypassed) }
 
-        // 10-Band Precision Sliders
-        item {
-            Text("FREQUENCY BANDS", fontWeight = FontWeight.Bold, color = TextMuted, fontSize = 12.sp)
-        }
+    // Preset Chips
+    item { PresetChips(state, viewModel) }
 
-        itemsIndexed(state.eqBands) { index, band ->
-            EqBandSliderRow(band, index, isBypassed, viewModel)
-        }
+    // 10-Band Precision Sliders
+    item {
+        Text("FREQUENCY BANDS", fontWeight = FontWeight.Bold, color = TextMuted, fontSize = 12.sp)
+    }
+
+    itemsIndexed(state.eqBands) { index, band ->
+        EqBandSliderRow(band, index, isBypassed, viewModel)
     }
 }
 
@@ -251,7 +259,7 @@ private fun EqBandSliderRow(
         )
 
         Text(
-            String.format("%+.1f dB", band.gain),
+            String.format(java.util.Locale.getDefault(), "%+.1f dB", band.gain),
             fontWeight = FontWeight.SemiBold,
             color = if (band.gain > 0) TealPrimary else if (band.gain < 0) AmberSecondary else TextMuted,
             fontSize = 12.sp,
