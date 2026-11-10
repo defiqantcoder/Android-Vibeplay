@@ -73,6 +73,16 @@ interface VibePlayDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTracks(tracks: List<TrackEntity>)
 
+    @Query("DELETE FROM tracks")
+    suspend fun deleteAllTracks()
+
+    /** Atomically replaces the last successful scan, including an empty library. */
+    @Transaction
+    suspend fun replaceTracks(tracks: List<TrackEntity>) {
+        deleteAllTracks()
+        insertTracks(tracks)
+    }
+
     @Query("SELECT * FROM crates")
     suspend fun getAllCrates(): List<CrateFolderEntity>
 

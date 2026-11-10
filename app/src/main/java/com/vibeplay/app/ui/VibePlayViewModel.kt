@@ -20,6 +20,7 @@ import com.vibeplay.app.wear.PhoneWearBridge
 import com.vibeplay.app.wear.PhoneWearBridgeEvents
 import com.vibeplay.core.hardware.UniversalDacEndpoint
 import com.vibeplay.core.wear.WearSyncProtocol
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -77,12 +78,14 @@ class VibePlayViewModel(
     private val audioEngine: VibeAudioEngine? = null,
     private val database: VibePlayDatabase? = null,
     private val wearBridge: PhoneWearBridge? = null,
-    private val hardwareManager: UsbDacHardwareManager? = null
+    private val hardwareManager: UsbDacHardwareManager? = null,
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(VibePlayUiState())
     val uiState: StateFlow<VibePlayUiState> = _uiState.asStateFlow()
     private var scanJob: Job? = null
+    private var scanStarted = false
 
     init {
         // Observe audioEngine playback state
@@ -176,11 +179,12 @@ class VibePlayViewModel(
         fallbackToMediaStore: Boolean = false,
         scan: suspend () -> List<Track>
     ) {
+        scanStarted = true
         scanJob?.cancel()
         scanJob = viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isScanning = true, scanSummary = "")
             try {
-                val (scannedTracks, actualSource) = withContext(Dispatchers.IO) {
+                val (scannedTracks, actualSource) = withContext(ioDispatcher) {
                     val found = scan()
                     if (found.isEmpty() && fallbackToMediaStore && context != null) {
                         mediaStoreTracks(context) to "MediaStore"
@@ -221,18 +225,18 @@ class VibePlayViewModel(
     /** Uses the injected database, or lazily opens the on-device library cache. */
     private fun libraryDao() = (database ?: context?.let { cacheDatabase(it) })?.dao()
 
-    /** Emits cached tracks straight into [_uiState]. Returns true when the cache had tracks. */
+    /** Loads the cache; returns true when startup scanning is unnecessary or superseded. */
     private suspend fun loadCachedTracks(): Boolean {
         val cached = try {
-            withContext(Dispatchers.IO) { libraryDao()?.getAllTracks().orEmpty().map { it.toTrack() } }
+            withContext(ioDispatcher) { libraryDao()?.getAllTracks().orEmpty().map { it.toTrack() } }
         } catch (e: CancellationException) {
             throw e
         } catch (_: Exception) {
             emptyList()
         }
+        // Even a completed empty scan supersedes startup cache loading and fallback.
+        if (scanStarted) return true
         if (cached.isEmpty()) return false
-        // A scan the user started in the meantime always wins over the cache.
-        if (_uiState.value.isScanning || _uiState.value.tracks.isNotEmpty()) return true
         val losslessCrate = CrateFolder(
             id = "crate-lossless-local",
             name = "Local Music Vault",
@@ -250,10 +254,9 @@ class VibePlayViewModel(
     }
 
     private suspend fun persistTracks(tracks: List<Track>) {
-        if (tracks.isEmpty()) return
         try {
-            withContext(Dispatchers.IO) {
-                libraryDao()?.insertTracks(tracks.map { it.toEntity() })
+            withContext(ioDispatcher) {
+                libraryDao()?.replaceTracks(tracks.map { it.toEntity() })
             }
         } catch (e: CancellationException) {
             throw e
