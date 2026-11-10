@@ -31,6 +31,8 @@ import androidx.wear.compose.foundation.lazy.rememberScalingLazyListState
 import androidx.wear.compose.foundation.rememberSwipeToDismissBoxState
 import androidx.wear.compose.foundation.rotary.RotaryScrollableDefaults
 import androidx.wear.compose.foundation.rotary.rotaryScrollable
+import androidx.wear.compose.foundation.rememberSwipeToDismissBoxState
+import androidx.wear.compose.foundation.SwipeToDismissBoxState
 import androidx.wear.compose.material.*
 import androidx.wear.compose.foundation.rememberSwipeToDismissBoxState
 import androidx.wear.compose.foundation.SwipeToDismissBoxState
