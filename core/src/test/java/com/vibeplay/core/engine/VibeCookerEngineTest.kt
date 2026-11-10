@@ -5,6 +5,7 @@ import com.vibeplay.core.model.VibeSqlBounds
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import kotlinx.coroutines.test.runTest
 
 class VibeCookerEngineTest {
 
@@ -223,5 +224,136 @@ class VibeCookerEngineTest {
 
         // High dance gives 1.0 (weighted 0.15), low gives 0.5 (weighted 0.075)
         assertEquals(0.075, scored[0].score - scored[1].score, 0.0001)
+    }
+
+    @Test
+    fun `scoreAndRankTracks handles missing keys without crashing`() {
+        // Arrange
+        val rules = VibeSqlBounds(
+            bpmMin = 120, bpmMax = 130,
+            energyMin = 0.6, energyMax = 0.8,
+            danceMin = 0.5, danceMax = 1.0,
+            targetKey = "8A"
+        )
+
+        // Empty string keys instead of proper camelot notation
+        val weirdKeyTrack1 = createTrack("t1", bpm = 125, energy = 0.7, danceability = 0.8, key = "")
+        val weirdKeyTrack2 = createTrack("t2", bpm = 125, energy = 0.7, danceability = 0.8, key = "INVALID")
+
+        val tracks = listOf(weirdKeyTrack1, weirdKeyTrack2)
+
+        // Act
+        val scored = VibeCookerEngine.scoreAndRankTracks(tracks, rules, anchorKey = null)
+
+        // Assert
+        assertEquals(2, scored.size)
+        // Just asserting it processes without crashing. Score logic defaults handled internally.
+        assertTrue(scored[0].score > 0.0)
+    }
+
+    @Test
+    fun `scoreAndRankTracks handles null target and anchor keys`() {
+        // Arrange
+        val rules = VibeSqlBounds(
+            bpmMin = 120, bpmMax = 130,
+            energyMin = 0.6, energyMax = 0.8,
+            danceMin = 0.5, danceMax = 1.0,
+            targetKey = null
+        )
+
+        val track1 = createTrack("t1", bpm = 125, energy = 0.7, danceability = 0.8, key = "8A")
+        val track2 = createTrack("t2", bpm = 125, energy = 0.7, danceability = 0.8, key = "5B")
+
+        val tracks = listOf(track1, track2)
+
+        // Act
+        val scored = VibeCookerEngine.scoreAndRankTracks(tracks, rules, anchorKey = null)
+
+        // Assert
+        assertEquals(2, scored.size)
+        assertEquals("General Transition", scored[0].harmonicCompatibility)
+        assertEquals("General Transition", scored[1].harmonicCompatibility)
+    }
+
+    @Test
+    fun `evaluateCamelotTransition handles adjacent steps properly`() {
+        assertEquals(0.90, VibeCookerEngine.evaluateCamelotTransition("8A", "9A").first, 0.001)
+        assertEquals(0.85, VibeCookerEngine.evaluateCamelotTransition("8A", "7A").first, 0.001)
+        assertEquals(0.75, VibeCookerEngine.evaluateCamelotTransition("8A", "10A").first, 0.001)
+    }
+
+    @Test
+    fun `evaluateCamelotTransition handles relative mode modulation`() {
+        val (score, note) = VibeCookerEngine.evaluateCamelotTransition("8A", "8B")
+        assertEquals(0.95, score, 0.001)
+        assertTrue(note.contains("Relative Mode Modulation"))
+    }
+
+    @Test
+    fun `evaluateCamelotTransition handles perfect match`() {
+        val (score, note) = VibeCookerEngine.evaluateCamelotTransition("10B", "10B")
+        assertEquals(1.0, score, 0.001)
+        assertTrue(note.contains("Perfect Harmonic Lock"))
+    }
+
+    @Test
+    fun `evaluateCamelotTransition handles dissonance`() {
+        val (score, note) = VibeCookerEngine.evaluateCamelotTransition("1A", "6A")
+        assertEquals(0.40, score, 0.001)
+        assertTrue(note.contains("Dissonant"))
+    }
+
+    @Test
+    fun `parsePromptToSqlBounds parses complex query successfully`() {
+        val bounds = VibeCookerEngine.parsePromptToSqlBounds("chill lofi beats under 90 with some acoustic 8A")
+
+        // chill/lofi gives bpmMax <= 105, under 90 gives bpmMax = 90
+        assertEquals(90, bounds.bpmMax)
+        // chill/lofi gives energyMax <= 0.60, acoustic gives energyMax <= 0.85 -> 0.60
+        assertEquals(0.60, bounds.energyMax, 0.001)
+        // 8A is the key
+        assertEquals("8A", bounds.targetKey)
+    }
+
+    @Test
+    fun `parsePromptToSqlBounds parses over 140 correctly`() {
+        val bounds = VibeCookerEngine.parsePromptToSqlBounds("fast techno over 140 bpm")
+        assertEquals(140, bounds.bpmMin)
+    }
+
+    @Test
+    fun `parsePromptToSqlBounds parses exact bpm correctly`() {
+        val bounds = VibeCookerEngine.parsePromptToSqlBounds("play some 128 bpm tracks")
+        assertEquals(118, bounds.bpmMin)
+        assertEquals(138, bounds.bpmMax)
+    }
+
+    @Test
+    fun `parsePromptToSqlBounds parses around bpm correctly`() {
+        val bounds = VibeCookerEngine.parsePromptToSqlBounds("play some tracks around 128")
+        assertEquals(120, bounds.bpmMin)
+        assertEquals(136, bounds.bpmMax)
+    }
+
+    @Test
+    fun `generateMixtapeLinerNotes handles empty playlist`() {
+        val note = VibeCookerEngine.generateMixtapeLinerNotes("test", emptyList())
+        assertEquals("No tracks matched the requested vibe parameters.", note)
+    }
+
+    @Test
+    fun `generateMixtapeLinerNotes generates correct notes for playlist`() {
+        val t1 = createTrack("1", 120, 0.5, 0.5)
+        val t2 = createTrack("2", 130, 0.5, 0.5)
+        val note = VibeCookerEngine.generateMixtapeLinerNotes("gym workout", listOf(t1, t2))
+        assertTrue(note.contains("gym workout"))
+        assertTrue(note.contains("125 BPM")) // Average of 120 and 130
+        assertTrue(note.contains("2 tracks"))
+    }
+
+    @Test
+    fun `synthesizeWithGemini calls generateMixtapeLinerNotes on blank key`() = kotlinx.coroutines.test.runTest {
+        val note = VibeCookerEngine.synthesizeWithGemini("test", listOf(createTrack("1", 120, 0.5, 0.5)), "")
+        assertTrue(note.contains("Curated 'test'"))
     }
 }
